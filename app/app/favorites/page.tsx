@@ -5,6 +5,8 @@ import SiteHeader from "@/components/SiteHeader";
 
 export const metadata: Metadata = {
   title: "Favorites",
+  // Saved stations live on each visitor's device; there's nothing here for search engines.
+  robots: { index: false, follow: true },
 };
 
 export default function FavoritesPage() {

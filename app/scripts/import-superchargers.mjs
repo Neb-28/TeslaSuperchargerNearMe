@@ -64,8 +64,9 @@ function normalize(element) {
   const specificName = tags.name && !GENERIC_NAMES.has(tags.name.trim().toLowerCase()) ? tags.name.trim() : null;
 
   // Tesla names stations "City, ST - Location"; OSM usually just says "Tesla Supercharger".
+  // The house number keeps stations on the same road apart ("Dublin, CA – 7201 Dublin Boulevard").
   const name =
-    specificName ?? (city && state ? `${city}, ${state}${tags["addr:street"] ? ` – ${tags["addr:street"]}` : ""}` : "Tesla Supercharger");
+    specificName ?? (city && state ? `${city}, ${state}${street ? ` – ${street}` : ""}` : "Tesla Supercharger");
   const address = [street, city, [state, tags["addr:postcode"]].filter(Boolean).join(" ")].filter(Boolean).join(", ") || null;
 
   const id = `${element.type[0]}${element.id}`;
@@ -78,6 +79,9 @@ function normalize(element) {
     city: city ? slugify(city) : "unlisted",
     name,
     cityLabel: city && state ? `${city}, ${state}` : null,
+    street,
+    // Set below when OSM has no city: the nearest station's city, shown as "near …".
+    nearLabel: null,
     address,
     lat: Number(lat.toFixed(6)),
     lon: Number(lon.toFixed(6)),
@@ -88,12 +92,49 @@ function normalize(element) {
   };
 }
 
+function km(a, b) {
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLon = toRad(b.lon - a.lon);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLon / 2) ** 2;
+  return 2 * 6371 * Math.asin(Math.sqrt(h));
+}
+
 const raw = await load(process.argv[2]);
-const stations = raw.elements
-  .filter((element) => isSupercharger(element.tags ?? {}))
-  .map(normalize)
-  .filter(Boolean)
-  .sort((a, b) => a.state.localeCompare(b.state) || a.city.localeCompare(b.city) || a.slug.localeCompare(b.slug));
+const normalized = raw.elements.filter((element) => isSupercharger(element.tags ?? {})).map(normalize).filter(Boolean);
+
+// About 9% of stations have no address in OSM. Borrow the nearest addressed station's city
+// (within 40 km) so they get a real state/city page and an honest "near …" name.
+const addressed = normalized.filter((station) => station.cityLabel);
+for (const station of normalized) {
+  if (station.cityLabel) continue;
+  let best = null;
+  for (const other of addressed) {
+    const distance = km(station, other);
+    if (distance < 40 && (!best || distance < best.distance)) best = { other, distance };
+  }
+  if (!best) continue;
+  station.state = best.other.state;
+  station.city = best.other.city;
+  station.nearLabel = best.other.cityLabel;
+  if (station.name === "Tesla Supercharger") station.name = `Tesla Supercharger near ${best.other.cityLabel}`;
+  station.slug = `near-${best.other.city}-${station.id}`;
+}
+
+// Any names still shared (two entries at one address) get the stall count, then a number.
+const byName = Map.groupBy(normalized, (station) => station.name);
+for (const group of byName.values()) {
+  if (group.length < 2) continue;
+  group.forEach((station, index) => {
+    station.name = `${station.name} (${station.stalls ? `${station.stalls} stalls` : `#${index + 1}`})`;
+  });
+}
+const stillShared = Map.groupBy(normalized, (station) => station.name);
+for (const group of stillShared.values()) {
+  if (group.length > 1) group.forEach((station, index) => (station.name = `${station.name} #${index + 1}`));
+}
+
+const stations = normalized.sort((a, b) => a.state.localeCompare(b.state) || a.city.localeCompare(b.city) || a.slug.localeCompare(b.slug));
 
 writeFileSync(
   new URL("../data/superchargers.json", import.meta.url),

@@ -1,0 +1,107 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import JsonLd from "@/components/JsonLd";
+import SiteFooter from "@/components/SiteFooter";
+import SiteHeader from "@/components/SiteHeader";
+import StationListCard from "@/components/StationListCard";
+import { absoluteUrl } from "@/lib/site";
+import { cityHref, getCity, nearbyCities, stateHref, stationHref, stationTitle } from "@/lib/superchargers";
+import { stateName } from "@/lib/usStates";
+
+type CityPageProps = PageProps<"/supercharger/[state]/[city]">;
+
+function plural(count: number, word: string) {
+  return `${count.toLocaleString("en-US")} ${word}${count === 1 ? "" : "s"}`;
+}
+
+export async function generateMetadata({ params }: CityPageProps): Promise<Metadata> {
+  const { state, city: citySlug } = await params;
+  const city = getCity(state, citySlug);
+  if (!city) return {};
+  const count = city.stations.length;
+  return {
+    title: `Tesla Superchargers in ${city.label} (${plural(count, "station")})`,
+    description: `${plural(count, "Tesla Supercharger station")} in ${city.label}${city.stalls ? ` with ${plural(city.stalls, "stall")}` : ""}. Addresses, charging speed, directions and places to eat or shop within walking distance.`,
+    alternates: { canonical: cityHref(city.state, city.city) },
+  };
+}
+
+export default async function CityPage({ params }: CityPageProps) {
+  const { state, city: citySlug } = await params;
+  const city = getCity(state, citySlug);
+  if (!city) notFound();
+
+  const count = city.stations.length;
+  const fastest = Math.max(0, ...city.stations.map((station) => station.maxKw ?? 0));
+  const nearOnly = city.stations.filter((station) => !station.cityLabel).length;
+  const others = nearbyCities(city);
+  const href = cityHref(city.state, city.city);
+
+  return (
+    <div className="app-shell">
+      <SiteHeader backHref={stateHref(city.state)} />
+      <main id="main" className="content-page">
+        <Breadcrumbs
+          items={[
+            { name: "Home", href: "/" },
+            { name: stateName(city.state), href: stateHref(city.state) },
+            { name: city.name, href },
+          ]}
+        />
+        <h1 className="page-title">Tesla Superchargers in {city.label}</h1>
+        <p className="page-sub">
+          {count === 1 ? "There is " : "There are "}
+          {plural(count, "Tesla Supercharger station")} {nearOnly === count ? "near" : "in"} {city.label}
+          {city.stalls ? ` with ${plural(city.stalls, "charging stall")} in total` : ""}
+          {fastest ? `, charging at up to ${fastest} kW` : ""}. Open a station for directions and for places to eat, grab coffee or shop
+          within a short walk while you charge.
+        </p>
+        <Link href={`/map?station=${city.stations[0].slug}`} className="action-button primary">
+          See them on the map
+        </Link>
+
+        <ul className="station-list content-card">
+          {city.stations.map((station) => (
+            <li key={station.id}>
+              <StationListCard station={station} />
+            </li>
+          ))}
+        </ul>
+
+        {others.length ? (
+          <section aria-labelledby="other-cities" className="link-section">
+            <h2 id="other-cities" className="section-title">Other cities in {stateName(city.state)}</h2>
+            <ul className="link-chips">
+              {others.map((item) => (
+                <li key={item.city}>
+                  <Link href={cityHref(item.state, item.city)} className="link-chip">
+                    {item.name} <span>{item.stations.length}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <Link href={stateHref(city.state)} className="footer-link">All Superchargers in {stateName(city.state)}</Link>
+          </section>
+        ) : null}
+
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            name: `Tesla Superchargers in ${city.label}`,
+            numberOfItems: count,
+            itemListElement: city.stations.map((station, index) => ({
+              "@type": "ListItem",
+              position: index + 1,
+              url: absoluteUrl(stationHref(station)),
+              name: stationTitle(station),
+            })),
+          }}
+        />
+      </main>
+      <SiteFooter osmCredit />
+    </div>
+  );
+}

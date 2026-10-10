@@ -507,6 +507,124 @@ img {
   text-decoration: underline;
 }
 
+/* ---------- SEO sections: breadcrumbs, link chips, FAQ ---------- */
+
+.breadcrumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.breadcrumbs li + li::before {
+  content: "›";
+  margin: 0 6px 0 4px;
+}
+
+.breadcrumbs a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.breadcrumbs [aria-current] {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.station-summary-card .breadcrumbs {
+  margin: -10px 0 -4px;
+}
+
+.content-card {
+  padding: 4px 16px;
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.content-page .action-button {
+  align-self: flex-start;
+}
+
+.link-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.link-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.link-chip,
+.link-chip:hover {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.link-chip:hover {
+  border-color: var(--accent);
+}
+
+.link-chip span {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.home-more {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 8px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.faq-item {
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  padding: 0 16px;
+}
+
+.faq-item summary {
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.faq-item p {
+  margin: 0;
+  padding: 0 0 14px;
+  color: var(--muted);
+  font-size: 15px;
+}
+
 /* ---------- Map ---------- */
 
 .map-shell {

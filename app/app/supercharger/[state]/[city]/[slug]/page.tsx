@@ -2,13 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import AdSlot from "@/components/AdSlot";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import JsonLd from "@/components/JsonLd";
 import FavoriteButton from "@/components/FavoriteButton";
 import NearbySection from "@/components/NearbySection";
 import ShareButton from "@/components/ShareButton";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import { nearbyForStation } from "@/lib/nearby";
-import { getStationBySlug, stationHref } from "@/lib/superchargers";
+import { absoluteUrl } from "@/lib/site";
+import { cityHref, getCity, getStationBySlug, stateHref, stationHref, stationTitle } from "@/lib/superchargers";
+import { stateName } from "@/lib/usStates";
 
 type StationPageProps = PageProps<"/supercharger/[state]/[city]/[slug]">;
 
@@ -21,8 +25,9 @@ export async function generateMetadata({ params }: StationPageProps): Promise<Me
   const station = await loadStation(params);
   if (!station) return {};
   return {
-    title: `${station.name} Supercharger — stalls, prices and what's nearby`,
-    description: `${station.stalls ? `${station.stalls} stalls` : "Tesla Supercharger"}${station.maxKw ? ` up to ${station.maxKw} kW` : ""} at ${station.address ?? station.name}. Directions and what's within walking distance while you charge.`,
+    // Street plus city keeps ~3,200 station titles distinct (many stations share a road or city).
+    title: stationTitle(station),
+    description: `${station.stalls ? `${station.stalls} stalls` : "Tesla Supercharger"}${station.maxKw ? ` up to ${station.maxKw} kW` : ""} at ${station.address ?? station.name}. Directions and places to eat, grab coffee or shop within walking distance while you charge.`,
     alternates: { canonical: stationHref(station) },
   };
 }
@@ -42,6 +47,7 @@ export default async function StationPage({ params }: StationPageProps) {
   const stallNumbers = Array.from({ length: station.stalls ?? 0 }, (_, index) => index + 1);
   const power = station.maxKw ? `${station.maxKw} kW NACS` : "NACS";
   const nearby = await nearbyForStation(station.id);
+  const cityInfo = getCity(station.state, station.city);
 
   return (
     <div className="app-shell">
@@ -62,6 +68,17 @@ export default async function StationPage({ params }: StationPageProps) {
 
         <main id="main" className="station-detail-body">
           <section className="station-summary-card">
+            {cityInfo ? (
+              <Breadcrumbs
+                items={[
+                  { name: "Home", href: "/" },
+                  { name: stateName(station.state), href: stateHref(station.state) },
+                  { name: cityInfo.name, href: cityHref(cityInfo.state, cityInfo.city) },
+                  { name: station.street ?? station.name, href },
+                ]}
+                showCurrent={false}
+              />
+            ) : null}
             <h1>{station.name}</h1>
             <div className="station-model">Tesla Supercharger</div>
             {station.address ? <div className="station-address">{station.address}</div> : null}
@@ -135,6 +152,33 @@ export default async function StationPage({ params }: StationPageProps) {
 
           <SiteFooter osmCredit />
         </main>
+
+        {/* Described as a schema.org Place (a charging location), not a LocalBusiness: we don't run it. */}
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "Place",
+            "@id": absoluteUrl(href),
+            name: stationTitle(station),
+            url: absoluteUrl(href),
+            additionalType: "https://www.wikidata.org/wiki/Q2140665", // electric vehicle charging station
+            geo: { "@type": "GeoCoordinates", latitude: lat, longitude: lon },
+            ...(station.address
+              ? {
+                  address: {
+                    "@type": "PostalAddress",
+                    streetAddress: station.street ?? undefined,
+                    addressLocality: station.cityLabel?.replace(/, [A-Z]{2}$/, ""),
+                    addressRegion: station.state.toUpperCase(),
+                    addressCountry: "US",
+                  },
+                }
+              : {}),
+            ...(station.stalls
+              ? { amenityFeature: { "@type": "LocationFeatureSpecification", name: "Charging stalls", value: station.stalls } }
+              : {}),
+          }}
+        />
       </div>
     </div>
   );

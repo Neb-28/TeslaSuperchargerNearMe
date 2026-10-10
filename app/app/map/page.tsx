@@ -7,7 +7,10 @@ import { getStationBySlug, nearestStations, stationHref, toPin } from "@/lib/sup
 import type { Place } from "@/lib/zipQuery";
 
 export const metadata: Metadata = {
-  title: "Superchargers near me — map",
+  title: "Map of Tesla Superchargers near me",
+  description: "Every US Tesla Supercharger on one map. Use your location or a ZIP code to find the closest stations.",
+  // Searches and "View larger map" links add query strings; they are all the same page to Google.
+  alternates: { canonical: "/map" },
 };
 
 export default async function MapPage({ searchParams }: PageProps<"/map">) {
@@ -19,7 +22,7 @@ export default async function MapPage({ searchParams }: PageProps<"/map">) {
   // "View larger map" on a station page opens /map?station=<slug>, centered on that station.
   const station = typeof params.station === "string" ? getStationBySlug(params.station) : null;
   const place: Place | null = station
-    ? { label: station.cityLabel ?? station.name, position: [station.lat, station.lon] }
+    ? { label: station.cityLabel ?? station.nearLabel ?? station.name, position: [station.lat, station.lon] }
     : geocodeZip(query);
   const initialNearby = nearestStations(place?.position ?? DEFAULT_CENTER).map(({ station: item }) => toPin(item));
 
