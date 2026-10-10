@@ -1,0 +1,11 @@
+# Never upload secrets, dependencies or local build output with `vercel deploy`.
+**/.env
+**/.env.local
+**/.env.*.local
+**/node_modules
+**/.next
+**/.vercel
+**/*.tsbuildinfo
+app/supabase/.temp
+app/data/featured-listings.json
+.DS_Store

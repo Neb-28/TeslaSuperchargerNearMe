@@ -64,8 +64,16 @@ describe("robots.txt", () => {
     expect(robots().rules).toEqual({ userAgent: "*", disallow: "/" });
   });
 
+  it("blocks everything on the public *.vercel.app address, even for production", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", "teslasuperchargernearme.vercel.app");
+    const { default: robots } = await import("@/app/robots");
+    expect(robots().rules).toEqual({ userAgent: "*", disallow: "/" });
+  });
+
   it("allows crawling and points to the sitemap on the live site", async () => {
     vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", "www.teslasuperchargernearme.com");
     const { default: robots } = await import("@/app/robots");
     const result = robots();
     expect(result.sitemap).toMatch(/\/sitemap\.xml$/);

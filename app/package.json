@@ -7,11 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "db:load": "node --env-file=.env.local scripts/load-db.mjs"
   },
   "dependencies": {
     "leaflet": "^1.9.4",
     "next": "16.3.8",
+    "postgres": "^3.4.9",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-leaflet": "^5.0.0"
@@ -24,8 +26,10 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.8",
+    "supabase": "^2.120.0",
     "tailwindcss": "^4",
     "typescript": "^5",
+    "vercel": "^63.1.2",
     "vitest": "^3.2.7"
   }
 }
