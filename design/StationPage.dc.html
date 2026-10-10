@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Station page</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&amp;family=Figtree:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#0B6E5B}a:hover{color:#08513F}
+button{font-family:inherit;cursor:pointer}
+select{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 1900px; box-sizing: border-box; background: #F3F5F2; color: #14211C; font-family: 'Figtree', system-ui, sans-serif; font-size: 15px; line-height: 1.4; display: flex; flex-direction: column; overflow: hidden">
+
+  <header style="background: #14211C; color: #FFFFFF; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between">
+    <div style="display: flex; align-items: center; gap: 10px">
+      <div style="width: 34px; height: 34px; border-radius: 10px; background: #3DDC97; display: flex; align-items: center; justify-content: center">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#14211C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"></path></svg>
+      </div>
+      <div style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.3px">TeslaSuperchargerNearMe.com</div>
+    </div>
+    <div style="display: flex; gap: 6px">
+      <button aria-label="Search" style="width: 44px; height: 44px; border: 0; border-radius: 12px; background: #24342E; color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+      </button>
+      <button aria-label="Map" style="width: 44px; height: 44px; border: 0; border-radius: 12px; background: #24342E; color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"></path><path d="M9 4v14M15 6v14"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <main style="padding: 16px; display: flex; flex-direction: column; gap: 14px; flex-grow: 1">
+
+    <section style="background: #FFFFFF; border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 1px 2px rgba(20,33,28,0.06)">
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <div style="display: inline-flex; align-self: flex-start; align-items: center; gap: 6px; background: #E2F0EB; color: #08513F; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 999px; letter-spacing: 0.2px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg>
+          OPEN TO ALL EVs
+        </div>
+        <h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 26px; line-height: 1.12; letter-spacing: -0.5px; font-weight: 700">Main St &amp; 5th Ave Supercharger</h1>
+        <div style="display: flex; align-items: center; gap: 6px; color: #56635D; font-size: 14px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>
+          [STATION ADDRESS], [CITY]
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+        <div style="background: #F3F5F2; border-radius: 14px; padding: 10px 12px">
+          <div style="font-size: 12px; color: #56635D; font-weight: 600">Free stalls</div>
+          <div style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 22px; font-weight: 700; color: #0B6E5B">7<span style="font-size: 14px; color: #56635D; font-weight: 600"> / 24</span></div>
+        </div>
+        <div style="background: #F3F5F2; border-radius: 14px; padding: 10px 12px">
+          <div style="font-size: 12px; color: #56635D; font-weight: 600">Max speed</div>
+          <div style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 22px; font-weight: 700">250<span style="font-size: 14px; color: #56635D; font-weight: 600"> kW</span></div>
+        </div>
+        <div style="background: #F3F5F2; border-radius: 14px; padding: 10px 12px">
+          <div style="font-size: 12px; color: #56635D; font-weight: 600">Price</div>
+          <div style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 22px; font-weight: 700">[$]<span style="font-size: 14px; color: #56635D; font-weight: 600">/kWh</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section style="background: #FFFFFF; border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 1px 2px rgba(20,33,28,0.06)">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px">
+        <div>
+          <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: -0.3px">Save on your EV</h2>
+          <div style="font-size: 14px; color: #56635D">Free quotes. Takes about a minute.</div>
+        </div>
+        <span style="font-size: 12px; color: #56635D; font-weight: 600; padding-top: 4px">Sponsored</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; background: #F3F5F2; padding: 4px; border-radius: 14px">
+        <sc-for list="{{leads}}" as="l" hint-placeholder-count="2">
+          <button onClick="{{l.pick}}" aria-pressed="{{l.on}}" style="{{l.style}}">{{l.tab}}</button>
+        </sc-for>
+      </div>
+
+      <div style="display: flex; gap: 12px; align-items: flex-start">
+        <div style="width: 48px; height: 48px; border-radius: 14px; background: #E2F0EB; color: #0B6E5B; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+          <sc-if value="{{isInstall}}" hint-placeholder-val="{{ true }}">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 12 4l9 7"></path><path d="M5 10v10h14V10"></path><path d="M13 12l-3 4h4l-3 4"></path></svg>
+          </sc-if>
+          <sc-if value="{{isInsurance}}" hint-placeholder-val="{{ false }}">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3z"></path><path d="m8.5 12 2.5 2.5 4.5-5"></path></svg>
+          </sc-if>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <div style="font-weight: 700; font-size: 17px; line-height: 1.2">{{lead.title}}</div>
+          <div style="font-size: 14px; color: #56635D">{{lead.body}}</div>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <sc-for list="{{lead.points}}" as="pt" hint-placeholder-count="3">
+          <div style="display: flex; gap: 8px; align-items: center; font-size: 14px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0B6E5B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg>
+            {{pt}}
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="zip" style="font-size: 13px; color: #56635D; font-weight: 600">ZIP code</label>
+        <div style="display: flex; gap: 8px">
+          <input id="zip" type="text" inputmode="numeric" maxlength="5" placeholder="12345" style="height: 48px; width: 110px; box-sizing: border-box; border: 1.5px solid #CFD8D3; border-radius: 12px; padding: 0 12px; font-size: 16px; font-family: inherit; color: #14211C">
+          <a href="#" style="flex-grow: 1; display: flex; align-items: center; justify-content: center; gap: 8px; height: 48px; border-radius: 12px; background: #0B6E5B; color: #FFFFFF; text-decoration: none; font-weight: 700; font-size: 15px">{{lead.cta}}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+          </a>
+        </div>
+      </div>
+
+      <div style="font-size: 11px; color: #56635D; line-height: 1.45">{{lead.partners}} We may be paid when you request quotes. [CONSENT TEXT: partners may contact you by phone, text or email]</div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 12px; padding-top: 6px">
+      <div>
+        <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.3px">While you charge</h2>
+        <div style="color: #56635D; font-size: 14px">Everything here is a short walk from the stalls.</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <div style="font-size: 13px; font-weight: 600; color: #56635D">How long are you charging?</div>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap">
+          <sc-for list="{{times}}" as="t" hint-placeholder-count="4">
+            <button onClick="{{t.pick}}" aria-pressed="{{t.on}}" style="{{t.style}}">{{t.label}}</button>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px">
+        <sc-for list="{{cats}}" as="c" hint-placeholder-count="4">
+          <button onClick="{{c.pick}}" aria-pressed="{{c.on}}" style="{{c.style}}">{{c.label}}</button>
+        </sc-for>
+      </div>
+
+      <sc-if value="{{isBars}}" hint-placeholder-val="{{ false }}">
+        <div style="background: #FFFFFF; border: 1.5px dashed #CFD8D3; border-radius: 12px; padding: 10px 12px; font-size: 13px; color: #56635D">You'll be driving after this. Look for food and zero-proof options, or pick up a bottle for home.</div>
+      </sc-if>
+
+      <article style="background: #FFF6E0; border: 1.5px solid #E2B04A; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+        <div style="display: flex; justify-content: space-between; align-items: center">
+          <div style="display: inline-flex; align-items: center; gap: 6px; background: #7A4E00; color: #FFFFFF; font-size: 11px; font-weight: 700; letter-spacing: 0.6px; padding: 5px 10px; border-radius: 999px">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3 6.5 7 .8-5.2 4.8 1.4 7L12 17.6 5.8 21l1.4-7L2 9.3l7-.8L12 2z"></path></svg>
+            #1 FEATURED
+          </div>
+          <span style="font-size: 12px; color: #7A4E00; font-weight: 600">Sponsored</span>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: flex-start">
+          <div style="width: 64px; height: 64px; border-radius: 14px; background: #F1D48F; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #7A4E00; font-size: 10px; font-weight: 700; text-align: center">[PHOTO]</div>
+          <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+            <div style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 19px; font-weight: 700; line-height: 1.15">{{featured.name}}</div>
+            <div style="font-size: 13px; color: #5C4410">{{featured.kind}}</div>
+            <div style="font-size: 13px; color: #5C4410; font-weight: 600">{{featured.walk}} min walk · {{featured.hours}}</div>
+          </div>
+        </div>
+        <div style="background: #FFFFFF; border-radius: 12px; padding: 10px 12px; display: flex; gap: 8px; align-items: center; font-size: 14px; font-weight: 600; color: #14211C">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A4E00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12 12 20l-8-8V4h8l8 8z"></path><circle cx="8.5" cy="8.5" r="1.5"></circle></svg>
+          {{featured.offer}}
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+          <a href="#" style="display: flex; align-items: center; justify-content: center; height: 44px; border-radius: 12px; background: #7A4E00; color: #FFFFFF; text-decoration: none; font-weight: 700; font-size: 14px">{{featured.cta}}</a>
+          <a href="#" style="display: flex; align-items: center; justify-content: center; height: 44px; border-radius: 12px; background: #FFFFFF; color: #7A4E00; text-decoration: none; font-weight: 700; font-size: 14px; border: 1.5px solid #E2B04A">Directions</a>
+        </div>
+      </article>
+
+      <sc-for list="{{others}}" as="p" hint-placeholder-count="3">
+        <article style="background: #FFFFFF; border-radius: 18px; padding: 14px; display: flex; gap: 12px; align-items: center; box-shadow: 0 1px 2px rgba(20,33,28,0.06)">
+          <div style="width: 30px; height: 30px; border-radius: 999px; background: #F3F5F2; color: #56635D; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">{{p.rank}}</div>
+          <div style="display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 0">
+            <div style="font-weight: 700; font-size: 16px">{{p.name}}</div>
+            <div style="font-size: 13px; color: #56635D">{{p.kind}}</div>
+            <div style="display: flex; gap: 10px; font-size: 12px; color: #56635D; font-weight: 600; padding-top: 2px">
+              <span>{{p.walk}} min walk</span><span>~{{p.time}} min visit</span><span style="color: #0B6E5B">{{p.hours}}</span>
+            </div>
+          </div>
+          <a href="#" aria-label="Directions" style="width: 44px; height: 44px; border-radius: 12px; background: #E2F0EB; color: #0B6E5B; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-8-8 18-2-8-8-2z"></path></svg>
+          </a>
+        </article>
+      </sc-for>
+
+      <sc-if value="{{noneFit}}" hint-placeholder-val="{{ false }}">
+        <div style="text-align: center; color: #56635D; font-size: 14px; padding: 12px">Nothing else fits that time. Try a longer charge.</div>
+      </sc-if>
+    </section>
+
+    <section style="background: #14211C; color: #FFFFFF; border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 10px; margin-top: 6px">
+      <div style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 19px; font-weight: 700; line-height: 1.2">Own a business near this station?</div>
+      <div style="font-size: 14px; color: #C9D3CE">EV drivers wait here 20–40 minutes, steps from your door. Take the #1 spot on this page.</div>
+      <a href="#" style="display: flex; align-items: center; justify-content: center; height: 46px; border-radius: 12px; background: #3DDC97; color: #14211C; text-decoration: none; font-weight: 700; font-size: 15px">Get featured · [PRICE]/mo</a>
+    </section>
+
+    <footer style="margin-top: auto; padding: 12px 4px 8px; font-size: 12px; color: #56635D; display: flex; flex-direction: column; gap: 4px">
+      <div>Not affiliated with Tesla, Inc. Station details shown are sample data.</div>
+      <div>Sponsored listings are clearly labeled.</div>
+    </footer>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1900}}'>
+class Component extends DCLogic {
+  data() {
+    return {
+      places: {
+        food: [
+          { name: 'Hearth & Ember Kitchen', kind: 'Wood-fired pizza, salads', walk: 3, time: 35, hours: 'Open till 10 PM', sponsored: true, offer: 'EV drivers: 10% off, show this screen', cta: 'Claim offer' },
+          { name: 'Greenline Deli', kind: 'Sandwiches to go', walk: 2, time: 10, hours: 'Open now' },
+          { name: 'Lucky Noodle Bar', kind: 'Ramen and dumplings', walk: 4, time: 25, hours: 'Open now' },
+          { name: 'Cedar Grill', kind: 'Sit-down American', walk: 6, time: 45, hours: 'Open till 11 PM' }
+        ],
+        coffee: [
+          { name: 'Daybreak Coffee Co.', kind: 'Espresso, pastries', walk: 1, time: 10, hours: 'Open till 7 PM', sponsored: true, offer: 'Free pastry with any drink', cta: 'Order ahead' },
+          { name: 'Ground Floor Espresso', kind: 'Specialty coffee', walk: 3, time: 10, hours: 'Open now' },
+          { name: 'Steep & Co. Tea House', kind: 'Tea, light bites', walk: 5, time: 20, hours: 'Open now' }
+        ],
+        grocery: [
+          { name: 'FreshWay Market', kind: 'Full grocery, hot bar', walk: 2, time: 20, hours: 'Open till 11 PM', sponsored: true, offer: '$5 off a $40 pickup order', cta: 'Start order' },
+          { name: 'Corner Pantry', kind: 'Snacks, drinks, essentials', walk: 1, time: 5, hours: 'Open 24 hours' },
+          { name: 'Harvest Co-op', kind: 'Organic and local', walk: 6, time: 25, hours: 'Open now' }
+        ],
+        bars: [
+          { name: 'The Copper Tap', kind: 'Pub food, zero-proof menu', walk: 3, time: 40, hours: 'Open till 1 AM', sponsored: true, offer: 'Happy hour bites, 4–7 PM', cta: 'See menu' },
+          { name: 'Vine & Barrel Wine Shop', kind: 'Bottles to take home', walk: 4, time: 15, hours: 'Open till 9 PM' },
+          { name: 'Low Tide Lounge', kind: 'Cocktails, small plates', walk: 7, time: 45, hours: 'Opens 5 PM' }
+        ]
+      },
+      leads: [
+        { id: 'install', tab: 'Home charger', title: 'Charge at home overnight', body: 'Compare Level 2 installation quotes from licensed electricians near you.', points: ['Up to 3 local quotes', 'Utility rebate check included', 'No obligation'], cta: 'Get install quotes', partners: 'Quotes from [INSTALLER PARTNERS].' },
+        { id: 'insurance', tab: 'EV insurance', title: 'Pay less to insure your EV', body: 'Compare rates from insurers that cover electric vehicles.', points: ['Compare [N] insurers at once', 'Battery and charger coverage options', 'Free, no obligation'], cta: 'Compare rates', partners: 'Rates from [INSURANCE PARTNERS].' }
+      ]
+    };
+  }
+
+  renderVals() {
+    const d = this.data();
+    const cat = this.state.cat || 'food';
+    const t = this.state.t || 'any';
+    const leadId = this.state.lead || 'install';
+
+    const pill = (on) => 'height: 44px; padding: 0 16px; border-radius: 999px; font-size: 14px; font-weight: 700; white-space: nowrap; flex-shrink: 0; ' +
+      (on ? 'background: #14211C; color: #FFFFFF; border: 1.5px solid #14211C' : 'background: #FFFFFF; color: #14211C; border: 1.5px solid #CFD8D3');
+
+    const catDefs = [
+      { id: 'food', label: 'Food & Drink' },
+      { id: 'coffee', label: 'Coffee' },
+      { id: 'grocery', label: 'Grocery' },
+      { id: 'bars', label: 'Bars & Wine' }
+    ];
+    const cats = catDefs.map((c) => ({ label: c.label, on: c.id === cat, style: pill(c.id === cat), pick: () => this.setState({ cat: c.id }) }));
+
+    const timeDefs = [
+      { id: 'any', label: 'Any', max: 999 },
+      { id: '15', label: '15 min', max: 15 },
+      { id: '30', label: '30 min', max: 30 },
+      { id: '45', label: '45+ min', max: 999 }
+    ];
+    const times = timeDefs.map((x) => ({ label: x.label, on: x.id === t, style: pill(x.id === t), pick: () => this.setState({ t: x.id }) }));
+    const max = (timeDefs.find((x) => x.id === t) || timeDefs[0]).max;
+
+    const list = d.places[cat];
+    const featured = list.find((p) => p.sponsored);
+    const others = list
+      .filter((p) => !p.sponsored && p.time <= max)
+      .sort((a, b) => a.walk - b.walk)
+      .map((p, i) => Object.assign({}, p, { rank: '#' + (i + 2) }));
+
+    const seg = (on) => 'height: 44px; border: 0; border-radius: 10px; font-size: 14px; font-weight: 700; ' +
+      (on ? 'background: #FFFFFF; color: #14211C; box-shadow: 0 1px 3px rgba(20,33,28,0.15)' : 'background: transparent; color: #56635D');
+    const leads = d.leads.map((l) => ({ tab: l.tab, on: l.id === leadId, style: seg(l.id === leadId), pick: () => this.setState({ lead: l.id }) }));
+    const lead = d.leads.find((l) => l.id === leadId) || d.leads[0];
+
+    return {
+      cats, times, featured, others,
+      noneFit: others.length === 0,
+      isBars: cat === 'bars',
+      leads, lead,
+      isInstall: lead.id === 'install',
+      isInsurance: lead.id === 'insurance'
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound, permanentRedirect } from "next/navigation";
+import AdSlot from "@/components/AdSlot";
+import FavoriteButton from "@/components/FavoriteButton";
+import NearbySection from "@/components/NearbySection";
+import ShareButton from "@/components/ShareButton";
+import SiteFooter from "@/components/SiteFooter";
+import SiteHeader from "@/components/SiteHeader";
+import { nearbyForStation } from "@/lib/nearby";
+import { getStationBySlug, stationHref } from "@/lib/superchargers";
+
+type StationPageProps = PageProps<"/supercharger/[state]/[city]/[slug]">;
+
+async function loadStation(params: StationPageProps["params"]) {
+  const { slug } = await params;
+  return getStationBySlug(slug);
+}
+
+export async function generateMetadata({ params }: StationPageProps): Promise<Metadata> {
+  const station = await loadStation(params);
+  if (!station) return {};
+  return {
+    title: `${station.name} Supercharger — stalls, prices and what's nearby`,
+    description: `${station.stalls ? `${station.stalls} stalls` : "Tesla Supercharger"}${station.maxKw ? ` up to ${station.maxKw} kW` : ""} at ${station.address ?? station.name}. Directions and what's within walking distance while you charge.`,
+    alternates: { canonical: stationHref(station) },
+  };
+}
+
+export default async function StationPage({ params }: StationPageProps) {
+  const station = await loadStation(params);
+  if (!station) notFound();
+
+  // One URL per station: fix a wrong state or city segment with a permanent redirect.
+  const { state, city } = await params;
+  if (state !== station.state || city !== station.city) permanentRedirect(stationHref(station));
+
+  const { lat, lon } = station;
+  const href = stationHref(station);
+  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+  // Stall labels only; there is no live availability feed yet (PRD: Phase 3 data partner).
+  const stallNumbers = Array.from({ length: station.stalls ?? 0 }, (_, index) => index + 1);
+  const power = station.maxKw ? `${station.maxKw} kW NACS` : "NACS";
+  const nearby = await nearbyForStation(station.id);
+
+  return (
+    <div className="app-shell">
+      <SiteHeader backHref="/map" showSearch showMenu={false} />
+
+      <div className="station-layout">
+        <section className="station-map-panel" aria-label="Station location map">
+          <iframe
+            title={`OpenStreetMap showing ${station.name} Supercharger`}
+            src={`https://www.openstreetmap.org/export/embed.html?bbox=${lon - 0.015}%2C${lat - 0.01}%2C${lon + 0.015}%2C${lat + 0.01}&layer=mapnik&marker=${lat}%2C${lon}`}
+            loading="lazy"
+            referrerPolicy="no-referrer"
+          />
+          <Link className="station-map-link" href={`/map?station=${station.slug}`}>
+            View larger map
+          </Link>
+        </section>
+
+        <main id="main" className="station-detail-body">
+          <section className="station-summary-card">
+            <h1>{station.name}</h1>
+            <div className="station-model">Tesla Supercharger</div>
+            {station.address ? <div className="station-address">{station.address}</div> : null}
+
+            <div className="station-actions">
+              <a className="station-action primary" href={directionsUrl} target="_blank" rel="noreferrer">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="m3 11 18-8-8 18-2-8-8-2z" />
+                </svg>
+                Directions
+              </a>
+              <FavoriteButton station={{ id: station.id, name: station.name, address: station.address ?? "", href }} />
+              <ShareButton title={station.name} />
+            </div>
+          </section>
+
+          <section className="charger-card">
+            <div className="charger-headline">
+              <h2>Charging points</h2>
+              {station.ccs ? (
+                <span className="open-badge">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="m5 12 5 5 9-10" />
+                  </svg>
+                  OPEN TO ALL EVs
+                </span>
+              ) : null}
+            </div>
+
+            {stallNumbers.length ? (
+              <details className="outlet-accordion">
+                <summary className="charger-main-row">
+                  <span className="charger-copy">{power}</span>
+                  <span className="charger-right">
+                    <span className="available-count">{stallNumbers.length} stalls</span>
+                    <svg className="plug-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0V8zM12 18v4" />
+                    </svg>
+                    <svg className="outlet-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="m6 9 6 6 6-6" />
+                    </svg>
+                  </span>
+                </summary>
+
+                <ul className="outlet-list" aria-label="Stalls">
+                  {stallNumbers.map((number) => (
+                    <li key={number} className="outlet-row">
+                      <span className="outlet-dot is-unknown" aria-hidden="true" />
+                      <span className="outlet-info">
+                        <span className="outlet-name">Stall {number}</span>
+                        <span className="outlet-status">Live status not available yet</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ) : (
+              <div className="charger-main-row is-static">
+                <span className="charger-copy">{power}</span>
+                <span className="charger-right">
+                  <span className="stall-unknown">Stall count not listed</span>
+                </span>
+              </div>
+            )}
+            <p className="port-status-note">Live stall availability isn&apos;t available yet. Stall counts come from OpenStreetMap.</p>
+          </section>
+
+          <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_STATION} />
+
+          <NearbySection stationSlug={station.slug} stationLat={lat} stationLon={lon} categories={nearby} />
+
+          <SiteFooter osmCredit />
+        </main>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Superchargers near me</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#14211C; --muted:#56635D; --ground:#F3F5F2; --accent:#0B6E5B; --mint:#3DDC97; --line:#E6EBE8; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; font-family: 'Figtree', system-ui, sans-serif; color: var(--ink); background: var(--ground); }
+  header { position: fixed; inset: 0 0 auto 0; height: 60px; background: var(--ink); color: #fff; display: flex; align-items: center; padding: 0 16px; z-index: 1000;
+           font-family: 'Bricolage Grotesque', sans-serif; font-size: 20px; font-weight: 700; }
+  #map { position: fixed; top: 60px; left: 0; right: 0; bottom: 0; }
+  #sheet { position: fixed; left: 0; right: 0; bottom: 0; max-height: 45%; overflow-y: auto; background: #fff; border-radius: 22px 22px 0 0;
+           box-shadow: 0 -4px 16px rgba(20,33,28,.12); padding: 10px 16px 16px; z-index: 1000; }
+  #sheet h1 { font-family: 'Bricolage Grotesque', sans-serif; font-size: 20px; margin: 6px 0 8px; }
+  .grab { width: 40px; height: 5px; border-radius: 99px; background: #CFD8D3; margin: 0 auto; }
+  .row { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); cursor: pointer; background: none; border-left: 0; border-right: 0; border-top: 0; width: 100%; text-align: left; font: inherit; color: inherit; }
+  .row:last-child { border-bottom: 0; }
+  .ico { width: 40px; height: 40px; border-radius: 12px; background: #E2F0EB; color: var(--accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 700; }
+  .name { font-weight: 700; }
+  .meta { font-size: 13px; color: var(--muted); }
+  .status { font-size: 14px; color: var(--muted); padding: 8px 0; }
+  .pin { background: var(--accent); color: #fff; font: 700 12px 'Figtree', sans-serif; padding: 4px 8px; border-radius: 99px; white-space: nowrap; box-shadow: 0 2px 6px rgba(20,33,28,.25); }
+  .group { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-top: 12px; }
+  .back { background: none; border: 0; color: var(--accent); font: 700 14px 'Figtree', sans-serif; padding: 8px 0; cursor: pointer; }
+</style>
+</head>
+<body>
+<header>TeslaSuperchargerNearMe.com</header>
+<div id="map"></div>
+<section id="sheet" aria-live="polite">
+  <div class="grab"></div>
+  <h1 id="title">Finding Superchargers near you…</h1>
+  <div id="list"><div class="status">Allow location access to see the closest stations.</div></div>
+</section>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ---- Settings ----
+// Public Overpass servers have fair-use limits. At real traffic levels, run your own Overpass
+// instance or pre-download stations nightly and serve them from your own server.
+const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
+const SEARCH_RADIUS_M = 40000;       // stations within ~25 miles
+const WALK_RADIUS_M = 600;           // places within ~7-8 minute walk
+const FALLBACK = [34.0522, -118.2437]; // used if the visitor blocks location
+
+// Map tiles: tile.openstreetmap.org is fine for testing only. Its usage policy does not allow
+// heavy commercial traffic, so switch TILE_URL to a paid OSM tile provider before launch.
+const TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+const map = L.map('map', { zoomControl: false }).setView(FALLBACK, 11);
+L.tileLayer(TILE_URL, { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+const layer = L.layerGroup().addTo(map);
+const titleEl = document.getElementById('title');
+const listEl = document.getElementById('list');
+let stations = [];
+
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+async function overpass(query) {
+  const res = await fetch(OVERPASS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'data=' + encodeURIComponent(query)
+  });
+  if (!res.ok) throw new Error('Overpass error ' + res.status);
+  return (await res.json()).elements || [];
+}
+
+function point(e) { return e.lat != null ? [e.lat, e.lon] : [e.center.lat, e.center.lon]; }
+
+function miles(a, b) {
+  const R = 3958.8, toRad = (d) => d * Math.PI / 180;
+  const dLat = toRad(b[0] - a[0]), dLon = toRad(b[1] - a[1]);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a[0])) * Math.cos(toRad(b[0])) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+async function loadStations(center) {
+  const [lat, lon] = center;
+  // Tesla charging stations in OSM are usually tagged brand/operator "Tesla, Inc.".
+  // The name filter keeps Superchargers and drops most Tesla destination chargers.
+  const q = `[out:json][timeout:25];
+    (
+      nwr["amenity"="charging_station"]["brand"~"tesla",i]["name"~"supercharger",i](around:${SEARCH_RADIUS_M},${lat},${lon});
+      nwr["amenity"="charging_station"]["operator"~"tesla",i]["name"~"supercharger",i](around:${SEARCH_RADIUS_M},${lat},${lon});
+    );
+    out center tags;`;
+  titleEl.textContent = 'Finding Superchargers near you…';
+  const els = await overpass(q);
+  const seen = new Set();
+  stations = els.filter((e) => !seen.has(e.type + e.id) && seen.add(e.type + e.id)).map((e) => {
+    const p = point(e);
+    return { id: e.type + '/' + e.id, pos: p, name: e.tags.name || 'Tesla Supercharger', stalls: e.tags.capacity, dist: miles(center, p) };
+  }).sort((a, b) => a.dist - b.dist).slice(0, 25);
+  showStations(center);
+}
+
+function showStations(center) {
+  layer.clearLayers();
+  L.circleMarker(center, { radius: 9, color: '#fff', weight: 4, fillColor: '#2F6FE4', fillOpacity: 1 }).addTo(layer);
+  listEl.replaceChildren();
+  titleEl.textContent = stations.length ? `${stations.length} Superchargers near you` : 'No Superchargers found nearby';
+  stations.forEach((s) => {
+    const icon = L.divIcon({ className: '', html: `<div class="pin">⚡ ${s.stalls ? Number(s.stalls) : ''}</div>`, iconAnchor: [20, 12] });
+    L.marker(s.pos, { icon }).addTo(layer).on('click', () => openStation(s));
+    const row = el('button', 'row');
+    row.append(el('div', 'ico', '⚡'));
+    const txt = el('div');
+    txt.append(el('div', 'name', s.name));
+    txt.append(el('div', 'meta', `${s.dist.toFixed(1)} mi${s.stalls ? ' · ' + Number(s.stalls) + ' stalls' : ''}`));
+    row.append(txt);
+    row.addEventListener('click', () => openStation(s));
+    listEl.append(row);
+  });
+  if (stations.length) map.fitBounds(L.latLngBounds([center, ...stations.slice(0, 5).map((s) => s.pos)]).pad(0.2));
+}
+
+const GROUPS = [
+  { label: 'Food & Drink', test: (t) => /^(restaurant|fast_food)$/.test(t.amenity) },
+  { label: 'Coffee', test: (t) => t.amenity === 'cafe' },
+  { label: 'Grocery', test: (t) => /^(supermarket|convenience|greengrocer)$/.test(t.shop) },
+  { label: 'Bars & Wine', test: (t) => /^(bar|pub)$/.test(t.amenity) || /^(wine|alcohol)$/.test(t.shop) }
+];
+
+async function openStation(s) {
+  map.setView(s.pos, 16);
+  titleEl.textContent = s.name;
+  listEl.replaceChildren(el('div', 'status', 'Loading places within walking distance…'));
+  const [lat, lon] = s.pos;
+  const q = `[out:json][timeout:25];
+    (
+      nwr["amenity"~"^(restaurant|fast_food|cafe|bar|pub)$"]["name"](around:${WALK_RADIUS_M},${lat},${lon});
+      nwr["shop"~"^(supermarket|convenience|greengrocer|wine|alcohol)$"]["name"](around:${WALK_RADIUS_M},${lat},${lon});
+    );
+    out center tags;`;
+  try {
+    const places = (await overpass(q)).map((e) => ({ pos: point(e), tags: e.tags }));
+    layer.clearLayers();
+    L.marker(s.pos, { icon: L.divIcon({ className: '', html: '<div class="pin">⚡ Charger</div>', iconAnchor: [30, 12] }) }).addTo(layer);
+    listEl.replaceChildren();
+    const back = el('button', 'back', '← All stations');
+    back.addEventListener('click', () => loadStations(map._userPos || FALLBACK));
+    listEl.append(back);
+    GROUPS.forEach((g) => {
+      const items = places.filter((p) => g.test(p.tags))
+        .map((p) => Object.assign(p, { walk: Math.max(1, Math.round(miles(s.pos, p.pos) * 1609 / 80)) })) // ~80 m per minute
+        .sort((a, b) => a.walk - b.walk).slice(0, 5);
+      if (!items.length) return;
+      listEl.append(el('div', 'group', g.label));
+      // Paid #1 placements would be inserted here, ahead of these free listings.
+      items.forEach((p) => {
+        L.circleMarker(p.pos, { radius: 6, color: '#0B6E5B', weight: 2, fillColor: '#fff', fillOpacity: 1 }).addTo(layer).bindPopup(p.tags.name);
+        const row = el('div', 'row');
+        const txt = el('div');
+        txt.append(el('div', 'name', p.tags.name));
+        txt.append(el('div', 'meta', `${p.walk} min walk${p.tags.opening_hours ? ' · ' + p.tags.opening_hours : ''}`));
+        row.append(txt);
+        listEl.append(row);
+      });
+    });
+  } catch (err) {
+    listEl.replaceChildren(el('div', 'status', 'Could not load nearby places. Please try again.'));
+  }
+}
+
+function start(center) {
+  map._userPos = center;
+  map.setView(center, 12);
+  loadStations(center).catch(() => { titleEl.textContent = 'Could not load stations'; listEl.replaceChildren(el('div', 'status', 'The map service is busy. Please try again.')); });
+}
+
+if ('geolocation' in navigator) {
+  navigator.geolocation.getCurrentPosition(
+    (p) => start([p.coords.latitude, p.coords.longitude]),
+    () => { listEl.replaceChildren(el('div', 'status', 'Location is off, so showing a sample area.')); start(FALLBACK); },
+    { enableHighAccuracy: false, timeout: 8000 }
+  );
+} else {
+  start(FALLBACK);
+}
+</script>
+</body>
+</html>
