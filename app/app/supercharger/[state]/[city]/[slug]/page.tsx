@@ -21,6 +21,12 @@ async function loadStation(params: StationPageProps["params"]) {
   return getStationBySlug(slug);
 }
 
+// Built the first time someone visits, then served from the CDN until the next deploy (the
+// station data ships with each deploy). Admin changes to Featured listings refresh station pages.
+export function generateStaticParams() {
+  return [];
+}
+
 export async function generateMetadata({ params }: StationPageProps): Promise<Metadata> {
   const station = await loadStation(params);
   if (!station) return {};

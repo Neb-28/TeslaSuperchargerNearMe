@@ -16,6 +16,12 @@ function plural(count: number, word: string) {
   return `${count.toLocaleString("en-US")} ${word}${count === 1 ? "" : "s"}`;
 }
 
+// Built the first time someone visits, then served from the CDN until the next deploy (the
+// station data ships with each deploy).
+export function generateStaticParams() {
+  return [];
+}
+
 export async function generateMetadata({ params }: CityPageProps): Promise<Metadata> {
   const { state, city: citySlug } = await params;
   const city = getCity(state, citySlug);

@@ -60,6 +60,9 @@ export default function CountryPicker({ current, options, basePath }: CountryPic
   }, [open]);
 
   const hrefFor = (slug: string) => (slug === US_SLUG ? basePath : `${basePath}?country=${slug}`);
+  // Home is a prebuilt page per country that only differs by ?country= (see next.config.ts), which
+  // the in-app router can't tell apart, so home switches with a normal page load (from the CDN).
+  const OptionLink = basePath === "/" ? "a" : Link;
 
   return (
     <div ref={wrapRef} className="country-picker">
@@ -81,7 +84,7 @@ export default function CountryPicker({ current, options, basePath }: CountryPic
         <ul ref={listRef}>
           {options.map((option) => (
             <li key={option.slug}>
-              <Link
+              <OptionLink
                 href={hrefFor(option.slug)}
                 className="country-picker-link"
                 aria-current={option.slug === current.slug}
@@ -92,7 +95,7 @@ export default function CountryPicker({ current, options, basePath }: CountryPic
                 </span>
                 <span className="country-picker-name">{option.name}</span>
                 <span className="country-picker-count">{option.count.toLocaleString("en-US")}</span>
-              </Link>
+              </OptionLink>
             </li>
           ))}
         </ul>

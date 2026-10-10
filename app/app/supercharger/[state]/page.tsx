@@ -25,6 +25,12 @@ function summary(state: string) {
   return totals ? { ...totals, cities: citiesInState(state) } : null;
 }
 
+// Built the first time someone visits, then served from the CDN until the next deploy (the
+// station data ships with each deploy).
+export function generateStaticParams() {
+  return [];
+}
+
 export async function generateMetadata({ params }: StatePageProps): Promise<Metadata> {
   const { state } = await params;
   const data = summary(state);

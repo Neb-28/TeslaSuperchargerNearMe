@@ -69,3 +69,16 @@ describe("world data", () => {
     expect(urls.has(stationHref(worldStations[worldStations.length - 1]))).toBe(true);
   });
 });
+
+describe("country homepages", () => {
+  it("rewrites /?country=<slug> for exactly the countries we have", async () => {
+    const config = (await import("@/next.config")).default;
+    const rewrites = await config.rewrites!();
+    const [rule] = Array.isArray(rewrites) ? rewrites : (rewrites.beforeFiles ?? []);
+    expect(rule.destination).toBe("/home/:country");
+    const value = new RegExp(`^${rule.has![0].value}$`);
+    for (const country of countries) expect(value.test(country.slug)).toBe(true);
+    expect(value.test("united-states")).toBe(false);
+    expect(value.test("atlantis")).toBe(false);
+  });
+});
