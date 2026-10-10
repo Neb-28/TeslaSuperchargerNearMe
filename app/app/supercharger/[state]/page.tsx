@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import JsonLd from "@/components/JsonLd";
 import SiteFooter from "@/components/SiteFooter";
+import SideRails from "@/components/SideRails";
 import SiteHeader from "@/components/SiteHeader";
 import StationListCard from "@/components/StationListCard";
 import { absoluteUrl } from "@/lib/site";
@@ -56,6 +57,7 @@ export default async function StatePage({ params }: StatePageProps) {
 
   return (
     <div className="app-shell">
+      <SideRails layout="content" />
       <SiteHeader backHref="/" />
       <main id="main" className="content-page">
         <Breadcrumbs

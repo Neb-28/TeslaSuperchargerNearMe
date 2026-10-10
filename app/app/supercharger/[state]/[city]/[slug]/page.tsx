@@ -8,6 +8,7 @@ import FavoriteButton from "@/components/FavoriteButton";
 import NearbySection from "@/components/NearbySection";
 import ShareButton from "@/components/ShareButton";
 import SiteFooter from "@/components/SiteFooter";
+import SideRails from "@/components/SideRails";
 import SiteHeader from "@/components/SiteHeader";
 import { nearbyForStation } from "@/lib/nearby";
 import { absoluteUrl } from "@/lib/site";
@@ -59,6 +60,7 @@ export default async function StationPage({ params }: StationPageProps) {
 
   return (
     <div className="app-shell">
+      <SideRails layout="station" />
       <SiteHeader backHref="/map" showSearch showMenu={false} />
 
       <div className="station-layout">

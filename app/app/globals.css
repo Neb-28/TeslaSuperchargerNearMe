@@ -2495,3 +2495,76 @@ a.station-row:hover .station-name {
   font-size: 13px;
   color: var(--muted);
 }
+
+/* ---------- Desktop side ads ----------
+   A tall ad centered in the empty space left and right of the page column, from the top of the
+   content down. Only shown where it fits beside the column (see components/SideRails.tsx). */
+.side-rails {
+  display: none;
+}
+
+.side-rails.is-station {
+  --page-w: 1200px;
+}
+
+.side-rails.is-content {
+  --page-w: 720px;
+}
+
+.side-rail {
+  position: absolute;
+  top: 96px;
+  width: var(--rail-w);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.side-rail.is-left {
+  left: calc((100vw - var(--page-w)) / 4 - var(--rail-w) / 2);
+}
+
+.side-rail.is-right {
+  right: calc((100vw - var(--page-w)) / 4 - var(--rail-w) / 2);
+}
+
+.side-rail .ad-label {
+  padding: 0;
+}
+
+.side-rail-ad {
+  display: flex;
+  width: var(--rail-w);
+  height: 600px;
+  overflow: hidden;
+}
+
+.side-rail .ad-placeholder {
+  border: 1.5px dashed var(--border);
+  border-radius: 12px;
+  text-align: center;
+}
+
+@media (min-width: 1180px) {
+  .side-rails.is-content[data-width="160"] {
+    display: block;
+  }
+}
+
+@media (min-width: 1480px) {
+  .side-rails.is-content[data-width="300"] {
+    display: block;
+  }
+}
+
+@media (min-width: 1600px) {
+  .side-rails.is-station[data-width="160"] {
+    display: block;
+  }
+}
+
+@media (min-width: 1920px) {
+  .side-rails.is-station[data-width="300"] {
+    display: block;
+  }
+}
