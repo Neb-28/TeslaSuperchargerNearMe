@@ -251,6 +251,13 @@ img {
   text-align: center;
 }
 
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0 12px;
+}
+
 /* Inline text link; padded to a 44 px tap target without changing the line. */
 .footer-link {
   display: inline-flex;

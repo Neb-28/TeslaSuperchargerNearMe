@@ -3,6 +3,9 @@ export const SITE_NAME = "TeslaSuperchargerNearMe";
 // Absolute URLs (canonical links, sitemap, structured data) are built from this.
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://teslasuperchargernearme.com").replace(/\/+$/, "");
 
+// Shown on the About, Contact and Privacy pages.
+export const CONTACT_EMAIL = process.env.CONTACT_EMAIL || "info@greenstartech.io";
+
 const bareHost = (host: string | undefined) => host?.replace(/^www\./, "").toLowerCase();
 
 // Only the live site may be indexed. On Vercel that means a production deployment served on our

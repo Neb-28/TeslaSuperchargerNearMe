@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
+import { CONTACT_EMAIL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Privacy policy",
@@ -10,7 +11,6 @@ export const metadata: Metadata = {
 // Draft written from what the site actually does today; have a lawyer review it before launch.
 // Update "Last updated" and the sections below whenever data handling changes (leads, analytics...).
 const LAST_UPDATED = "October 10, 2026";
-const contactEmail = process.env.CONTACT_EMAIL;
 
 export default function PrivacyPage() {
   return (
@@ -90,14 +90,8 @@ export default function PrivacyPage() {
 
         <h2>Changes and contact</h2>
         <p>
-          We&apos;ll update this page when our practices change and show the new date at the top.{" "}
-          {contactEmail ? (
-            <>
-              Questions or requests about your information: <a href={`mailto:${contactEmail}`}>{contactEmail}</a>.
-            </>
-          ) : (
-            "Questions or requests about your information: [CONTACT EMAIL]."
-          )}
+          We&apos;ll update this page when our practices change and show the new date at the top. Questions or requests about your
+          information: <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
         </p>
       </main>
       <SiteFooter />

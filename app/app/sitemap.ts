@@ -20,6 +20,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...countries.map((country) => ({ url: absoluteUrl(stateHref(country.slug)), lastModified: updated, changeFrequency: "weekly" as const, priority: 0.7 })),
     ...allWorldCities().map((city) => ({ url: absoluteUrl(cityHref(city.state, city.city)), lastModified: updated, changeFrequency: "weekly" as const, priority: 0.6 })),
     ...worldStations.map((station) => ({ url: absoluteUrl(stationHref(station)), lastModified: updated, changeFrequency: "weekly" as const, priority: 0.5 })),
+    { url: absoluteUrl("/about"), changeFrequency: "yearly", priority: 0.2 },
+    { url: absoluteUrl("/contact"), changeFrequency: "yearly", priority: 0.2 },
     { url: absoluteUrl("/privacy"), changeFrequency: "yearly", priority: 0.1 },
   ];
 }
