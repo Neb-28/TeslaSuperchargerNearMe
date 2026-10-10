@@ -61,7 +61,7 @@ export default function HomeContent({ country }: { country: CountrySummary | nul
 
         <h1 className="home-title">Find a Supercharger near you</h1>
 
-        <p className="home-sub">For every EV, Tesla or not. See open stalls and what&apos;s nearby.</p>
+        <p className="home-sub">30 minutes to charge. A whole neighborhood to explore. Your charging stop just got interesting.</p>
 
         {/* A plain GET form, so search works before (or without) JavaScript. */}
         <form action="/map" method="get" role="search" className="search-shell">

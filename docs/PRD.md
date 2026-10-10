@@ -72,7 +72,7 @@ All screens are designed at 390 px wide (phone first) and must work from 320 px 
 - Content centered vertically and horizontally, 20 px side padding, 22 px gaps.
 - Brand mark 76 × 76 px, radius 22, mint background, bolt icon 40 px.
 - H1: "Find a Supercharger near you", display font 30 px, bold, letter-spacing −0.6 px.
-- Subline: "For every EV, Tesla or not. See open stalls and what's nearby." 15 px, `muted`.
+- Subline: "30 minutes to charge. A whole neighborhood to explore. Your charging stop just got interesting." 15 px, `muted`.
 - Search field: full width, 52 px tall, pill radius, 1.5 px `border`, search icon inside on the left, placeholder "Search city, place or address". Must be a real `<input type="search">` with a label.
 - Button grid, 2 columns, 10 px gap, each button 52 px tall, radius 14:
     - **Near me** (primary): `accent` fill, white text, navigation-arrow icon. Requests location, then opens Map.
