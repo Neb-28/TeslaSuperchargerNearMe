@@ -10,14 +10,17 @@ type NearbySectionProps = {
   stationLat: number;
   stationLon: number;
   categories: NearbyCategory[];
+  // Stations outside the US and UK show metres and kilometres.
+  metric?: boolean;
 };
 
-function formatDistance(meters: number) {
+function formatDistance(meters: number, metric = false) {
+  if (metric) return meters < 1000 ? `${Math.round(meters / 10) * 10} m` : `${(meters / 1000).toFixed(1)} km`;
   const feet = meters * 3.28084;
   return feet < 1000 ? `${Math.round(feet / 10) * 10} ft` : `${(meters / 1609.34).toFixed(1)} mi`;
 }
 
-export default function NearbySection({ stationSlug, stationLat, stationLon, categories }: NearbySectionProps) {
+export default function NearbySection({ stationSlug, stationLat, stationLon, categories, metric = false }: NearbySectionProps) {
   const firstWithPlaces = categories.find((category) => category.listings.length)?.id ?? categories[0].id;
   const [selected, setSelected] = useState<CategoryId>(firstWithPlaces);
   const current = categories.find((category) => category.id === selected)!;
@@ -62,7 +65,7 @@ export default function NearbySection({ stationSlug, stationLat, stationLon, cat
                   listing={listing}
                   directionsHref={listing.featured.lat != null && listing.featured.lon != null ? directions(listing.featured.lat, listing.featured.lon) : null}
                 />
-              ) : <PlaceRow listing={listing} driving={driving} href={directions(listing.place.lat, listing.place.lon)} />}
+              ) : <PlaceRow listing={listing} driving={driving} metric={metric} href={directions(listing.place.lat, listing.place.lon)} />}
             </li>
           ))}
         </ol>
@@ -119,10 +122,10 @@ function FeaturedCard({ listing, directionsHref }: { listing: Extract<PublicList
   );
 }
 
-function PlaceRow({ listing, driving, href }: { listing: Extract<PublicListing, { type: "place" }>; driving: boolean; href: string }) {
+function PlaceRow({ listing, driving, metric, href }: { listing: Extract<PublicListing, { type: "place" }>; driving: boolean; metric: boolean; href: string }) {
   const { place } = listing;
   return (
-    <a className="nearby-row" href={href} target="_blank" rel="noreferrer" aria-label={`${place.name}, ${place.kind}, ${formatDistance(place.distanceM)} away. Directions`}>
+    <a className="nearby-row" href={href} target="_blank" rel="noreferrer" aria-label={`${place.name}, ${place.kind}, ${formatDistance(place.distanceM, metric)} away. Directions`}>
       <span className="rank-badge" aria-hidden="true">#{listing.rank}</span>
       <span className="nearby-row-copy">
         <span className="nearby-row-name">{place.name}</span>
@@ -131,7 +134,7 @@ function PlaceRow({ listing, driving, href }: { listing: Extract<PublicListing, 
           {driving ? "" : ` · ${place.walkMin} min walk`}
         </span>
       </span>
-      <span className="nearby-row-distance">{formatDistance(place.distanceM)}</span>
+      <span className="nearby-row-distance">{formatDistance(place.distanceM, metric)}</span>
     </a>
   );
 }

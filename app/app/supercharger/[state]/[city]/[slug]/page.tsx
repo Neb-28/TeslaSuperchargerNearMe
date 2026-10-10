@@ -150,7 +150,13 @@ export default async function StationPage({ params }: StationPageProps) {
 
           <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_STATION} />
 
-          <NearbySection stationSlug={station.slug} stationLat={lat} stationLon={lon} categories={nearby} />
+          <NearbySection
+            stationSlug={station.slug}
+            stationLat={lat}
+            stationLon={lon}
+            categories={nearby}
+            metric={isWorldStation(station) && station.countryCode !== "GB"}
+          />
 
           <SiteFooter osmCredit dataCredit={isWorldStation(station)} />
         </main>

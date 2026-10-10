@@ -4,6 +4,11 @@
 // Usage: node scripts/import-places.mjs        (needs data/superchargers.json; can take an hour)
 //        node scripts/import-places.mjs --fresh  (start over instead of resuming)
 //        node scripts/import-places.mjs --first=38.63,-77.29  (do the area around a point first)
+//        node scripts/import-places.mjs --world  (stations outside the US, data/world-superchargers.json)
+//
+// US stations are looked up around Tesla stations as mapped in OpenStreetMap. Many stations
+// abroad (China especially) aren't in OSM, so --world searches around each station's own
+// coordinates instead, in small batches of nearby stations.
 //
 // Progress is saved after every grid cell, so the site can use partial data and a stopped run
 // resumes where it left off. Cells that keep failing are skipped and retried on the next run.
@@ -115,14 +120,47 @@ async function overpass(query) {
   return null; // give up on this cell for now; the next run retries it
 }
 
-const { stations } = JSON.parse(readFileSync(new URL("../data/superchargers.json", import.meta.url), "utf8"));
+const WORLD = process.argv.includes("--world");
+const WORLD_BATCH = 25;
+const { stations } = JSON.parse(
+  readFileSync(new URL(WORLD ? "../data/world-superchargers.json" : "../data/superchargers.json", import.meta.url), "utf8"),
+);
 
-// Group stations into grid cells.
+// Group stations into grid cells; world cells are split into small batches (keys start "w:").
 const cells = new Map();
 for (const station of stations) {
   const key = `${Math.floor(station.lat / CELL_DEGREES)}:${Math.floor(station.lon / CELL_DEGREES)}`;
   if (!cells.has(key)) cells.set(key, []);
   cells.get(key).push(station);
+}
+if (WORLD) {
+  for (const [key, cellStations] of [...cells]) {
+    cells.delete(key);
+    for (let i = 0; i < cellStations.length; i += WORLD_BATCH) cells.set(`w:${key}:${i / WORLD_BATCH}`, cellStations.slice(i, i + WORLD_BATCH));
+  }
+}
+
+function queryFor(cellStations) {
+  if (WORLD) {
+    const around = (radius, station) => `(around:${radius},${station.lat},${station.lon})`;
+    const parts = cellStations.flatMap((station) => [
+      `nwr${around(WALK_RADIUS_M, station)}["amenity"~"^(restaurant|fast_food|food_court|ice_cream|cafe|bar|pub|biergarten)$"]["name"];`,
+      `nwr${around(WALK_RADIUS_M, station)}["shop"]["name"];`,
+      `nwr${around(CHARGER_RADIUS_M, station)}["amenity"="charging_station"];`,
+    ]);
+    return `[out:json][timeout:180];\n(\n${parts.join("\n")}\n);\nout center tags;`;
+  }
+  const lats = cellStations.map((s) => s.lat);
+  const lons = cellStations.map((s) => s.lon);
+  const bbox = [Math.min(...lats) - 0.001, Math.min(...lons) - 0.001, Math.max(...lats) + 0.001, Math.max(...lons) + 0.001].join(",");
+  return `[out:json][timeout:180];
+nwr["amenity"="charging_station"]["brand"~"^tesla",i](${bbox})->.sc;
+(
+  nwr(around.sc:${WALK_RADIUS_M})["amenity"~"^(restaurant|fast_food|food_court|ice_cream|cafe|bar|pub|biergarten)$"]["name"];
+  nwr(around.sc:${WALK_RADIUS_M})["shop"]["name"];
+  nwr(around.sc:${CHARGER_RADIUS_M})["amenity"="charging_station"];
+);
+out center tags;`;
 }
 
 const OUT = new URL("../data/places.json", import.meta.url);
@@ -138,7 +176,8 @@ const order = [...cells];
 if (firstArg) {
   const [lat, lon] = firstArg.slice("--first=".length).split(",").map(Number);
   const firstKey = `${Math.floor(lat / CELL_DEGREES)}:${Math.floor(lon / CELL_DEGREES)}`;
-  order.sort(([a], [b]) => (b === firstKey) - (a === firstKey));
+  const isFirst = (key) => key === firstKey || key.startsWith(`w:${firstKey}:`);
+  order.sort(([a], [b]) => isFirst(b) - isFirst(a));
 }
 
 let done = 0;
@@ -146,17 +185,7 @@ let skipped = 0;
 for (const [cellKey, cellStations] of order) {
   done++;
   if (cellsDone.has(cellKey)) continue;
-  const lats = cellStations.map((s) => s.lat);
-  const lons = cellStations.map((s) => s.lon);
-  const bbox = [Math.min(...lats) - 0.001, Math.min(...lons) - 0.001, Math.max(...lats) + 0.001, Math.max(...lons) + 0.001].join(",");
-  const query = `[out:json][timeout:180];
-nwr["amenity"="charging_station"]["brand"~"^tesla",i](${bbox})->.sc;
-(
-  nwr(around.sc:${WALK_RADIUS_M})["amenity"~"^(restaurant|fast_food|food_court|ice_cream|cafe|bar|pub|biergarten)$"]["name"];
-  nwr(around.sc:${WALK_RADIUS_M})["shop"]["name"];
-  nwr(around.sc:${CHARGER_RADIUS_M})["amenity"="charging_station"];
-);
-out center tags;`;
+  const query = queryFor(cellStations);
 
   const elements = await overpass(query);
   if (!elements) {
