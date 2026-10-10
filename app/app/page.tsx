@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import CountryPicker from "@/components/CountryPicker";
 import JsonLd from "@/components/JsonLd";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
-import { allCities, cityHref, stateHref, statesWithStations, superchargers } from "@/lib/superchargers";
+import { allCities, cityHref, countryOptions, countryPhrase, getCountry, stateHref, statesWithStations, superchargers } from "@/lib/superchargers";
 import { stateName, US_STATES } from "@/lib/usStates";
 
 // The title and description come from the root layout's defaults.
@@ -46,10 +47,18 @@ const faqs = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage({ searchParams }: PageProps<"/">) {
+  // ?country=germany switches the city lists (and the links to the map) to that country.
+  // Without it the page is the US homepage, unchanged.
+  const params = await searchParams;
+  const country = typeof params.country === "string" ? getCountry(params.country) : null;
+  const options = countryOptions();
+  const current = (country && options.find((option) => option.slug === country.slug)) || options[0];
+  const withCountry = (path: string) => (country ? `${path}${path.includes("?") ? "&" : "?"}country=${country.slug}` : path);
+
   return (
     <div className="app-shell">
-      <SiteHeader />
+      <SiteHeader countryPicker={<CountryPicker current={current} options={options} basePath="/" />} />
 
       <main id="main" className="home-page">
         <div className="hero-mark" aria-hidden="true">
@@ -70,17 +79,18 @@ export default function HomePage() {
             <path d="m20 20-3.5-3.5" />
           </svg>
           <input id="home-search" name="q" type="search" enterKeyHint="search" placeholder="Search city, ZIP code or station" autoComplete="off" />
+          {country ? <input type="hidden" name="country" value={country.slug} /> : null}
         </form>
 
         <div className="primary-grid">
-          <Link href="/map?near=1" className="action-button primary">
+          <Link href={withCountry("/map?near=1")} className="action-button primary">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M21 3 3 10.5l7.5 3L13.5 21 21 3z" />
             </svg>
             Near me
           </Link>
 
-          <Link href="/map" className="action-button secondary">
+          <Link href={withCountry("/map")} className="action-button secondary">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0B6E5B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z" />
               <path d="M9 4v14M15 6v14" />
@@ -98,6 +108,41 @@ export default function HomePage() {
       </main>
 
       <div className="home-more">
+        {country ? (
+          <>
+            <section aria-labelledby="states-title" className="link-section">
+              <h2 id="states-title" className="section-title">Superchargers in {countryPhrase(country.name)}</h2>
+              <p className="page-sub">
+                {country.count.toLocaleString("en-US")} Tesla Supercharger stations across {countryPhrase(country.name)}.
+              </p>
+              <ul className="link-chips">
+                {[...country.cities]
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map((city) => (
+                    <li key={city.city}>
+                      <Link href={cityHref(city.state, city.city)} className="link-chip">
+                        {city.name} <span>{city.stations.length}</span>
+                      </Link>
+                    </li>
+                  ))}
+              </ul>
+            </section>
+
+            <section aria-labelledby="cities-title" className="link-section">
+              <h2 id="cities-title" className="section-title">Popular cities</h2>
+              <ul className="link-chips">
+                {country.cities.slice(0, 12).map((city) => (
+                  <li key={city.city}>
+                    <Link href={cityHref(city.state, city.city)} className="link-chip">
+                      {city.name} <span>{city.stations.length}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </>
+        ) : (
+          <>
         <section aria-labelledby="states-title" className="link-section">
           <h2 id="states-title" className="section-title">Superchargers by state</h2>
           <p className="page-sub">{superchargers.length.toLocaleString("en-US")} Tesla Supercharger stations across the US.</p>
@@ -124,6 +169,8 @@ export default function HomePage() {
             ))}
           </ul>
         </section>
+          </>
+        )}
 
         <section aria-labelledby="faq-title" className="link-section faq">
           <h2 id="faq-title" className="section-title">Questions drivers ask</h2>

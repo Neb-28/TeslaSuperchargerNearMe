@@ -29,6 +29,9 @@ type MapViewProps = {
   highlightHref: string | null;
   near: boolean;
   focusSearch: boolean;
+  // Set outside the US: only that country's stations are loaded, ZIP lookup is off and the map
+  // starts on initialPlace (its busiest city). Null means the US map, exactly as before.
+  country?: { slug: string; code: string | null } | null;
 };
 
 function zipNotFound(zip: string) {
@@ -39,11 +42,23 @@ function formatMiles(miles: number) {
   return miles < 10 ? `${miles.toFixed(1)} mi` : `${Math.round(miles).toLocaleString("en-US")} mi`;
 }
 
-export default function MapView({ initialQuery, initialPlace, initialNearby, highlightHref, near, focusSearch }: MapViewProps) {
+// Kilometres outside the US and the UK.
+function formatDistance(miles: number, countryCode: string | null | undefined) {
+  if (!countryCode || countryCode === "GB") return formatMiles(miles);
+  const km = miles * 1.609344;
+  return km < 10 ? `${km.toFixed(1)} km` : `${Math.round(km).toLocaleString("en-US")} km`;
+}
+
+// Accent- and case-insensitive, so "munchen" and "Munich" both find München.
+const fold = (text: string) => text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+export default function MapView({ initialQuery, initialPlace, initialNearby, highlightHref, near, focusSearch, country = null }: MapViewProps) {
   const router = useRouter();
   const searchRef = useRef<HTMLInputElement>(null);
   const [draft, setDraft] = useState(initialQuery);
-  const initialZip = parseZip(initialQuery);
+  // ZIP codes are US-only; elsewhere five digits are just part of a search.
+  const initialZip = country ? null : parseZip(initialQuery);
+  const countryPlace = country ? initialPlace : null;
   // `query` filters by station name (names include the city); a ZIP search sets `place` instead.
   const [query, setQuery] = useState(initialZip ? "" : initialQuery.trim());
   const [place, setPlace] = useState<Place | null>(initialPlace);
@@ -59,7 +74,7 @@ export default function MapView({ initialQuery, initialPlace, initialNearby, hig
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/stations")
+    fetch(country ? `/api/stations?country=${country.slug}` : "/api/stations")
       .then((response) => response.json() as Promise<{ pins: PinTuple[] }>)
       .then(({ pins }) => {
         if (!cancelled) setAllPins(pins.map(pinFromTuple));
@@ -70,12 +85,14 @@ export default function MapView({ initialQuery, initialPlace, initialNearby, hig
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [country]);
 
   const needle = query.toLowerCase();
   const matchingPins = useMemo(() => {
     const source = allPins ?? initialNearby;
-    return needle ? source.filter((pin) => pin.name.toLowerCase().includes(needle)) : source;
+    if (!needle) return source;
+    // Pins outside the US also match on their city, region and country names.
+    return source.filter((pin) => (pin.search === undefined ? pin.name.toLowerCase().includes(needle) : fold(`${pin.name} ${pin.search}`).includes(fold(needle))));
   }, [allPins, initialNearby, needle]);
 
   const nearby = useMemo(() => {
@@ -92,12 +109,13 @@ export default function MapView({ initialQuery, initialPlace, initialNearby, hig
 
   async function applySearch(value: string) {
     const trimmed = value.trim();
-    window.history.replaceState(null, "", trimmed ? `/map?q=${encodeURIComponent(trimmed)}` : "/map");
+    const countryParam = country ? `country=${country.slug}` : "";
+    window.history.replaceState(null, "", trimmed ? `/map?q=${encodeURIComponent(trimmed)}${countryParam ? `&${countryParam}` : ""}` : `/map${countryParam ? `?${countryParam}` : ""}`);
     setSearchError(null);
 
-    const zip = parseZip(trimmed);
+    const zip = country ? null : parseZip(trimmed);
     if (!zip) {
-      setPlace(null);
+      setPlace(countryPlace);
       setQuery(trimmed);
       return;
     }
@@ -184,7 +202,7 @@ export default function MapView({ initialQuery, initialPlace, initialNearby, hig
         <ul className="station-list">
           {nearby.map((station, index) => {
             const isNearest = index === 0 && showNearest && !needle;
-            const sub = [formatMiles(station.miles), station.stalls ? `${station.stalls} stalls` : null, station.kw ? `${station.kw} kW` : null]
+            const sub = [formatDistance(station.miles, country?.code), station.stalls ? `${station.stalls} stalls` : null, station.kw ? `${station.kw} kW` : null]
               .filter(Boolean)
               .join(" · ");
 

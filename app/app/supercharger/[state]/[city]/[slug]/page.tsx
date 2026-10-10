@@ -11,7 +11,7 @@ import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import { nearbyForStation } from "@/lib/nearby";
 import { absoluteUrl } from "@/lib/site";
-import { cityHref, getCity, getStationBySlug, stateHref, stationHref, stationTitle } from "@/lib/superchargers";
+import { areaName, cityHref, getCity, getStationBySlug, isWorldStation, stateHref, stationHref, stationTitle } from "@/lib/superchargers";
 import { stateName } from "@/lib/usStates";
 
 type StationPageProps = PageProps<"/supercharger/[state]/[city]/[slug]">;
@@ -45,7 +45,9 @@ export default async function StationPage({ params }: StationPageProps) {
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
   // Stall labels only; there is no live availability feed yet (PRD: Phase 3 data partner).
   const stallNumbers = Array.from({ length: station.stalls ?? 0 }, (_, index) => index + 1);
-  const power = station.maxKw ? `${station.maxKw} kW NACS` : "NACS";
+  // US stations are NACS; elsewhere the connector comes from the data (CCS2 in Europe, GB/T in China…).
+  const plug = station.plug ?? "NACS";
+  const power = station.maxKw ? `${station.maxKw} kW ${plug}` : plug;
   const nearby = await nearbyForStation(station.id);
   const cityInfo = getCity(station.state, station.city);
 
@@ -72,7 +74,7 @@ export default async function StationPage({ params }: StationPageProps) {
               <Breadcrumbs
                 items={[
                   { name: "Home", href: "/" },
-                  { name: stateName(station.state), href: stateHref(station.state) },
+                  { name: areaName(station.state, stateName), href: stateHref(station.state) },
                   { name: cityInfo.name, href: cityHref(cityInfo.state, cityInfo.city) },
                   { name: station.street ?? station.name, href },
                 ]}
@@ -150,7 +152,7 @@ export default async function StationPage({ params }: StationPageProps) {
 
           <NearbySection stationSlug={station.slug} stationLat={lat} stationLon={lon} categories={nearby} />
 
-          <SiteFooter osmCredit />
+          <SiteFooter osmCredit dataCredit={isWorldStation(station)} />
         </main>
 
         {/* Described as a schema.org Place (a charging location), not a LocalBusiness: we don't run it. */}

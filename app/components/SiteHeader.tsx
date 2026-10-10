@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import BackButton from "./BackButton";
 import BrandName, { BRAND_NAME } from "./BrandName";
 import MenuButton from "./MenuButton";
@@ -10,11 +11,13 @@ type SiteHeaderProps = {
   showSearch?: boolean;
   // Station pages turn this off on phones so the name fits on one line.
   showMenu?: boolean;
+  // Home and Map only: the flag dropdown for switching country.
+  countryPicker?: ReactNode;
 };
 
 // Phones: Back on the left, Search and/or Menu on the right.
 // Desktop (900 px+): the Menu is replaced by inline links.
-export default function SiteHeader({ backHref, showSearch = false, showMenu = true }: SiteHeaderProps) {
+export default function SiteHeader({ backHref, showSearch = false, showMenu = true, countryPicker }: SiteHeaderProps) {
   return (
     <header className="topbar">
       <div className="topbar-inner">
@@ -39,6 +42,7 @@ export default function SiteHeader({ backHref, showSearch = false, showMenu = tr
         </nav>
 
         <div className="header-actions">
+          {countryPicker}
           {showSearch ? (
             <Link href="/map?search=1" aria-label="Search" className="icon-button">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">

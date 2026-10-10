@@ -1,6 +1,7 @@
 // Server-only: loads the ~900 KB Supercharger snapshot (scripts/import-superchargers.mjs).
 // When the M1 database lands, these functions become SQL queries with the same shapes.
 import snapshot from "@/data/superchargers.json";
+import worldSnapshot from "@/data/world-superchargers.json";
 import type { Pin, PinTuple } from "./pins";
 import { milesBetween, type LatLng } from "./stations";
 
@@ -19,6 +20,8 @@ export type Supercharger = {
   stalls: number | null;
   maxKw: number | null;
   ccs: boolean; // has a CCS (Magic Dock) connector, so non-Tesla EVs can plug in
+  // Outside the US only (data/world-superchargers.json); US stations show "NACS".
+  plug?: string | null;
 };
 
 export const superchargers = (snapshot as { stations: Supercharger[] }).stations;
@@ -31,7 +34,7 @@ export function stationHref(station: Pick<Supercharger, "state" | "city" | "slug
 const bySlug = new Map(superchargers.map((station) => [station.slug, station]));
 
 export function getStationBySlug(slug: string) {
-  return bySlug.get(slug) ?? null;
+  return bySlug.get(slug) ?? worldBySlug.get(slug) ?? null;
 }
 
 export function stationPins(): PinTuple[] {
@@ -74,7 +77,7 @@ const titles = (() => {
 })();
 
 export function stationTitle(station: Supercharger) {
-  return titles.get(station.id)!;
+  return titles.get(station.id) ?? worldTitles.get(station.id)!;
 }
 
 // Stations without any city (very remote) only get station pages, not state/city pages.
@@ -102,7 +105,7 @@ for (const [key, stations] of Map.groupBy(listed, (station) => `${station.state}
 }
 
 export function getCity(state: string, city: string) {
-  return citiesByKey.get(`${state}/${city}`) ?? null;
+  return citiesByKey.get(`${state}/${city}`) ?? worldCitiesByKey.get(`${state}/${city}`) ?? null;
 }
 
 export function allCities() {
@@ -138,10 +141,146 @@ export function nearbyCities(city: CitySummary, limit = 8) {
     item.stations.reduce((sum, station) => sum + station.lon, 0) / item.stations.length,
   ];
   const origin = center(city);
-  return citiesInState(city.state)
+  return (getCountry(city.state)?.cities ?? citiesInState(city.state))
     .filter((item) => item.city !== city.city)
     .map((item) => ({ item, miles: milesBetween(origin, center(item)) }))
     .sort((a, b) => a.miles - b.miles)
     .slice(0, limit)
     .map(({ item }) => item);
+}
+
+// ---------- The rest of the world (data/world-superchargers.json, from supercharge.info) ----------
+// Outside the US a country takes the place of the state: /supercharger/germany/munchen/<station>.
+// Country slugs are full names, so they never collide with two-letter US state codes. The US
+// functions above are unchanged; world stations only show up through the lookups that fall back
+// to them (station by slug, city, title) and through the country functions below.
+
+export type WorldSupercharger = Supercharger & {
+  country: string;
+  countryCode: string | null;
+  cityName: string;
+  region: string | null;
+};
+
+export const worldStations = (worldSnapshot as unknown as { stations: WorldSupercharger[] }).stations;
+export const worldSnapshotDate = (worldSnapshot as { fetchedAt: string | null }).fetchedAt;
+const worldBySlug = new Map(worldStations.map((station) => [station.slug, station]));
+
+export const US_COUNTRY = { slug: "united-states", code: "US", name: "United States" } as const;
+
+export function isWorldStation(station: Supercharger): station is WorldSupercharger {
+  return "country" in station;
+}
+
+const worldTitles = (() => {
+  const base = new Map(
+    worldStations.map((station) => [
+      station.id,
+      station.street ? `Tesla Supercharger at ${station.street}, ${station.cityLabel}` : `Tesla Supercharger in ${station.cityLabel}`,
+    ]),
+  );
+  const unique = new Map<string, string>();
+  for (const [title, group] of Map.groupBy(worldStations, (station) => base.get(station.id)!)) {
+    group.forEach((station, index) => unique.set(station.id, group.length === 1 ? title : `${title} (#${index + 1})`));
+  }
+  return unique;
+})();
+
+export type CountrySummary = {
+  slug: string;
+  code: string | null;
+  name: string;
+  count: number;
+  stalls: number;
+  cities: CitySummary[]; // most stations first
+  center: LatLng; // the busiest city, where the map opens for this country
+};
+
+const worldCitiesByKey = new Map<string, CitySummary>();
+for (const [key, stations] of Map.groupBy(worldStations, (station) => `${station.state}/${station.city}`)) {
+  const [state, city] = key.split("/");
+  worldCitiesByKey.set(key, {
+    state,
+    city,
+    name: stations[0].cityName,
+    label: stations[0].cityLabel ?? stations[0].cityName,
+    stations: [...stations].sort((a, b) => (b.stalls ?? 0) - (a.stalls ?? 0) || a.name.localeCompare(b.name)),
+    stalls: stations.reduce((sum, station) => sum + (station.stalls ?? 0), 0),
+  });
+}
+
+const centerOf = (stations: Supercharger[]): LatLng => [
+  stations.reduce((sum, station) => sum + station.lat, 0) / stations.length,
+  stations.reduce((sum, station) => sum + station.lon, 0) / stations.length,
+];
+
+export const countries: CountrySummary[] = [...Map.groupBy(worldStations, (station) => station.state)]
+  .map(([slug, stations]) => {
+    const cities = [...worldCitiesByKey.values()]
+      .filter((city) => city.state === slug)
+      .sort((a, b) => b.stations.length - a.stations.length || a.name.localeCompare(b.name));
+    return {
+      slug,
+      code: stations[0].countryCode,
+      name: stations[0].country,
+      count: stations.length,
+      stalls: stations.reduce((sum, station) => sum + (station.stalls ?? 0), 0),
+      cities,
+      center: centerOf(cities[0].stations),
+    };
+  })
+  .sort((a, b) => a.name.localeCompare(b.name));
+
+const countryBySlug = new Map(countries.map((country) => [country.slug, country]));
+
+export function getCountry(slug: string) {
+  return countryBySlug.get(slug) ?? null;
+}
+
+export function allWorldCities() {
+  return [...worldCitiesByKey.values()];
+}
+
+/** The page heading for a state code or country slug ("Virginia", "Germany"). */
+export function areaName(state: string, usName: (code: string) => string) {
+  return getCountry(state)?.name ?? usName(state);
+}
+
+/** A country name as it reads after "across" or "in": "the United Kingdom", "Germany". */
+export function countryPhrase(name: string) {
+  return /^(United Kingdom|United Arab Emirates|Netherlands|Philippines|United States)$/.test(name) ? `the ${name}` : name;
+}
+
+/** Every country with stations for the flag dropdown: the US first, then A–Z. */
+export function countryOptions() {
+  return [
+    { slug: US_COUNTRY.slug, code: US_COUNTRY.code, name: US_COUNTRY.name, count: superchargers.length },
+    ...countries.map((country) => ({ slug: country.slug, code: country.code, name: country.name, count: country.count })),
+  ];
+}
+
+// Extra words a station can be found by on the map: its city and country, plus English names
+// for cities the feed spells locally ("Munich" for München).
+const ENGLISH_NAMES: Record<string, string> = {
+  München: "Munich", Köln: "Cologne", "Frankfurt am Main": "Frankfurt", Nürnberg: "Nuremberg", Roma: "Rome",
+  Milano: "Milan", Napoli: "Naples", Venezia: "Venice", Firenze: "Florence", Torino: "Turin", Praha: "Prague",
+  Warszawa: "Warsaw", Göteborg: "Gothenburg", Beograd: "Belgrade", Sevilla: "Seville", "Ciudad de México": "Mexico City",
+  București: "Bucharest", København: "Copenhagen", Wien: "Vienna", Lisboa: "Lisbon", Athina: "Athens",
+};
+
+function worldPin(station: WorldSupercharger): PinTuple {
+  const search = [station.cityName, ENGLISH_NAMES[station.cityName], station.region, station.country].filter(Boolean).join(" ");
+  return [station.lat, station.lon, station.stalls, station.maxKw, station.name, stationHref(station), search];
+}
+
+export function countryPins(slug: string): PinTuple[] {
+  return worldStations.filter((station) => station.state === slug).map(worldPin);
+}
+
+export function nearestInCountry(slug: string, point: LatLng, limit = 25) {
+  return worldStations
+    .filter((station) => station.state === slug)
+    .map((station) => ({ station, miles: milesBetween(point, [station.lat, station.lon]) }))
+    .sort((a, b) => a.miles - b.miles)
+    .slice(0, limit);
 }

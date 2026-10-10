@@ -7,7 +7,7 @@ import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import StationListCard from "@/components/StationListCard";
 import { absoluteUrl } from "@/lib/site";
-import { cityHref, citiesInState, stateHref, statesWithStations } from "@/lib/superchargers";
+import { areaName, cityHref, citiesInState, countryPhrase, getCountry, stateHref, statesWithStations } from "@/lib/superchargers";
 import { stateName, US_STATES } from "@/lib/usStates";
 
 type StatePageProps = PageProps<"/supercharger/[state]">;
@@ -17,6 +17,9 @@ function plural(count: number, word: string) {
 }
 
 function summary(state: string) {
+  // Outside the US the country takes the state's place (/supercharger/germany).
+  const country = getCountry(state);
+  if (country) return { state, count: country.count, stalls: country.stalls, cities: country.cities };
   if (!US_STATES[state]) return null;
   const totals = statesWithStations().find((item) => item.state === state);
   return totals ? { ...totals, cities: citiesInState(state) } : null;
@@ -27,8 +30,8 @@ export async function generateMetadata({ params }: StatePageProps): Promise<Meta
   const data = summary(state);
   if (!data) return {};
   return {
-    title: `Tesla Superchargers in ${stateName(state)} (${plural(data.count, "station")})`,
-    description: `All ${plural(data.count, "Tesla Supercharger station")} in ${stateName(state)} across ${plural(data.cities.length, "city")}, with stall counts, charging speed, directions and what's within walking distance.`,
+    title: `Tesla Superchargers in ${countryPhrase(areaName(state, stateName))} (${plural(data.count, "station")})`,
+    description: `All ${plural(data.count, "Tesla Supercharger station")} in ${countryPhrase(areaName(state, stateName))} across ${plural(data.cities.length, "city")}, with stall counts, charging speed, directions and what's within walking distance.`,
     alternates: { canonical: stateHref(state) },
   };
 }
@@ -38,7 +41,8 @@ export default async function StatePage({ params }: StatePageProps) {
   const data = summary(state);
   if (!data) notFound();
 
-  const name = stateName(state);
+  const name = areaName(state, stateName);
+  const inName = countryPhrase(name); // "the United Kingdom"; US state names are unchanged
   const biggest = data.cities
     .flatMap((city) => city.stations)
     .sort((a, b) => (b.stalls ?? 0) - (a.stalls ?? 0))
@@ -54,9 +58,9 @@ export default async function StatePage({ params }: StatePageProps) {
             { name, href: stateHref(state) },
           ]}
         />
-        <h1 className="page-title">Tesla Superchargers in {name}</h1>
+        <h1 className="page-title">Tesla Superchargers in {inName}</h1>
         <p className="page-sub">
-          {name} has {plural(data.count, "Supercharger station")}
+          {inName.charAt(0).toUpperCase() + inName.slice(1)} has {plural(data.count, "Supercharger station")}
           {data.stalls ? ` and ${plural(data.stalls, "charging stall")}` : ""} across {plural(data.cities.length, "city")} and town
           {data.cities.length === 1 ? "" : "s"}. Pick a city to see each station&apos;s address, charging speed and what&apos;s within
           walking distance.
@@ -77,7 +81,7 @@ export default async function StatePage({ params }: StatePageProps) {
 
         {biggest.length ? (
           <section aria-labelledby="biggest-title" className="link-section">
-            <h2 id="biggest-title" className="section-title">Largest stations in {name}</h2>
+            <h2 id="biggest-title" className="section-title">Largest stations in {inName}</h2>
             <ul className="station-list content-card">
               {biggest.map((station) => (
                 <li key={station.id}>
@@ -92,7 +96,7 @@ export default async function StatePage({ params }: StatePageProps) {
           data={{
             "@context": "https://schema.org",
             "@type": "ItemList",
-            name: `Tesla Supercharger cities in ${name}`,
+            name: `Tesla Supercharger cities in ${inName}`,
             numberOfItems: data.cities.length,
             itemListElement: data.cities.map((city, index) => ({
               "@type": "ListItem",
@@ -103,7 +107,7 @@ export default async function StatePage({ params }: StatePageProps) {
           }}
         />
       </main>
-      <SiteFooter osmCredit />
+      <SiteFooter osmCredit dataCredit={Boolean(getCountry(state))} />
     </div>
   );
 }

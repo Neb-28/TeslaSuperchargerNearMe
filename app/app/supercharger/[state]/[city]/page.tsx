@@ -7,7 +7,7 @@ import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import StationListCard from "@/components/StationListCard";
 import { absoluteUrl } from "@/lib/site";
-import { cityHref, getCity, nearbyCities, stateHref, stationHref, stationTitle } from "@/lib/superchargers";
+import { areaName, cityHref, countryPhrase, getCity, getCountry, nearbyCities, stateHref, stationHref, stationTitle } from "@/lib/superchargers";
 import { stateName } from "@/lib/usStates";
 
 type CityPageProps = PageProps<"/supercharger/[state]/[city]">;
@@ -46,7 +46,7 @@ export default async function CityPage({ params }: CityPageProps) {
         <Breadcrumbs
           items={[
             { name: "Home", href: "/" },
-            { name: stateName(city.state), href: stateHref(city.state) },
+            { name: areaName(city.state, stateName), href: stateHref(city.state) },
             { name: city.name, href },
           ]}
         />
@@ -72,7 +72,7 @@ export default async function CityPage({ params }: CityPageProps) {
 
         {others.length ? (
           <section aria-labelledby="other-cities" className="link-section">
-            <h2 id="other-cities" className="section-title">Other cities in {stateName(city.state)}</h2>
+            <h2 id="other-cities" className="section-title">Other cities in {countryPhrase(areaName(city.state, stateName))}</h2>
             <ul className="link-chips">
               {others.map((item) => (
                 <li key={item.city}>
@@ -82,7 +82,7 @@ export default async function CityPage({ params }: CityPageProps) {
                 </li>
               ))}
             </ul>
-            <Link href={stateHref(city.state)} className="footer-link">All Superchargers in {stateName(city.state)}</Link>
+            <Link href={stateHref(city.state)} className="footer-link">All Superchargers in {countryPhrase(areaName(city.state, stateName))}</Link>
           </section>
         ) : null}
 
@@ -101,7 +101,7 @@ export default async function CityPage({ params }: CityPageProps) {
           }}
         />
       </main>
-      <SiteFooter osmCredit />
+      <SiteFooter osmCredit dataCredit={Boolean(getCountry(city.state))} />
     </div>
   );
 }

@@ -2383,3 +2383,115 @@ a.station-row:hover .station-name {
     width: 100%;
   }
 }
+
+/* ---------- Country flag dropdown (Home and Map) ---------- */
+
+.country-picker {
+  position: relative;
+  display: flex;
+}
+
+.country-picker-button {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--ink-raised);
+  color: var(--surface);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.country-picker-button:hover,
+.country-picker-button[aria-expanded="true"] {
+  box-shadow: 0 0 0 2px var(--mint);
+}
+
+.country-picker-flag {
+  font-size: 16px;
+}
+
+.country-picker-code {
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.country-picker-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 1200;
+  width: min(300px, calc(100vw - 32px));
+  max-height: min(70vh, 480px);
+  overflow-y: auto;
+  padding: 6px;
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-float);
+}
+
+.country-picker-panel[hidden] {
+  display: none;
+}
+
+.country-picker-title {
+  margin: 6px 10px 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.country-picker-panel ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.country-picker-link,
+.country-picker-link:hover {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 10px;
+  border-radius: 10px;
+  color: var(--ink);
+  font-size: 15px;
+}
+
+.country-picker-link:hover,
+.country-picker-link[aria-current="true"] {
+  background: var(--ground);
+}
+
+.country-picker-link[aria-current="true"] .country-picker-name {
+  font-weight: 700;
+}
+
+.country-picker-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 52px;
+}
+
+.country-picker-chip span {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.country-picker-name {
+  flex: 1;
+}
+
+.country-picker-count {
+  font-size: 13px;
+  color: var(--muted);
+}
