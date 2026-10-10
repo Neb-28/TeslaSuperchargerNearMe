@@ -1,12 +1,6 @@
 export const BRAND_NAME = "TeslaSuperchargerNearMe";
 
-// Breaks after "Supercharger" on narrow screens so the long name never gets cut off.
+// Always one line; on phones the header shrinks the font to fit (see .topbar .brand-mark).
 export default function BrandName() {
-  return (
-    <>
-      TeslaSupercharger
-      <wbr />
-      NearMe
-    </>
-  );
+  return <>{BRAND_NAME}</>;
 }

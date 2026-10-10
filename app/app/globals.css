@@ -239,6 +239,54 @@ img {
   .brand-wrap.has-back .brand-icon {
     display: none;
   }
+
+  /* Keep the name on one line. Sized for the busiest header (Back + country + menu); the 176 px
+     is the padding, buttons and gaps, and 13 is the name's width per px of font size. */
+  .topbar .brand-mark {
+    font-size: clamp(13px, calc((100vw - 176px) / 13), 20px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .brand-wrap,
+  .brand-link,
+  .brand-link:hover {
+    gap: 8px;
+  }
+
+  .brand-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+  }
+
+  .header-actions {
+    gap: 8px;
+  }
+
+  /* Buttons look smaller, but the ::after keeps a 44 px tap target (4 px beyond each edge). */
+  .topbar .icon-button,
+  .topbar .country-picker-button {
+    position: relative;
+    width: 36px;
+    height: 36px;
+  }
+
+  .topbar .icon-button {
+    border-radius: 10px;
+  }
+
+  .topbar .icon-button::after,
+  .topbar .country-picker-button::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+  }
+
+  .topbar .country-picker-flag {
+    font-size: 14px;
+  }
 }
 
 .footer-note {
