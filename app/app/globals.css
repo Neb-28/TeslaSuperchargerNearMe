@@ -3000,25 +3000,29 @@ a.route-stop-name {
 }
 
 /* Home: the country choice as a labelled pill above the state/city lists. */
+/* The pill always stays beside the label; on the narrowest phones the label wraps instead. */
 .home-country {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 8px 12px;
+  gap: 10px;
 }
 
 .home-country-label {
+  flex: 0 1 auto;
+  min-width: 0;
   font-size: 15px;
   font-weight: 600;
+  line-height: 1.3;
   color: var(--muted);
 }
 
 .country-select {
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   min-height: 44px;
-  padding: 0 14px;
+  padding: 0 12px;
   border: 1.5px solid var(--border);
   border-radius: 999px;
   background: var(--surface);
@@ -3037,6 +3041,10 @@ a.route-stop-name {
 .country-select-flag {
   font-size: 18px;
   line-height: 1;
+}
+
+.home-country .country-picker {
+  flex-shrink: 0;
 }
 
 /* In the page the list opens below the pill, aligned to its left edge. */
