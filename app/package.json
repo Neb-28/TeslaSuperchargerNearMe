@@ -11,6 +11,7 @@
     "db:load": "node --env-file=.env.local scripts/load-db.mjs"
   },
   "dependencies": {
+    "@sentry/nextjs": "^11.6.0",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.117.3",
     "leaflet": "^1.9.4",

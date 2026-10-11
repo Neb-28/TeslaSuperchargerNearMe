@@ -100,6 +100,14 @@ export default function PrivacyPage() {
           <li>Map and place data come from OpenStreetMap contributors.</li>
           <li>Directions open Google Maps, which has its own privacy policy.</li>
           <li>
+            We use{" "}
+            <a href="https://sentry.io/privacy/" target="_blank" rel="noreferrer">
+              Sentry
+            </a>{" "}
+            to find and fix errors. When something goes wrong, and for a sample of page loads, Sentry receives technical details such as the
+            page, your browser and device type, and your IP address.
+          </li>
+          <li>
             The route planner sends the start and destination you enter to{" "}
             <a href="https://openrouteservice.org/privacy-policy/" target="_blank" rel="noreferrer">openrouteservice</a> (HeiGIT, Germany)
             to find addresses and driving routes.

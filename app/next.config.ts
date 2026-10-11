@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs/config";
 
 // Country slugs with a homepage (app/home/[country]), from the same snapshot lib/superchargers.ts reads.
 const world = JSON.parse(readFileSync(path.join(process.cwd(), "data", "world-superchargers.json"), "utf8")) as {
@@ -30,4 +31,16 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Sentry's build step: uploads source maps so production stack traces are readable. Needs
+// SENTRY_ORG, SENTRY_PROJECT and SENTRY_AUTH_TOKEN; without them the build simply skips the upload.
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+
+  // Upload a larger set of source maps for prettier stack traces
+  widenClientFileUpload: true,
+
+  // Only print logs for uploading source maps in CI
+  silent: !process.env.CI,
+});
