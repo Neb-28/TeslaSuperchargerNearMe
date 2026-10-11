@@ -341,16 +341,17 @@ img {
   }
 
   /* Keep the name on one line, as big as the room allows: 100cqi is the brand area's width,
-     40 px the logo and its gap (84 px with Back too), and 12.9 the name's width per px of font size. */
+     40 px the logo and its gap (84 px with Back too), and 13.6 the width of "Tesla Supercharger
+     Near Me" per px of font size. */
   .topbar .brand-mark {
-    font-size: clamp(11px, calc((100cqi - 40px) / 12.9), 22px);
+    font-size: clamp(11px, calc((100cqi - 40px) / 13.6), 22px);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   .topbar .has-back .brand-mark {
-    font-size: clamp(11px, calc((100cqi - 84px) / 12.9), 22px);
+    font-size: clamp(11px, calc((100cqi - 84px) / 13.6), 22px);
   }
 
   /* Smallest phones with Back plus two buttons (Map at 320 px): drop the logo so the name fits. */
@@ -360,7 +361,7 @@ img {
     }
 
     .topbar .has-back .brand-mark {
-      font-size: clamp(11px, calc((100cqi - 44px) / 12.9), 22px);
+      font-size: clamp(11px, calc((100cqi - 44px) / 13.6), 22px);
     }
   }
 
