@@ -32,14 +32,14 @@ const nextConfig: NextConfig = {
   // /home/germany is only an internal address; anyone who lands on it goes to the real one.
   async redirects() {
     return [
-      // The Vercel address is public too: send every page there to the same path on the real domain
-      // (301, so search engines move any ranking to the .com). Query strings are kept.
-      {
+      // The Vercel address and www are public too: send every page there to the same path on the
+      // real domain (301, so search engines move any ranking to the .com). Query strings are kept.
+      ...["teslasuperchargernearme.vercel.app", "www.teslasuperchargernearme.com"].map((host) => ({
         source: "/:path*",
-        has: [{ type: "host", value: "teslasuperchargernearme.vercel.app" }],
+        has: [{ type: "host" as const, value: host }],
         destination: "https://teslasuperchargernearme.com/:path*",
-        statusCode: 301,
-      },
+        statusCode: 301 as const,
+      })),
       { source: "/home/:country", destination: "/?country=:country", permanent: true },
     ];
   },
