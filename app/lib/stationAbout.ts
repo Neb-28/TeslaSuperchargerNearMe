@@ -70,7 +70,14 @@ function distinctNames(places: Place[], limit: number) {
 function where(station: AboutStation) {
   const { street, cityLabel, nearLabel } = station;
   const at = street ? (/^near /i.test(street) ? street : `at ${street}`) : null;
-  if (at && cityLabel) return `${at} in ${cityLabel}`;
+  if (at && cityLabel) {
+    // "No. 5676 Cao'an Road, Jiading District, Shanghai" already ends with the city: add only
+    // the region or country after it, not "in Shanghai, China" again.
+    const [cityName, ...region] = cityLabel.split(", ");
+    const repeatsCity = street!.split(",").at(-1)!.trim().toLowerCase() === cityName.toLowerCase();
+    if (repeatsCity) return region.length ? `${at}, ${region.join(", ")}` : at;
+    return `${at} in ${cityLabel}`;
+  }
   if (at && nearLabel) return `${at}, near ${nearLabel}`;
   if (cityLabel) return `in ${cityLabel}`;
   if (nearLabel) return `near ${nearLabel}`;

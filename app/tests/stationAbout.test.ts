@@ -75,6 +75,15 @@ describe("station About text", () => {
     expect(text(stationAbout(input({ isUs: false }, { ccs: true, plug: "CCS2" })))).not.toContain("Magic Dock");
   });
 
+  it("doesn't repeat the city when the street already ends with it", () => {
+    expect(text(stationAbout(input({}, { street: "7 Dongping North Road, Chuanshan District, Suining", cityLabel: "Suining, China" })))).toContain(
+      "This Tesla Supercharger at 7 Dongping North Road, Chuanshan District, Suining, China has",
+    );
+    expect(text(stationAbout(input({}, { street: "42170 Big Bear Lake", cityLabel: "Big Bear Lake, CA" })))).toContain(
+      "at 42170 Big Bear Lake in Big Bear Lake, CA",
+    );
+  });
+
   it("handles 'near' streets and stations without stall or power data", () => {
     expect(text(stationAbout(input({}, { street: "near Jiading Auto City", cityLabel: "Shanghai, China" })))).toContain(
       "This Tesla Supercharger near Jiading Auto City in Shanghai, China",
