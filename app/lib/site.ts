@@ -1,7 +1,8 @@
 export const SITE_NAME = "TeslaSuperchargerNearMe";
 
-// Absolute URLs (canonical links, sitemap, structured data) are built from this.
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://teslasuperchargernearme.com").replace(/\/+$/, "");
+// The canonical address of the site. Canonical links (metadataBase in app/layout.tsx), the
+// sitemap and structured data all point here; next.config.ts sends the *.vercel.app address to it.
+export const SITE_URL = "https://teslasuperchargernearme.com";
 
 // Shown on the About, Contact and Privacy pages.
 export const CONTACT_EMAIL = process.env.CONTACT_EMAIL || "info@greenstartech.io";

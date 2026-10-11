@@ -21,6 +21,7 @@ const bodyFont = Figtree({
 const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
 
 export const metadata: Metadata = {
+  // Every canonical tag and share URL resolves against https://teslasuperchargernearme.com.
   metadataBase: new URL(SITE_URL),
   title: {
     default: "Tesla Supercharger Near Me – Find the Closest Supercharger",

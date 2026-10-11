@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "About",
   description:
     "About TeslaSuperchargerNearMe: a free locator for Tesla Superchargers and the places within walking distance, where the data comes from, and how the site is supported.",
+  alternates: { canonical: "/about" },
 };
 
 export default function AboutPage() {

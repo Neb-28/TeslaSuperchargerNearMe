@@ -6,6 +6,7 @@ import { CONTACT_EMAIL } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Privacy policy",
   description: "How TeslaSuperchargerNearMe uses location, cookies and advertising.",
+  alternates: { canonical: "/privacy" },
 };
 
 // Draft written from what the site actually does today; have a lawyer review it before launch.

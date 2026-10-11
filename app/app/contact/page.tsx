@@ -6,6 +6,7 @@ import { CONTACT_EMAIL } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Contact",
   description: "Contact TeslaSuperchargerNearMe: data corrections, business inquiries and privacy questions.",
+  alternates: { canonical: "/contact" },
 };
 
 export default function ContactPage() {
