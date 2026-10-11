@@ -1,6 +1,6 @@
 import { otherChargersFor } from "@/lib/fastChargers";
 import { geocodeZip } from "@/lib/geocode";
-import { drivingRoute, RoutingError, routingConfigured, searchAddress } from "@/lib/openRouteService";
+import { drivingRoute, RoutingError, routingConfigured, searchAddress, type AddressMatch } from "@/lib/openRouteService";
 import { CATEGORIES } from "@/lib/places";
 import { placesForStation } from "@/lib/placesData";
 import { planTrip, sampleRoute, type RouteStation } from "@/lib/routePlanner";
@@ -44,14 +44,40 @@ function coordinates(text: string): LatLng | null {
   return Math.abs(lat) <= 90 && Math.abs(lon) <= 180 ? [lat, lon] : null;
 }
 
-async function resolvePlace(text: string) {
+type Place = { label: string; position: LatLng; country: string | null };
+
+// Places we can resolve without a search: the visitor's own location, or a US ZIP code.
+function exactPlace(text: string): Place | null {
   const position = coordinates(text);
-  if (position) return { label: "Your location", position };
+  if (position) return { label: "Your location", position, country: null };
   if (parseZip(text)) {
     const zip = geocodeZip(text);
-    if (zip) return { label: `ZIP ${zip.label}`, position: zip.position };
+    if (zip) return { label: `ZIP ${zip.label}`, position: zip.position, country: "USA" };
   }
-  return searchAddress(text);
+  return null;
+}
+
+// Place names can be ambiguous: "Miami" finds Barranquilla, Colombia first, and "Richmond" near
+// Arlington, VA finds Staten Island (Richmond County) first. When the other end is an exact point,
+// take the closest of the best matches; otherwise prefer a match in the other end's country.
+async function resolveTrip(fromText: string, toText: string): Promise<[Place | null, Place | null]> {
+  const fromExact = exactPlace(fromText);
+  const toExact = exactPlace(toText);
+  const [fromMatches, toMatches] = await Promise.all([
+    fromExact ? null : searchAddress(fromText, toExact?.position),
+    toExact ? null : searchAddress(toText, fromExact?.position),
+  ]);
+  const closestBest = (matches: AddressMatch[]) => {
+    const best = Math.max(...matches.map((match) => match.confidence));
+    return matches.filter((match) => match.confidence === best).sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity))[0];
+  };
+  const pick = (matches: AddressMatch[] | null, other: Place | null, otherMatches: AddressMatch[] | null) => {
+    if (!matches?.length) return null;
+    if (other) return closestBest(matches);
+    const otherCountry = otherMatches?.[0]?.country;
+    return matches.find((match) => otherCountry && match.country === otherCountry) ?? matches[0];
+  };
+  return [fromExact ?? pick(fromMatches, toExact, toMatches), toExact ?? pick(toMatches, fromExact, fromMatches)];
 }
 
 // What's within walking distance; we only have this for Superchargers.
@@ -80,7 +106,7 @@ export async function GET(request: Request) {
   if (!routingConfigured()) return fail("The route planner isn't available yet.", 503);
 
   try {
-    const [from, to] = await Promise.all([resolvePlace(fromText), resolvePlace(toText)]);
+    const [from, to] = await resolveTrip(fromText, toText);
     if (!from) return fail("We couldn't find your starting point. Try a city, address or ZIP code.", 404);
     if (!to) return fail("We couldn't find your destination. Try a city, address or ZIP code.", 404);
 

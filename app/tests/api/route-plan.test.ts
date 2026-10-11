@@ -46,6 +46,9 @@ describe("GET /api/route-plan", () => {
     const body = await response.json();
     expect(response.status).toBe(200);
     expect(fetchSpy).toHaveBeenCalledTimes(1); // directions only; ZIPs are looked up locally
+    // City centers can be far from a road (Orlando's is inside the airport): search up to 5 km.
+    const sent = JSON.parse(String((fetchSpy.mock.calls[0] as unknown as [string, RequestInit])[1].body));
+    expect(sent.radiuses).toEqual([5000, 5000]);
     expect(body.from.label).toBe("ZIP 22202");
     expect(body.stops).toEqual([]);
     expect(body.arrivePct).toBeGreaterThan(10);
@@ -82,6 +85,52 @@ describe("GET /api/route-plan", () => {
       expect(stop.nearby).toBeNull();
     }
     expect(body.arrivePct).toBeGreaterThanOrEqual(10);
+  });
+
+  it("picks the match in the same country when a name is ambiguous", async () => {
+    // "Miami" finds Barranquilla, Colombia first; with Atlanta, GA it should be Miami, FL.
+    const place = (label: string, lat: number, lon: number, country: string) => ({
+      geometry: { coordinates: [lon, lat] },
+      properties: { label, country_a: country },
+    });
+    const fetchSpy = vi.fn(async (input: string | URL) => {
+      const url = new URL(String(input));
+      if (url.pathname.endsWith("/geocode/search")) {
+        return Response.json({
+          features:
+            url.searchParams.get("text") === "Miami"
+              ? [place("Barranquilla, AT, Colombia", 10.96, -74.8, "COL"), place("Miami, FL, USA", 25.77, -80.19, "USA")]
+              : [place("Atlanta, GA, USA", 33.75, -84.39, "USA"), place("Atalanta, SC, Brazil", -27.4, -49.8, "BRA")],
+        });
+      }
+      return Response.json(fakeRoute([[25.77, -80.19], [33.75, -84.39]], 1_000_000));
+    });
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const body = await (await call({ from: "Miami", to: "Atlanta", range: "346", plug: "nacs" })).json();
+    expect(body.from.label).toBe("Miami, FL, USA");
+    expect(body.to.label).toBe("Atlanta, GA, USA");
+  });
+
+  it("next to a ZIP code, searches near it and takes the closest good match", async () => {
+    // "Richmond" from Arlington, VA: Staten Island (Richmond County) ranks first but Richmond, VA is closer.
+    const match = (label: string, lat: number, lon: number, distance: number) => ({
+      geometry: { coordinates: [lon, lat] },
+      properties: { label, country_a: "USA", confidence: 1, distance },
+    });
+    const fetchSpy = vi.fn(async (input: string | URL) => {
+      const url = new URL(String(input));
+      if (url.pathname.endsWith("/geocode/search")) {
+        return Response.json({ features: [match("Staten Island, NY, USA", 40.58, -74.15, 314), match("Richmond, VA, USA", 37.54, -77.44, 154)] });
+      }
+      return Response.json(fakeRoute([[38.86, -77.05], [37.54, -77.44]], 170_000));
+    });
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const body = await (await call({ from: "22202", to: "Richmond", range: "346", plug: "nacs" })).json();
+    const search = new URL(String(fetchSpy.mock.calls.find(([input]) => String(input).includes("/geocode/search"))![0]));
+    expect(Number(search.searchParams.get("focus.point.lat"))).toBeCloseTo(38.86, 1);
+    expect(body.to.label).toBe("Richmond, VA, USA");
   });
 
   it("passes on a friendly message when there's no road nearby", async () => {
