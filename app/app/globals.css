@@ -236,17 +236,13 @@ img {
   background: var(--ground);
 }
 
-/* On phones the Back button takes the brand square's place, leaving room for the name. */
+/* Phones: Back (when there is one), the logo and the name share the left side of the header. */
 @media (max-width: 899px) {
-  .brand-wrap.has-back .brand-icon {
-    display: none;
-  }
-
   .topbar-inner {
     gap: 8px;
-    min-height: 80px;
-    padding-top: 18px;
-    padding-bottom: 18px;
+    min-height: 88px;
+    padding-top: 22px;
+    padding-bottom: 22px;
   }
 
   /* The brand area takes all the room the buttons leave, so the name can fill it. */
@@ -256,7 +252,7 @@ img {
   }
 
   /* Keep the name on one line, as big as the room allows: 100cqi is the brand area's width,
-     40 px the logo and its gap (44 px for Back), and 12.9 the name's width per px of font size. */
+     40 px the logo and its gap (84 px with Back too), and 12.9 the name's width per px of font size. */
   .topbar .brand-mark {
     font-size: clamp(11px, calc((100cqi - 40px) / 12.9), 22px);
     white-space: nowrap;
@@ -265,7 +261,18 @@ img {
   }
 
   .topbar .has-back .brand-mark {
-    font-size: clamp(11px, calc((100cqi - 44px) / 12.9), 22px);
+    font-size: clamp(11px, calc((100cqi - 84px) / 12.9), 22px);
+  }
+
+  /* Smallest phones with Back plus two buttons (Map at 320 px): drop the logo so the name fits. */
+  @container (max-width: 220px) {
+    .has-back .brand-icon {
+      display: none;
+    }
+
+    .topbar .has-back .brand-mark {
+      font-size: clamp(11px, calc((100cqi - 44px) / 12.9), 22px);
+    }
   }
 
   .brand-wrap,
