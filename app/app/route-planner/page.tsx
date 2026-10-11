@@ -17,10 +17,6 @@ export default function RoutePlannerPage() {
       <SiteHeader backHref="/" />
       <main id="main" className="content-page">
         <h1 className="page-title">Route planner</h1>
-        <p className="page-sub">
-          Tell us where you&apos;re starting, where you&apos;re going and what you drive. We&apos;ll pick Superchargers along the way and
-          show what&apos;s nearby at each stop.
-        </p>
         <RoutePlanner configured={routingConfigured()} />
       </main>
       <SiteFooter osmCredit />

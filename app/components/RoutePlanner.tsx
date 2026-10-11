@@ -67,7 +67,13 @@ function nearbyLine(nearby: Record<CategoryId, number>) {
 export default function RoutePlanner({ configured }: { configured: boolean }) {
   const [fromText, setFromText] = useState("");
   const [toText, setToText] = useState("");
+  // "Use my location": the phone's position, and the address we showed for it in "Starting from".
+  // Planning uses the position as long as the box still shows that address.
   const [myPosition, setMyPosition] = useState<LatLng | null>(null);
+  const [myAddress, setMyAddress] = useState<string | null>(null);
+  const locateRequest = useRef(0);
+  // How the start reads in the results ("Your location" from the server becomes the address).
+  const [startLabel, setStartLabel] = useState<string | null>(null);
   const [vehicle, setVehicle] = useState<VehicleChoice>(EMPTY_VEHICLE);
   const [locating, setLocating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -84,16 +90,34 @@ export default function RoutePlanner({ configured }: { configured: boolean }) {
       setError("Your browser can't share your location here. Type a city, address or ZIP code instead.");
       return;
     }
+    const request = ++locateRequest.current;
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
+      async ({ coords }) => {
         // About 100 m is precise enough for a route start.
-        setMyPosition([Math.round(coords.latitude * 1000) / 1000, Math.round(coords.longitude * 1000) / 1000]);
-        setFromText(MY_LOCATION);
+        const position: LatLng = [Math.round(coords.latitude * 1000) / 1000, Math.round(coords.longitude * 1000) / 1000];
+        let address = MY_LOCATION;
+        try {
+          const response = await fetch(`/api/nearest-address?lat=${position[0]}&lon=${position[1]}`);
+          const label = response.ok ? (await response.json()).label : null;
+          if (typeof label === "string" && label) address = label;
+        } catch {
+          // Offline or lookup failed: the box says "Your location" and planning still uses the position.
+        }
+        // The driver started typing an address meanwhile: keep what they typed.
+        if (request !== locateRequest.current) return;
+        setMyPosition(position);
+        setMyAddress(address);
+        setFromText(address);
         setLocating(false);
       },
-      () => {
-        setError("We couldn't get your location. Type a city, address or ZIP code instead.");
+      (problem) => {
+        if (request !== locateRequest.current) return;
+        setError(
+          problem.code === problem.PERMISSION_DENIED
+            ? "Location is turned off for this site. Allow it in your browser or phone settings, or type an address."
+            : "We couldn't get your location. Type a city, address or ZIP code instead.",
+        );
         setLocating(false);
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
@@ -141,13 +165,15 @@ export default function RoutePlanner({ configured }: { configured: boolean }) {
       return;
     }
     saveVehicle(vehicle);
-    const from = fromText === MY_LOCATION && myPosition ? myPosition.join(",") : fromText.trim();
+    const fromMyLocation = Boolean(myPosition) && fromText === myAddress;
+    const from = fromMyLocation && myPosition ? myPosition.join(",") : fromText.trim();
+    setStartLabel(fromMyLocation ? myAddress : null);
     const query = new URLSearchParams({ from, to: toText.trim(), range: vehicle.rangeMi, plug });
     if (vehicle.modelId) query.set("car", String(vehicle.modelId));
     if (vehicle.port) query.set("port", vehicle.port);
     if (plug === "nacs" && vehicle.ccsAdapter) query.set("adapter", "1");
     // Keep typed trips in the address bar so they can be shared or reopened (never the visitor's location).
-    if (fromText !== MY_LOCATION) window.history.replaceState(null, "", `/route-planner?${query}`);
+    if (!fromMyLocation) window.history.replaceState(null, "", `/route-planner?${query}`);
     plan(query);
   }
 
@@ -214,7 +240,7 @@ export default function RoutePlanner({ configured }: { configured: boolean }) {
         <div className="form-card trip-bar">
           <p className="trip-bar-text">
             <strong>
-              {result.from.label} → {result.to.label}
+              {startLabel ?? result.from.label} → {result.to.label}
             </strong>
             <span>{carLabel}</span>
           </p>
@@ -224,24 +250,30 @@ export default function RoutePlanner({ configured }: { configured: boolean }) {
         </div>
       ) : (
         // method/action let the button work even before the page's script loads (see the effect above).
-        <form className="form-card" method="get" action="/route-planner" onSubmit={onSubmit}>
-          <label className="field">
-            <span>Starting from</span>
+        <form className="form-card route-form" method="get" action="/route-planner" onSubmit={onSubmit}>
+          <div className="field">
+            <div className="field-label-row">
+              <label htmlFor="route-from">Starting from</label>
+              <button type="button" className="text-button" onClick={locateMe} disabled={locating}>
+                {locating ? "Finding you…" : "Use my location"}
+              </button>
+            </div>
             <input
+              id="route-from"
               name="from"
               value={fromText}
               onChange={(event) => {
                 setFromText(event.target.value);
                 setMyPosition(null);
+                // A location lookup still on its way shouldn't overwrite what's being typed.
+                locateRequest.current++;
+                setLocating(false);
               }}
               placeholder="City, address or ZIP code"
               autoComplete="street-address"
               required
             />
-          </label>
-          <button type="button" className="text-button" onClick={locateMe} disabled={locating}>
-            {locating ? "Finding your location…" : "Use my location"}
-          </button>
+          </div>
 
           <label className="field">
             <span>Going to</span>
@@ -285,7 +317,7 @@ export default function RoutePlanner({ configured }: { configured: boolean }) {
             <li className="route-point">
               <span className="route-marker start" aria-hidden="true" />
               <span>
-                <strong>Start</strong> · {result.from.label} with {START_PCT}%
+                <strong>Start</strong> · {startLabel ?? result.from.label} with {START_PCT}%
               </span>
             </li>
             {result.stops.map((stop, index) => {

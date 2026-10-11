@@ -35,6 +35,23 @@ export async function searchAddress(text: string): Promise<{ label: string; posi
   return { label: String(feature.properties?.label ?? text), position: [lat, lon] };
 }
 
+// The street address nearest a point (for "Use my location"), or null if there's none.
+export async function nearestAddress(position: LatLng): Promise<string | null> {
+  const url = new URL(`${baseUrl()}/geocode/reverse`);
+  url.searchParams.set("api_key", process.env.ORS_API_KEY ?? "");
+  url.searchParams.set("point.lat", String(position[0]));
+  url.searchParams.set("point.lon", String(position[1]));
+  url.searchParams.set("size", "1");
+  // A street address, else the street, else the town (rural spots). Without this the nearest
+  // "venue" wins, which can be a numbered room or a colonnade instead of an address.
+  url.searchParams.set("layers", "address,street,locality,county");
+
+  const response = await fetch(url, { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(8000) }).catch(() => null);
+  if (!response?.ok) throw new RoutingError(response?.status === 429 ? BUSY : "Address lookup isn't available right now.", response?.status === 429 ? 429 : 502);
+  const label = (await response.json()).features?.[0]?.properties?.label;
+  return typeof label === "string" ? label : null;
+}
+
 export async function drivingRoute(from: LatLng, to: LatLng): Promise<{ path: LatLng[]; distanceKm: number; durationS: number }> {
   const response = await fetch(`${baseUrl()}/v2/directions/driving-car/geojson`, {
     method: "POST",

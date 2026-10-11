@@ -2201,6 +2201,44 @@ a.station-row:hover .station-name {
 
 /* ---------- Route planner ---------- */
 
+/* The planner form: tighter than other forms, so the whole trip fits on a phone screen. */
+.route-form {
+  gap: 10px;
+  padding: 16px;
+}
+
+.route-form .field {
+  gap: 4px;
+}
+
+.route-form .vehicle-picker {
+  gap: 10px;
+}
+
+.route-form .vehicle-picker legend {
+  margin-bottom: 4px;
+}
+
+/* A label with a small action on the right ("Use my location"). The button keeps a 44 px tap
+   target; the negative margins stop it from adding height to the row. */
+.field-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.field-label-row label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.field-label-row .text-button {
+  margin: -14px 0 -6px;
+  font-size: 14px;
+}
+
 .vehicle-picker {
   margin: 0;
   padding: 0;

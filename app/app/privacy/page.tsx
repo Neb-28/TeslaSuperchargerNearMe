@@ -33,8 +33,8 @@ export default function PrivacyPage() {
         </p>
         <p>
           The one exception is <strong>Use my location</strong> in the route planner: your approximate location (rounded to about 100 m) is
-          sent to our server and to openrouteservice to work out the driving route. We don&apos;t store it, and those routes are never
-          cached.
+          sent to our server and to openrouteservice to show you the nearest street address and work out the driving route. We
+          don&apos;t store it, and those answers are never cached.
         </p>
 
         <h2>Searches and saved stations</h2>
