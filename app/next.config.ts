@@ -11,6 +11,10 @@ const countrySlugs = [...new Set(world.stations.map((station) => station.state))
 const countryValue = `(?<country>${countrySlugs.join("|")})`;
 
 const nextConfig: NextConfig = {
+  // Which Sentry environment this build reports as: Vercel's "production" or "preview", or
+  // "local" for builds on a developer's machine (so testing never mixes with real visitors).
+  env: { NEXT_PUBLIC_SENTRY_ENVIRONMENT: process.env.VERCEL_ENV ?? "local" },
+
   // Dev only: lets a phone on the same Wi-Fi load the dev server's scripts
   // (e.g. http://192.168.1.224:3107). Has no effect on production builds.
   allowedDevOrigins: ["192.168.*.*", "10.*.*.*"],
