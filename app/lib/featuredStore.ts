@@ -126,10 +126,16 @@ export async function listFeaturedForEmail(email: string) {
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
-// The live listing per category for one station (at most one each).
+// The live listing per category for one station (at most one each). Station pages must load even
+// if the database is unreachable, so a failed lookup means "no featured listing" (and is logged).
 export async function liveFeaturedForStation(stationId: string) {
   if (storedInDatabase()) {
-    return (await db()!<Row[]>`select * from featured_listings where status = 'live' and station_id = ${stationId}`).map(fromRow);
+    try {
+      return (await db()!<Row[]>`select * from featured_listings where status = 'live' and station_id = ${stationId}`).map(fromRow);
+    } catch (error) {
+      console.error("Featured listings lookup failed", error);
+      return [];
+    }
   }
   return (await readAll()).filter((listing) => listing.stationId === stationId && listing.status === "live");
 }
