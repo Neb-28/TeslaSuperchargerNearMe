@@ -59,7 +59,7 @@ export default function HomeContent({ country }: { country: CountrySummary | nul
           </svg>
         </div>
 
-        <h1 className="home-title">Find a Supercharger near you</h1>
+        <h1 className="home-title">Find a Supercharger <br />near you</h1>
 
         <p className="home-sub">30 minutes to charge. A whole neighborhood to explore. Your charging stop just got interesting.</p>
 

@@ -240,10 +240,23 @@ img {
     display: none;
   }
 
-  /* Keep the name on one line. Sized for the busiest header (Back + country + menu); the 176 px
-     is the padding, buttons and gaps, and 13 is the name's width per px of font size. */
+  .topbar-inner {
+    gap: 8px;
+    min-height: 80px;
+    padding-top: 18px;
+    padding-bottom: 18px;
+  }
+
+  /* The brand area takes all the room the buttons leave, so the name can fill it. */
+  .brand-wrap {
+    flex: 1 1 0;
+    container-type: inline-size;
+  }
+
+  /* Keep the name on one line, as big as the room allows: 100cqi is the brand area's width,
+     40 px the logo and its gap (44 px for Back), and 12.9 the name's width per px of font size. */
   .topbar .brand-mark {
-    font-size: clamp(13px, calc((100vw - 176px) / 13), 20px);
+    font-size: clamp(11px, calc((100cqi - 40px) / 12.9), 22px);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -251,14 +264,18 @@ img {
 
   .brand-wrap,
   .brand-link,
+  .topbar .has-back .brand-mark {
+    font-size: clamp(11px, calc((100cqi - 44px) / 12.9), 22px);
+  }
+
   .brand-link:hover {
     gap: 8px;
   }
 
   .brand-icon {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
   }
 
   .header-actions {
@@ -354,6 +371,13 @@ img {
 
 .home-sub {
   margin: 0;
+/* "Find a Supercharger" stays on the first line on the smallest phones too. */
+@media (max-width: 359px) {
+  .home-title {
+    font-size: 8.3vw;
+  }
+}
+
   font-size: 15px;
   color: var(--muted);
 }
