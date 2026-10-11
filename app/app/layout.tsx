@@ -29,6 +29,8 @@ export const metadata: Metadata = {
   description:
     "Find the closest Tesla Supercharger, see how many stalls and how fast it charges, and what's within walking distance while you charge. Every US Supercharger on one map.",
   openGraph: { siteName: BRAND_NAME, type: "website", locale: "en_US" },
+  // Shared links show the large preview card (app/opengraph-image.tsx, or a station's own).
+  twitter: { card: "summary_large_image" },
   // Previews, staging and local dev must never be indexed (see lib/site.ts).
   ...(isIndexable ? {} : { robots: { index: false, follow: false } }),
   // Lets AdSense confirm we own the site on every page.

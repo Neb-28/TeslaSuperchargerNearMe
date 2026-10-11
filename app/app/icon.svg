@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- The site's brand mark: mint square with the dark lightning bolt (same shape as the header). -->
+  <rect width="64" height="64" rx="16" fill="#3DDC97"/>
+  <svg x="12.8" y="12.8" width="38.4" height="38.4" viewBox="0 0 24 24">
+    <path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z" fill="none" stroke="#14211C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</svg>
