@@ -1,0 +1,28 @@
+<!-- Sign-in email (Supabase "Magic Link" and "Confirm signup"). {{ .Token }} is the 6-digit code
+     the site asks for. The button sends {{ .TokenHash }} to our /auth/confirm, which signs in on
+     the server, so it works in any browser (a {{ .ConfirmationURL }} link only works in the
+     browser that asked for the code, which fails when the email is opened on another device).
+     Inline styles only: email apps ignore stylesheets. Colors are the site's design tokens. -->
+<div style="margin:0;padding:24px 0;background:#F3F5F2;font-family:Arial,Helvetica,sans-serif;color:#14211C">
+  <div style="max-width:480px;margin:0 auto;background:#FFFFFF;border-radius:16px;overflow:hidden">
+    <div style="padding:20px 24px;background:#14211C;color:#FFFFFF;font-size:18px;font-weight:bold">
+      Tesla Supercharger Near Me
+    </div>
+    <div style="padding:24px">
+      <p style="margin:0 0 12px;font-size:16px">Here's your sign-in code:</p>
+      <p style="margin:0 0 20px;font-size:32px;font-weight:bold;letter-spacing:6px;color:#0B6E5B">{{ .Token }}</p>
+      <p style="margin:0 0 20px;font-size:15px;color:#56635D">
+        Enter it on the sign-in page. It expires in one hour. Or sign in with one tap:
+      </p>
+      <p style="margin:0 0 24px">
+        <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/account" style="display:inline-block;padding:12px 20px;border-radius:12px;background:#0B6E5B;color:#FFFFFF;font-weight:bold;text-decoration:none">Sign in</a>
+      </p>
+      <p style="margin:0;font-size:13px;color:#56635D">
+        Didn't ask for this? You can ignore this email; nobody can sign in without the code.
+      </p>
+    </div>
+  </div>
+  <p style="max-width:480px;margin:12px auto 0;font-size:12px;color:#56635D;text-align:center">
+    teslasuperchargernearme.com · Not affiliated with Tesla, Inc.
+  </p>
+</div>
