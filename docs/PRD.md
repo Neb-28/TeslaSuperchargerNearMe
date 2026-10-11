@@ -36,12 +36,13 @@ The MVP ships three screens (Home, Map, Station page) plus a simple business sig
 | Business "Get featured" sign-up and payment | P1 | MVP |
 | Display ads slots | P1 | MVP |
 | Favorites saved on device | P1 | MVP |
+| Optional accounts (email code sign-in): favorites synced across devices, business dashboard | P2 | MVP+ |
 | City pages for SEO ("Superchargers in [city]") | P1 | Phase 2 |
 | Crowd reports (working, busy, broken) | P2 | Phase 2 |
 | Live free-stall counts via data partner | P2 | Phase 3 |
 | Road-trip planner | P2 | Phase 3 |
 
-**Out of scope for the MVP:** user accounts, native iOS and Android apps, payment for charging, and live stall availability.
+**Out of scope for the MVP:** native iOS and Android apps, payment for charging, and live stall availability. Accounts are optional: every feature works signed out.
 
 ## User flow
 
@@ -239,6 +240,7 @@ The browser loads map tiles straight from the tile provider; every other request
 | `featured_listings` | id, business_id, station_id, category, offer_text, cta_label, cta_url, photo_url, status (pending, live, paused), stripe_subscription_id, starts_at, ends_at |
 | `leads` | id, type (install, insurance), zip, name, phone, email, station_id, consent_text, consent_at, page_url, delivered_to, status |
 | `events` | id, type (view, click), listing_id or lead_type, station_id, created_at |
+| `favorites` | user_id (Supabase Auth user), station_id, name, address, href, created_at. Row Level Security: each account reads and writes only its own rows |
 
 ### Import job
 
@@ -257,6 +259,14 @@ The browser loads map tiles straight from the tile provider; every other request
 - `POST /api/featured/checkout` — starts a Stripe Checkout session for a listing.
 - `POST /api/stripe/webhook` — activates or pauses listings on payment events.
 - `POST /api/events` — records listing and lead-card views and clicks.
+
+### Accounts (optional)
+
+- Supabase Auth, sign-in by emailed code (the email also has a link). New emails get an account automatically.
+- `/login` → `/account` (favorites link, business dashboard, sign out). `/auth/confirm` handles the email link.
+- Favorites stay on the device; signed-in visitors also sync them to `favorites` (three-way merge, so removals on one device carry over).
+- `/business/dashboard` lists the Featured requests whose contact email matches the signed-in email.
+- Pages served from the CDN never read the session on the server; only the signed-in pages do.
 
 ## SEO, compliance and legal
 

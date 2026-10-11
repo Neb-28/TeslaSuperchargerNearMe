@@ -35,7 +35,10 @@ export default function PrivacyPage() {
         <h2>Searches and saved stations</h2>
         <ul>
           <li>When you search for a ZIP code, it is sent to our server to look up the area. We don&apos;t link searches to you.</li>
-          <li>Stations you save with <strong>Save</strong> are kept only in your browser on this device. Clearing your browser data removes them.</li>
+          <li>
+            Stations you save with <strong>Save</strong> are kept in your browser on this device. If you sign in, they are also saved
+            to your account so they appear on your other devices.
+          </li>
           <li>Like most websites, our hosting provider keeps short-lived technical logs (such as IP address and pages requested) for security and reliability.</li>
         </ul>
 
@@ -69,6 +72,14 @@ export default function PrivacyPage() {
         <p>
           Businesses can pay to appear first in a category near a station. These listings are labeled &ldquo;#1 FEATURED&rdquo; and
           &ldquo;Sponsored&rdquo;. Links in them go to the business&apos;s own website, which has its own privacy policy.
+        </p>
+
+        <h2>Accounts (optional)</h2>
+        <p>
+          You can use the whole site without an account. If you choose to sign in, we use your email address only to send you sign-in
+          codes and to identify your account. We store your email and the stations you save. Sign-in is handled by our database
+          provider, Supabase, and uses a cookie to keep you signed in. Businesses that sign in see the Featured requests made with
+          their email. To delete your account and saved stations, email us at the address below.
         </p>
 
         <h2>Businesses that apply to be featured</h2>

@@ -3,6 +3,7 @@ import { Bricolage_Grotesque, Figtree } from "next/font/google";
 import "./globals.css";
 import { BRAND_NAME } from "@/components/BrandName";
 import { isIndexable, SITE_URL } from "@/lib/site";
+import FavoritesSync from "@/components/FavoritesSync";
 import HistoryTracker from "@/components/HistoryTracker";
 
 const displayFont = Bricolage_Grotesque({
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <a href="#main" className="skip-link">Skip to content</a>
         <HistoryTracker />
+        <FavoritesSync />
         {children}
       </body>
     </html>

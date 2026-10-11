@@ -262,12 +262,12 @@ img {
     text-overflow: ellipsis;
   }
 
-  .brand-wrap,
-  .brand-link,
   .topbar .has-back .brand-mark {
     font-size: clamp(11px, calc((100cqi - 44px) / 12.9), 22px);
   }
 
+  .brand-wrap,
+  .brand-link,
   .brand-link:hover {
     gap: 8px;
   }
@@ -369,8 +369,6 @@ img {
   font-weight: 700;
 }
 
-.home-sub {
-  margin: 0;
 /* "Find a Supercharger" stays on the first line on the smallest phones too. */
 @media (max-width: 359px) {
   .home-title {
@@ -378,6 +376,8 @@ img {
   }
 }
 
+.home-sub {
+  margin: 0;
   font-size: 15px;
   color: var(--muted);
 }
@@ -490,6 +490,12 @@ img {
   margin: 0;
   font-size: 15px;
   color: var(--muted);
+}
+
+.page-sub a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
 }
 
 .empty-state {
@@ -2182,6 +2188,96 @@ a.station-row:hover .station-name {
   color: var(--accent-hover);
   font-size: 14px;
   font-weight: 600;
+}
+
+/* ---------- Sign in, account and business dashboard ---------- */
+
+.login-note {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.login-note a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.login-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 16px;
+}
+
+.dashboard-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dashboard-list .section-title {
+  margin: 0;
+}
+
+.dashboard-facts {
+  margin: 0;
+  display: grid;
+  gap: 8px;
+  font-size: 15px;
+}
+
+.dashboard-facts div {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 8px;
+}
+
+.dashboard-facts dt {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.dashboard-facts dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-facts a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.status-pill {
+  align-self: flex-start;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--ground);
+  color: var(--muted);
+}
+
+.status-pending {
+  background: var(--gold-bg);
+  color: var(--gold-ink);
+}
+
+.status-live {
+  background: var(--accent-soft);
+  color: var(--accent-hover);
+}
+
+.status-rejected {
+  background: var(--divider);
+  color: var(--ink);
 }
 
 .check-field {

@@ -165,6 +165,11 @@ export type WorldSupercharger = Supercharger & {
 export const worldStations = (worldSnapshot as unknown as { stations: WorldSupercharger[] }).stations;
 export const worldSnapshotDate = (worldSnapshot as { fetchedAt: string | null }).fetchedAt;
 const worldBySlug = new Map(worldStations.map((station) => [station.slug, station]));
+const byId = new Map<string, Supercharger | WorldSupercharger>([...superchargers, ...worldStations].map((station) => [station.id, station]));
+
+export function getStationById(id: string) {
+  return byId.get(id) ?? null;
+}
 
 export const US_COUNTRY = { slug: "united-states", code: "US", name: "United States" } as const;
 

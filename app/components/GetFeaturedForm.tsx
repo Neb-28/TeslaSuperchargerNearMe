@@ -5,6 +5,7 @@ import { useActionState, useState } from "react";
 import { applyForFeatured, type ApplyState } from "@/app/business/get-featured/actions";
 import { OFFER_MAX } from "@/lib/featuredValidation";
 import { CATEGORIES, type CategoryId } from "@/lib/places";
+import { authConfigured } from "@/lib/supabase/env";
 
 type GetFeaturedFormProps = {
   stationSlug: string;
@@ -36,6 +37,12 @@ export default function GetFeaturedForm({ stationSlug, stationName, stationHref,
           <li>After payment we review the listing, usually within one business day.</li>
           <li>Your listing goes live at the top of the list, labeled Sponsored.</li>
         </ol>
+        {authConfigured ? (
+          <p className="login-note">
+            Track your request any time in your <Link href="/business/dashboard">business dashboard</Link>: sign in with{" "}
+            {state.email || "the email you used"}.
+          </p>
+        ) : null}
         <Link href={stationHref} className="action-button secondary">Back to the station</Link>
       </div>
     );
