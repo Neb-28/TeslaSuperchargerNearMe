@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { applyForFeatured, type ApplyState } from "@/app/business/get-featured/actions";
+import { SLOT_LABELS, SPONSOR_SLOTS, type SponsorSlot } from "@/lib/featured";
 import { OFFER_MAX } from "@/lib/featuredValidation";
 import { CATEGORIES, type CategoryId } from "@/lib/places";
 import { authConfigured } from "@/lib/supabase/env";
@@ -14,11 +15,22 @@ type GetFeaturedFormProps = {
   initialCategory: CategoryId;
   // Names of places near the station, per category, offered as suggestions.
   suggestions: Record<CategoryId, string[]>;
+  // Spots already held by a live business, per category.
+  takenSlots: Record<CategoryId, SponsorSlot[]>;
 };
 
-export default function GetFeaturedForm({ stationSlug, stationName, stationHref, initialCategory, suggestions }: GetFeaturedFormProps) {
+const SLOT_NOTES: Record<SponsorSlot, string> = {
+  1: "The big gold card at the very top of the list.",
+  2: "A sponsored card right below #1.",
+  3: "A sponsored card right below #2.",
+};
+
+const firstFree = (taken: SponsorSlot[]) => SPONSOR_SLOTS.find((slot) => !taken.includes(slot)) ?? 1;
+
+export default function GetFeaturedForm({ stationSlug, stationName, stationHref, initialCategory, suggestions, takenSlots }: GetFeaturedFormProps) {
   const [state, formAction, pending] = useActionState<ApplyState, FormData>(applyForFeatured, { status: "idle" });
   const [category, setCategory] = useState<CategoryId>(initialCategory);
+  const [slot, setSlot] = useState<SponsorSlot>(firstFree(takenSlots[initialCategory]));
   const [offerLength, setOfferLength] = useState(0);
   const errors = state.status === "error" ? state.errors : {};
   // React empties the form after each submit; refill it with what was sent so nothing is lost.
@@ -30,7 +42,7 @@ export default function GetFeaturedForm({ stationSlug, stationName, stationHref,
       <div className="form-card" role="status">
         <h2 className="section-title">Thanks, we got your request</h2>
         <p className="page-sub">
-          You asked for the #1 Featured spot in {CATEGORIES.find((item) => item.id === category)?.label} at {stationName}.
+          You asked for the {SLOT_LABELS[slot]} spot in {CATEGORIES.find((item) => item.id === category)?.label} at {stationName}.
         </p>
         <ol className="location-steps">
           <li>We&apos;ll email {state.email || "you"} with the price and a secure link to pay by card.</li>
@@ -64,13 +76,46 @@ export default function GetFeaturedForm({ stationSlug, stationName, stationHref,
 
       <label className="field">
         <span>Category</span>
-        <select name="category" defaultValue={value("category", initialCategory)} onChange={(event) => setCategory(event.target.value as CategoryId)} aria-describedby={describedBy("category")}>
+        <select
+          name="category"
+          defaultValue={value("category", initialCategory)}
+          onChange={(event) => {
+            const next = event.target.value as CategoryId;
+            setCategory(next);
+            if (takenSlots[next].includes(slot)) setSlot(firstFree(takenSlots[next]));
+          }}
+          aria-describedby={describedBy("category")}
+        >
           {CATEGORIES.map((item) => (
             <option key={item.id} value={item.id}>{item.label}</option>
           ))}
         </select>
         {error("category")}
       </label>
+
+      <fieldset className="spot-picker" aria-describedby={describedBy("slot")}>
+        <legend>Which spot?</legend>
+        {SPONSOR_SLOTS.map((option) => {
+          // When every spot is taken the business can still apply; we offer the next one that opens.
+          const taken = takenSlots[category].includes(option) && takenSlots[category].length < SPONSOR_SLOTS.length;
+          return (
+            <label key={option} className={`spot-option${taken ? " is-taken" : ""}`}>
+              <input type="radio" name="slot" value={option} checked={slot === option} disabled={taken} onChange={() => setSlot(option)} />
+              <span className="spot-option-copy">
+                <span className="spot-option-title">
+                  {SLOT_LABELS[option]}
+                  {taken ? <span className="spot-taken">Taken</span> : null}
+                </span>
+                <span className="spot-option-note">{SLOT_NOTES[option]}</span>
+              </span>
+            </label>
+          );
+        })}
+        {takenSlots[category].length === SPONSOR_SLOTS.length ? (
+          <p className="login-note">All three spots are taken right now. Apply anyway and we&apos;ll offer you the next one that opens.</p>
+        ) : null}
+        {error("slot")}
+      </fieldset>
 
       <label className="field">
         <span>Business name</span>

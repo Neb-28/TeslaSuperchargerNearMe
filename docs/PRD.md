@@ -183,12 +183,13 @@ Four revenue streams share every station page; featured listings and leads come 
 
 ### Featured listing rules
 
-- One featured business per category per station. Ties go to the earlier sign-up; a waitlist holds the rest.
+- Three paid spots per category per station: **#1 Featured** (the large gold card) and **#2 / #3 Sponsored** (smaller gold-bordered cards right below). One live business per spot. Ties go to the earlier sign-up; a waitlist holds the rest.
+- The business picks a spot when applying (taken spots are shown as taken; if all three are taken it can still apply for the waitlist). Admin can move a listing between free spots.
 - A business must be within the walking radius (default 600 m) of the station it pays for.
-- Always shown first and never hidden by the charge-time filter.
-- Always labeled "Sponsored" and "#1 FEATURED".
-- Fields: name, type line, photo, hours, offer text (max 50 characters), action button label and URL, directions coordinates.
-- No featured slot on a station = the best free listing moves up to #1 (no empty gold card).
+- Paid spots always come first, in spot order, and are never hidden by the charge-time filter. Free places follow by walking time, numbered after them; a paid business isn't listed again among the free places.
+- Always labeled "Sponsored": "#1 FEATURED" on the large card, "#2 SPONSORED" / "#3 SPONSORED" on the smaller ones.
+- Fields: name, type line, photo, hours, offer text (max 50 characters), action button label and URL, directions coordinates, spot (1–3).
+- Unsold spots leave no gaps: whatever is sold moves up (if only #2 is sold, it shows first as a smaller sponsored card, numbered 1), then the free listings.
 
 ### Business sign-up ("Get featured")
 

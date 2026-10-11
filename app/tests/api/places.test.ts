@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { GET } from "@/app/api/stations/[id]/places/route";
-import { createFeatured, deleteFeatured, listFeatured, setFeaturedStatus, SlotTakenError, type NewFeatured } from "@/lib/featuredStore";
+import { createFeatured, deleteFeatured, listFeatured, setFeaturedStatus, SlotTakenError, updateFeatured, type NewFeatured } from "@/lib/featuredStore";
 import { superchargers } from "@/lib/superchargers";
 
 // Keep test listings out of the real local store.
@@ -17,6 +17,7 @@ function newListing(overrides: Partial<NewFeatured> = {}): NewFeatured {
   return {
     stationId: station.id,
     category: "food",
+    slot: 1,
     businessName: "Test Diner",
     kind: "Burgers",
     offerText: "Free fries with any burger",
@@ -103,6 +104,28 @@ describe("featured listing store", () => {
     const second = await createFeatured(newListing({ businessName: "Rival Diner" }));
     await setFeaturedStatus(first.id, "paused");
     await expect(setFeaturedStatus(second.id, "live")).resolves.toMatchObject({ status: "live" });
+  });
+
+  it("lets three businesses share a category, one per spot", async () => {
+    await createFeatured(newListing(), "live");
+    await expect(createFeatured(newListing({ slot: 2, businessName: "Second Diner" }), "live")).resolves.toMatchObject({ slot: 2 });
+    await expect(createFeatured(newListing({ slot: 3, businessName: "Third Diner" }), "live")).resolves.toMatchObject({ slot: 3 });
+    await expect(createFeatured(newListing({ slot: 3, businessName: "Fourth Diner" }), "live")).rejects.toBeInstanceOf(SlotTakenError);
+
+    const body = await (await call(station.id, "food")).json();
+    expect(body.listings.slice(0, 4).map((listing: { rank: number; type: string; featured?: { businessName: string; slot: number } }) => [listing.rank, listing.type, listing.featured?.businessName, listing.featured?.slot])).toEqual([
+      [1, "featured", "Test Diner", 1],
+      [2, "featured", "Second Diner", 2],
+      [3, "featured", "Third Diner", 3],
+      [4, "place", undefined, undefined],
+    ]);
+  });
+
+  it("moves a live listing only to a free spot", async () => {
+    await createFeatured(newListing(), "live");
+    const second = await createFeatured(newListing({ slot: 2, businessName: "Second Diner" }), "live");
+    await expect(updateFeatured(second.id, { slot: 1 })).rejects.toBeInstanceOf(SlotTakenError);
+    await expect(updateFeatured(second.id, { slot: 3 })).resolves.toMatchObject({ slot: 3, status: "live" });
   });
 
   it("lets different categories each have a live listing", async () => {

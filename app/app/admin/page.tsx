@@ -1,18 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { adminConfigured, isAdmin } from "@/lib/adminAuth";
-import type { FeaturedListing, FeaturedStatus } from "@/lib/featured";
+import { SLOT_LABELS, SPONSOR_SLOTS, type FeaturedListing, type FeaturedStatus } from "@/lib/featured";
 import { listFeatured } from "@/lib/featuredStore";
 import { CATEGORIES, categoryLabel } from "@/lib/places";
-import { superchargers, stationHref } from "@/lib/superchargers";
-import { addListingAction, deleteAction, loginAction, logoutAction, setStatusAction } from "./actions";
+import { getStationById, stationHref } from "@/lib/superchargers";
+import { addListingAction, deleteAction, loginAction, logoutAction, setSlotAction, setStatusAction } from "./actions";
 
 export const metadata: Metadata = {
   title: "Admin — Featured listings",
   robots: { index: false, follow: false },
 };
 
-const stationsById = new Map(superchargers.map((station) => [station.id, station]));
 
 const GROUPS: { status: FeaturedStatus; title: string; empty: string }[] = [
   { status: "pending", title: "Waiting for review", empty: "No new applications." },
@@ -92,6 +91,14 @@ export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
               ))}
             </select>
           </label>
+          <label className="field">
+            <span>Spot</span>
+            <select name="slot" required defaultValue="1">
+              {SPONSOR_SLOTS.map((slot) => (
+                <option key={slot} value={slot}>{SLOT_LABELS[slot]}</option>
+              ))}
+            </select>
+          </label>
           <FeaturedFields />
           <button type="submit" className="action-button primary">Add and publish</button>
         </form>
@@ -157,7 +164,7 @@ function FeaturedFields() {
 }
 
 function ListingCard({ listing }: { listing: FeaturedListing }) {
-  const station = stationsById.get(listing.stationId);
+  const station = getStationById(listing.stationId);
   const actions: { status: FeaturedStatus; label: string }[] = [
     { status: "live", label: "Make live" },
     { status: "paused", label: "Pause" },
@@ -168,7 +175,9 @@ function ListingCard({ listing }: { listing: FeaturedListing }) {
     <article className="admin-card">
       <div className="admin-card-head">
         <strong>{listing.businessName}</strong>
-        <span className="admin-source">{listing.source === "admin" ? "Added by us" : "Business application"}</span>
+        <span className="admin-source">
+          {SLOT_LABELS[listing.slot]} · {listing.source === "admin" ? "Added by us" : "Business application"}
+        </span>
       </div>
       <p className="admin-line">
         {categoryLabel(listing.category)} at{" "}
@@ -190,6 +199,16 @@ function ListingCard({ listing }: { listing: FeaturedListing }) {
               <button type="submit" className={`location-button ${action.status === "live" ? "primary" : "secondary"}`}>{action.label}</button>
             </form>
           ))}
+        <form action={setSlotAction} className="admin-slot-form">
+          <input type="hidden" name="id" value={listing.id} />
+          <label className="sr-only" htmlFor={`slot-${listing.id}`}>Spot for {listing.businessName}</label>
+          <select id={`slot-${listing.id}`} name="slot" defaultValue={listing.slot}>
+            {SPONSOR_SLOTS.map((slot) => (
+              <option key={slot} value={slot}>{SLOT_LABELS[slot]}</option>
+            ))}
+          </select>
+          <button type="submit" className="location-button secondary">Move</button>
+        </form>
         <form action={deleteAction}>
           <input type="hidden" name="id" value={listing.id} />
           <button type="submit" className="location-button secondary">Delete</button>

@@ -1,4 +1,4 @@
-// Server-only: builds a station's "Nearby" lists (featured first, then free places by walk time).
+// Server-only: builds a station's "Nearby" lists (paid spots first, then free places by walk time).
 import type { FeaturedListing } from "./featured";
 import { liveFeaturedForStation } from "./featuredStore";
 import { orderListings } from "./listingOrder";
@@ -6,7 +6,7 @@ import { CATEGORIES, type CategoryId, type Place } from "./places";
 import { placesForStation } from "./placesData";
 
 // What visitors may see of a featured listing: never the business's contact details.
-export type PublicFeatured = Pick<FeaturedListing, "id" | "businessName" | "kind" | "offerText" | "ctaLabel" | "ctaUrl" | "distanceM" | "lat" | "lon">;
+export type PublicFeatured = Pick<FeaturedListing, "id" | "slot" | "businessName" | "kind" | "offerText" | "ctaLabel" | "ctaUrl" | "distanceM" | "lat" | "lon">;
 
 export type PublicListing =
   | { type: "featured"; rank: number; featured: PublicFeatured }
@@ -14,14 +14,14 @@ export type PublicListing =
 
 export type NearbyCategory = { id: CategoryId; label: string; listings: PublicListing[] };
 
-function toPublic({ id, businessName, kind, offerText, ctaLabel, ctaUrl, distanceM, lat, lon }: FeaturedListing): PublicFeatured {
-  return { id, businessName, kind, offerText, ctaLabel, ctaUrl, distanceM, lat, lon };
+function toPublic({ id, slot, businessName, kind, offerText, ctaLabel, ctaUrl, distanceM, lat, lon }: FeaturedListing): PublicFeatured {
+  return { id, slot, businessName, kind, offerText, ctaLabel, ctaUrl, distanceM, lat, lon };
 }
 
 export async function nearbyCategory(stationId: string, category: CategoryId, featured?: FeaturedListing[]): Promise<PublicListing[]> {
   const live = featured ?? (await liveFeaturedForStation(stationId));
   const places = placesForStation(stationId)[category];
-  return orderListings(places, live.find((listing) => listing.category === category) ?? null).map((listing) =>
+  return orderListings(places, live.filter((listing) => listing.category === category)).map((listing) =>
     listing.type === "featured" ? { ...listing, featured: toPublic(listing.featured) } : listing,
   );
 }

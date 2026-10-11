@@ -40,6 +40,7 @@ export async function applyForFeatured(_previous: ApplyState, form: FormData): P
   await createFeatured({
     stationId: station.id,
     category: result.values.category,
+    slot: result.values.slot,
     businessName: result.values.businessName,
     kind: result.values.kind,
     offerText: result.values.offerText,

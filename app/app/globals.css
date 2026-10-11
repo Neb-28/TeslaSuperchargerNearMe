@@ -1636,6 +1636,179 @@ a.station-row:hover .station-name {
   border: 1.5px solid var(--gold-border);
 }
 
+/* #2 and #3 Sponsored: a smaller paid card under the #1 Featured one. */
+.sponsored-card {
+  background: var(--surface);
+  border: 1.5px solid var(--gold-border);
+  border-radius: 16px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sponsored-top {
+  display: flex;
+}
+
+.sponsored-badge {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--gold-bg);
+  color: var(--gold-ink);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+}
+
+.sponsored-name {
+  margin: 2px 0 0;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.sponsored-meta {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.sponsored-offer {
+  margin: 2px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gold-text);
+}
+
+.sponsored-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 4px;
+}
+
+.sponsored-button,
+.sponsored-button:hover {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1.5px solid var(--gold-ink);
+  color: var(--gold-ink);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.sponsored-link,
+.sponsored-link:hover {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--gold-ink);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+/* Get featured: choosing the #1, #2 or #3 spot. */
+.spot-picker {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.spot-picker legend {
+  padding: 0;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.spot-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 44px;
+  padding: 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.spot-option:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.spot-option.is-taken {
+  cursor: not-allowed;
+  background: var(--ground);
+}
+
+.spot-option input {
+  width: 20px;
+  height: 20px;
+  margin: 1px 0 0;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+
+.spot-option-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.spot-option-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.spot-option-note {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.spot-taken {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--divider);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.admin-slot-form {
+  display: flex;
+  gap: 6px;
+}
+
+.admin-slot-form select {
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  font: inherit;
+  font-size: 14px;
+}
+
 .listing-card {
   background: var(--surface);
   border-radius: 18px;

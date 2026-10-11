@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { isAdmin, logIn, logOut } from "@/lib/adminAuth";
-import type { FeaturedStatus } from "@/lib/featured";
-import { createFeatured, deleteFeatured, setFeaturedStatus, SlotTakenError } from "@/lib/featuredStore";
+import { isSponsorSlot, SLOT_LABELS, type FeaturedStatus } from "@/lib/featured";
+import { createFeatured, deleteFeatured, setFeaturedStatus, SlotTakenError, updateFeatured } from "@/lib/featuredStore";
 import { validateFeaturedForm } from "@/lib/featuredValidation";
 import { placesForStation } from "@/lib/placesData";
 import { getStationBySlug, stationHref } from "@/lib/superchargers";
@@ -46,6 +46,23 @@ export async function setStatusAction(form: FormData) {
   }
 }
 
+// Move a listing to another spot (#1 Featured, #2 or #3 Sponsored). A live listing can only move
+// to a free spot.
+export async function setSlotAction(form: FormData) {
+  await requireAdmin();
+  const slot = Number(form.get("slot"));
+  if (!isSponsorSlot(slot)) done("Unknown spot.", "err");
+  try {
+    const listing = await updateFeatured(String(form.get("id")), { slot });
+    if (!listing) done("That listing no longer exists.", "err");
+    revalidatePath("/supercharger/[state]/[city]/[slug]", "page");
+    done(`${listing.businessName} is now in the ${SLOT_LABELS[slot]} spot.`);
+  } catch (error) {
+    if (error instanceof SlotTakenError) done(error.message, "err");
+    throw error;
+  }
+}
+
 export async function deleteAction(form: FormData) {
   await requireAdmin();
   await deleteFeatured(String(form.get("id")));
@@ -75,6 +92,7 @@ export async function addListingAction(form: FormData) {
       {
         stationId: station.id,
         category: result.values.category,
+        slot: result.values.slot,
         businessName: result.values.businessName,
         kind: result.values.kind,
         offerText: result.values.offerText,

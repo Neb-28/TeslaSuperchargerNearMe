@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import { loginHref } from "@/lib/authRedirect";
-import type { FeaturedStatus } from "@/lib/featured";
+import { SLOT_LABELS, type FeaturedStatus } from "@/lib/featured";
 import { listFeaturedForEmail } from "@/lib/featuredStore";
 import { CATEGORIES } from "@/lib/places";
 import { CONTACT_EMAIL } from "@/lib/site";
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 
 const STATUS: Record<FeaturedStatus, { label: string; note: string }> = {
   pending: { label: "Waiting for review", note: "We'll email you with the price and a secure link to pay. After payment we review it, usually within one business day." },
-  live: { label: "Live", note: "Shown first in its category at this station, labeled Sponsored." },
+  live: { label: "Live", note: "Shown above the free listings in its category at this station, labeled Sponsored." },
   paused: { label: "Paused", note: "Not shown right now. Email us to turn it back on." },
   rejected: { label: "Not approved", note: "Email us if you'd like to know why or apply again with changes." },
 };
@@ -60,6 +60,10 @@ export default async function BusinessDashboardPage() {
                     <div>
                       <dt>Station</dt>
                       <dd>{station ? <Link href={stationHref(station)}>{station.name}</Link> : "Station no longer listed"}</dd>
+                    </div>
+                    <div>
+                      <dt>Spot</dt>
+                      <dd>{SLOT_LABELS[listing.slot]}</dd>
                     </div>
                     <div>
                       <dt>Category</dt>

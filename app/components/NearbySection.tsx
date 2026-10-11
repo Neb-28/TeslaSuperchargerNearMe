@@ -28,6 +28,8 @@ export default function NearbySection({ stationSlug, stationLat, stationLon, cat
 
   const directions = (lat: number, lon: number) =>
     `https://www.google.com/maps/dir/?api=1&origin=${stationLat},${stationLon}&destination=${lat},${lon}&travelmode=${driving ? "driving" : "walking"}`;
+  const featuredDirections = ({ featured }: Extract<PublicListing, { type: "featured" }>) =>
+    featured.lat != null && featured.lon != null ? directions(featured.lat, featured.lon) : null;
 
   return (
     <section className="nearby-card" aria-labelledby="nearby-title">
@@ -61,10 +63,11 @@ export default function NearbySection({ stationSlug, stationLat, stationLon, cat
           {current.listings.map((listing) => (
             <li key={listing.type === "featured" ? `f-${listing.featured.id}` : `p-${listing.place.name}-${listing.place.distanceM}`}>
               {listing.type === "featured" ? (
-                <FeaturedCard
-                  listing={listing}
-                  directionsHref={listing.featured.lat != null && listing.featured.lon != null ? directions(listing.featured.lat, listing.featured.lon) : null}
-                />
+                listing.featured.slot === 1 ? (
+                  <FeaturedCard listing={listing} directionsHref={featuredDirections(listing)} />
+                ) : (
+                  <SponsoredCard listing={listing} directionsHref={featuredDirections(listing)} />
+                )
               ) : <PlaceRow listing={listing} driving={driving} metric={metric} href={directions(listing.place.lat, listing.place.lon)} />}
             </li>
           ))}
@@ -73,7 +76,7 @@ export default function NearbySection({ stationSlug, stationLat, stationLon, cat
 
       <div className="get-featured-banner">
         <h3 className="banner-title">Own a business near this station?</h3>
-        <p className="banner-copy">EV drivers wait here 20–40 minutes, steps from your door. Take the #1 spot in {current.label}.</p>
+        <p className="banner-copy">EV drivers wait here 20–40 minutes, steps from your door. Get a sponsored spot at the top of {current.label}.</p>
         <Link className="banner-button" href={`/business/get-featured?station=${stationSlug}&category=${selected}`}>
           Get featured
         </Link>
@@ -114,6 +117,41 @@ function FeaturedCard({ listing, directionsHref }: { listing: Extract<PublicList
         </a>
         {directionsHref ? (
           <a className="light-button" href={directionsHref} target="_blank" rel="noreferrer">
+            Directions
+          </a>
+        ) : null}
+      </div>
+    </article>
+  );
+}
+
+// The #2 and #3 Sponsored spots: smaller than the #1 card, still clearly marked as paid.
+function SponsoredCard({ listing, directionsHref }: { listing: Extract<PublicListing, { type: "featured" }>; directionsHref: string | null }) {
+  const { featured } = listing;
+  return (
+    <article className="sponsored-card">
+      <div className="sponsored-top">
+        <span className="sponsored-badge">#{listing.rank} SPONSORED</span>
+      </div>
+      <h3 className="sponsored-name">{featured.businessName}</h3>
+      <p className="sponsored-meta">
+        {featured.kind}
+        {featured.distanceM != null ? ` · ${Math.max(1, Math.round(featured.distanceM / 80))} min walk` : ""}
+      </p>
+      <p className="sponsored-offer">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M20 12 12 20l-8-8V4h8l8 8z" />
+          <circle cx="8.5" cy="8.5" r="1.5" />
+        </svg>
+        {featured.offerText}
+      </p>
+      <div className="sponsored-actions">
+        {/* rel="sponsored" tells search engines this is a paid link. */}
+        <a className="sponsored-button" href={featured.ctaUrl} target="_blank" rel="sponsored noopener noreferrer">
+          {featured.ctaLabel}
+        </a>
+        {directionsHref ? (
+          <a className="sponsored-link" href={directionsHref} target="_blank" rel="noreferrer">
             Directions
           </a>
         ) : null}
