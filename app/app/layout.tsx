@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   openGraph: { siteName: BRAND_NAME, type: "website", locale: "en_US" },
   // Previews, staging and local dev must never be indexed (see lib/site.ts).
   ...(isIndexable ? {} : { robots: { index: false, follow: false } }),
-  // Lets AdSense confirm we own the site on every page, including Home, which shows no ads.
+  // Lets AdSense confirm we own the site on every page.
   ...(adsenseClient ? { other: { "google-adsense-account": adsenseClient } } : {}),
 };
 

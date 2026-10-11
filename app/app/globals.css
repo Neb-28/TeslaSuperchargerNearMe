@@ -3298,8 +3298,13 @@ a.route-stop-name {
   --page-w: 1200px;
 }
 
-.side-rails.is-content {
+.side-rails.is-content,
+.side-rails.is-planner {
   --page-w: 720px;
+}
+
+.side-rails.is-home {
+  --page-w: 960px;
 }
 
 .side-rail {
@@ -3326,7 +3331,7 @@ a.route-stop-name {
 .side-rail-ad {
   display: flex;
   width: var(--rail-w);
-  height: 600px;
+  height: var(--rail-h, 600px);
   overflow: hidden;
 }
 
@@ -3334,6 +3339,30 @@ a.route-stop-name {
   border: 1.5px dashed var(--border);
   border-radius: 12px;
   text-align: center;
+}
+
+@media (min-width: 1320px) {
+  .side-rails.is-home[data-width="160"] {
+    display: block;
+  }
+}
+
+@media (min-width: 1680px) {
+  .side-rails.is-home[data-width="300"] {
+    display: block;
+  }
+}
+
+@media (min-width: 1100px) {
+  .side-rails.is-planner[data-width="160"] {
+    display: block;
+  }
+}
+
+@media (min-width: 1400px) {
+  .side-rails.is-planner[data-width="300"] {
+    display: block;
+  }
 }
 
 @media (min-width: 1180px) {

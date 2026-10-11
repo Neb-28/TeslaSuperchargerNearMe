@@ -13,6 +13,17 @@ type RailWidth = 300 | 160;
 const LAYOUTS = {
   station: { 300: 1920, 160: 1600 }, // .station-layout, 1200 px
   content: { 300: 1480, 160: 1180 }, // .content-page (state and city pages), 720 px
+  planner: { 300: 1400, 160: 1100 }, // .content-page on the route planner, 720 px
+  home: { 300: 1680, 160: 1320 }, // .home-more (state and city lists on Home), 960 px
+};
+
+// Ad height for each width. The route planner and Home are long pages, so their wide rails use
+// the tall 300×1050 "portrait" size; everywhere else (and every 160 px rail) it's 600.
+const HEIGHTS: Record<keyof typeof LAYOUTS, Record<RailWidth, number>> = {
+  station: { 300: 600, 160: 600 },
+  content: { 300: 600, 160: 600 },
+  planner: { 300: 1050, 160: 600 },
+  home: { 300: 1050, 160: 600 },
 };
 
 // Desktop only: a tall ad in the empty space left and right of the page. They scroll with the page
@@ -24,6 +35,7 @@ export default function SideRails({ layout }: { layout: keyof typeof LAYOUTS }) 
   const pushed = useRef(false);
   const live = Boolean(adClient && slot);
   const breakpoints = LAYOUTS[layout];
+  const height = width ? HEIGHTS[layout][width] : 600;
 
   useEffect(() => {
     // One size per visit: an AdSense unit can't change size after it has loaded.
@@ -47,7 +59,7 @@ export default function SideRails({ layout }: { layout: keyof typeof LAYOUTS }) 
   if (!width || (!live && process.env.NODE_ENV === "production")) return null;
 
   return (
-    <div className={`side-rails is-${layout}`} data-width={width} style={{ "--rail-w": `${width}px` } as CSSProperties}>
+    <div className={`side-rails is-${layout}`} data-width={width} style={{ "--rail-w": `${width}px`, "--rail-h": `${height}px` } as CSSProperties}>
       {live ? (
         <Script
           id="adsbygoogle-js"
@@ -63,7 +75,7 @@ export default function SideRails({ layout }: { layout: keyof typeof LAYOUTS }) 
           {live ? (
             <ins className="adsbygoogle side-rail-ad" data-ad-client={adClient} data-ad-slot={slot} />
           ) : (
-            <div className="ad-placeholder side-rail-ad">Ad space · {width} × 600</div>
+            <div className="ad-placeholder side-rail-ad">Ad space · {width} × {height}</div>
           )}
         </aside>
       ))}

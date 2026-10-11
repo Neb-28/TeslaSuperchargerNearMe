@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import RoutePlanner from "@/components/RoutePlanner";
+import SideRails from "@/components/SideRails";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import { routingConfigured } from "@/lib/openRouteService";
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
 export default function RoutePlannerPage() {
   return (
     <div className="app-shell">
+      <SideRails layout="planner" />
       <SiteHeader backHref="/" />
       <main id="main" className="content-page">
         <h1 className="page-title">Route planner</h1>

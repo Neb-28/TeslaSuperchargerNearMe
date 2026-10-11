@@ -1,5 +1,6 @@
 import Link from "next/link";
 import CountryPicker from "./CountryPicker";
+import SideRails from "./SideRails";
 import JsonLd from "./JsonLd";
 import SiteFooter from "./SiteFooter";
 import SiteHeader from "./SiteHeader";
@@ -50,6 +51,7 @@ export default function HomeContent({ country }: { country: CountrySummary | nul
 
   return (
     <div className="app-shell">
+      <SideRails layout="home" />
       <SiteHeader />
 
       <main id="main" className="home-page">
