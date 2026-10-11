@@ -82,12 +82,13 @@ export default function HomeContent({ country }: { country: CountrySummary | nul
             Near me
           </Link>
 
-          <Link href={withCountry("/map")} className="action-button secondary">
+          <Link href="/route-planner" className="action-button secondary">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0B6E5B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z" />
-              <path d="M9 4v14M15 6v14" />
+              <circle cx="6" cy="19" r="2.5" />
+              <circle cx="18" cy="5" r="2.5" />
+              <path d="M8.5 19H16a3.5 3.5 0 0 0 0-7H8a3.5 3.5 0 0 1 0-7h7.5" />
             </svg>
-            Map
+            Route planner
           </Link>
 
           <Link href="/favorites" className="action-button secondary wide">

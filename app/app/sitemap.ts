@@ -12,6 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: absoluteUrl("/"), lastModified: updated, changeFrequency: "weekly", priority: 1 },
     { url: absoluteUrl("/map"), lastModified: updated, changeFrequency: "weekly", priority: 0.8 },
+    { url: absoluteUrl("/route-planner"), changeFrequency: "monthly", priority: 0.8 },
     ...statesWithStations()
       .filter(({ state }) => US_STATES[state])
       .map(({ state }) => ({ url: absoluteUrl(stateHref(state)), lastModified: updated, changeFrequency: "weekly" as const, priority: 0.7 })),

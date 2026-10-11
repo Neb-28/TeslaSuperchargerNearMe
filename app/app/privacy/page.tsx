@@ -31,6 +31,11 @@ export default function PrivacyPage() {
           this page, which uses it on your device to sort stations by distance. We don&apos;t send your exact location to our servers
           and we don&apos;t store it. You can turn location access off at any time in your browser or phone settings.
         </p>
+        <p>
+          The one exception is <strong>Use my location</strong> in the route planner: your approximate location (rounded to about 100 m) is
+          sent to our server and to openrouteservice to work out the driving route. We don&apos;t store it, and those routes are never
+          cached.
+        </p>
 
         <h2>Searches and saved stations</h2>
         <ul>
@@ -94,6 +99,11 @@ export default function PrivacyPage() {
           <li>Map images are loaded from a map tile provider, which receives your IP address when your browser requests them.</li>
           <li>Map and place data come from OpenStreetMap contributors.</li>
           <li>Directions open Google Maps, which has its own privacy policy.</li>
+          <li>
+            The route planner sends the start and destination you enter to{" "}
+            <a href="https://openrouteservice.org/privacy-policy/" target="_blank" rel="noreferrer">openrouteservice</a> (HeiGIT, Germany)
+            to find addresses and driving routes.
+          </li>
         </ul>
 
         <h2>Children</h2>

@@ -40,7 +40,7 @@ The MVP ships three screens (Home, Map, Station page) plus a simple business sig
 | City pages for SEO ("Superchargers in [city]") | P1 | Phase 2 |
 | Crowd reports (working, busy, broken) | P2 | Phase 2 |
 | Live free-stall counts via data partner | P2 | Phase 3 |
-| Road-trip planner | P2 | Phase 3 |
+| Route planner: Superchargers along a trip, by vehicle and range (Home button replaces Map) | P1 | MVP+ |
 
 **Out of scope for the MVP:** native iOS and Android apps, payment for charging, and live stall availability. Accounts are optional: every feature works signed out.
 
@@ -141,6 +141,8 @@ One dark-green ink, one mint highlight, one gold for paid placements; define the
 | `gold-ink` | #7A4E00 | Featured badge, buttons, labels |
 | `gold-text` | #5C4410 | Featured card secondary text |
 | `location` | #2F6FE4 | User location dot |
+| `other-network` | #6B4FBB | Route planner: other networks' chargers (pins, labels); white text on it passes |
+| `other-network-soft` | #EFEAFB | Route planner: other-network badge background |
 
 Text colors must meet 4.5:1 contrast on their background. White on `accent` and on `gold-ink` passes.
 
@@ -259,6 +261,14 @@ The browser loads map tiles straight from the tile provider; every other request
 - `POST /api/featured/checkout` — starts a Stripe Checkout session for a listing.
 - `POST /api/stripe/webhook` — activates or pauses listings on payment events.
 - `POST /api/events` — records listing and lead-card views and clicks.
+
+### Route planner
+
+- `/route-planner` (Home's second button; Map stays in the menu). Inputs: start (address, ZIP or "Use my location"), destination, and the driver's car: Year → Make → Model from the EPA's fueleconomy.gov data (`data/ev-models.json`, refreshed with `node scripts/import-ev-models.mjs`), which fills in the official range (editable), plus the charging port for non-Tesla cars (NACS, CCS with adapter, CCS only). Cars not listed: type the range. The car is remembered on the device. Every trip assumes leaving with 80%.
+- `GET /api/route-plan?from&to&range&plug` — openrouteservice (`ORS_API_KEY`, server-only) for address search and the driving route; US ZIPs are looked up locally.
+- Stops: stations within ~5 mi of the route. Stop when the battery is down to 10–15% (a 350-mile car first stops after ~227–245 miles), at the fastest station in that band; never arrive below 10%. Charge to 80%; the last stop charges only what the destination needs (+5%), up to 90% if that saves a stop. Before a gap in the network, charge enough to cross it (up to 100%). Superchargers come first: another network's fast charger (US DOE Alternative Fuels Data Center, `data/fast-chargers.json`, refreshed with `node scripts/import-fast-chargers.mjs`) is used only where Superchargers can't bridge a gap, and is shown in `other-network` purple with its network name and a Directions link. Plugs: NACS cars use Superchargers and NACS plugs elsewhere (CCS plugs too if they carry a CCS adapter); CCS cars with a NACS adapter use everything; CCS-only cars use Magic Dock Superchargers and CCS chargers.
+- Each stop shows arrival charge, rough charge time and what's nearby, linking to the station page. Trips typed in are cached by the CDN; trips from the visitor's location are never cached.
+- Attribution: "© openrouteservice.org by HeiGIT" with the OpenStreetMap credit.
 
 ### Accounts (optional)
 

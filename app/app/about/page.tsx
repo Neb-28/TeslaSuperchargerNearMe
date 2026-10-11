@@ -35,6 +35,14 @@ export default function AboutPage() {
           </a>
           . We refresh our listings regularly. Map data © OpenStreetMap contributors.
         </p>
+        <p>
+          The route planner uses official car ranges from the US EPA (fueleconomy.gov) and, where Superchargers can&apos;t reach, other
+          networks&apos; fast chargers from the US Department of Energy&apos;s Alternative Fuels Data Center. Driving routes come from{" "}
+          <a href="https://openrouteservice.org/" target="_blank" rel="noreferrer">
+            openrouteservice
+          </a>
+          .
+        </p>
 
         <h2>An honest note on availability</h2>
         <p>

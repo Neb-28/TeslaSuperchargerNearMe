@@ -17,6 +17,8 @@
   --gold-ink: #7a4e00;
   --gold-text: #5c4410;
   --location: #2f6fe4;
+  --other-network: #6b4fbb;
+  --other-network-soft: #efeafb;
   --shadow-card: 0 1px 2px rgba(20, 33, 28, 0.06);
   --shadow-float: 0 2px 8px rgba(20, 33, 28, 0.15);
   --font-display: "Bricolage Grotesque", "Segoe UI", sans-serif;
@@ -2188,6 +2190,249 @@ a.station-row:hover .station-name {
   color: var(--accent-hover);
   font-size: 14px;
   font-weight: 600;
+}
+
+/* ---------- Route planner ---------- */
+
+.vehicle-picker {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.vehicle-picker legend {
+  padding: 0;
+  margin-bottom: 14px;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.vehicle-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.field select:disabled,
+.field input:disabled {
+  background: var(--ground);
+  color: var(--muted);
+}
+
+.route-results {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  outline: none;
+  scroll-margin-top: 96px; /* below the sticky header */
+}
+
+/* The planned trip, folded: "From → To · car" with a Change trip button. */
+.trip-bar {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 12px;
+}
+
+.trip-bar-text {
+  margin: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.trip-bar-text span {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.route-summary {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.route-map {
+  height: 320px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--divider);
+}
+
+.route-stop-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--surface);
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--surface);
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: var(--shadow-float);
+}
+
+.route-stop-pin.other {
+  background: var(--other-network);
+}
+
+.route-stop-pin.small {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+  box-shadow: none;
+  vertical-align: -2px;
+}
+
+.route-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.route-legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.network-badge {
+  align-self: flex-start;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-hover);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.network-badge.other {
+  background: var(--other-network-soft);
+  color: var(--other-network);
+}
+
+.route-stop.other-network .route-stop-card {
+  box-shadow: inset 4px 0 0 var(--other-network), var(--shadow-card);
+}
+
+.route-stop.other-network .route-stop-label {
+  color: var(--other-network);
+}
+
+/* Start, numbered stops and arrival, top to bottom, joined by a line like the route on the map. */
+.route-stops {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.route-stops::before {
+  content: "";
+  position: absolute;
+  left: 13px;
+  top: 14px;
+  bottom: 14px;
+  width: 2px;
+  background: var(--border);
+}
+
+.route-point,
+.route-stop {
+  position: relative;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 10px;
+}
+
+.route-point {
+  align-items: center;
+  min-height: 32px;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.route-marker {
+  justify-self: center;
+  width: 16px;
+  height: 16px;
+  border: 3px solid var(--ground);
+  border-radius: 999px;
+  background: var(--ink);
+  box-sizing: content-box;
+}
+
+.route-marker.end {
+  background: var(--accent);
+}
+
+.route-stop {
+  align-items: start;
+}
+
+.route-stop > .route-stop-pin {
+  margin-top: 16px;
+}
+
+.route-stop-card {
+  gap: 6px;
+  min-width: 0;
+}
+
+.route-stop-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-hover);
+}
+
+.route-stop-name {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+a.route-stop-name {
+  text-decoration: underline;
+}
+
+.route-charge {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.route-nearby {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.route-nearby a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
 }
 
 /* ---------- Sign in, account and business dashboard ---------- */
