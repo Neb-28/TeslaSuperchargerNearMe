@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import BackButton from "./BackButton";
 import BrandName, { BRAND_NAME } from "./BrandName";
 import MenuButton from "./MenuButton";
-import { navLinks } from "./navLinks";
 
 type SiteHeaderProps = {
   // Where Back goes when there is no previous in-app page (e.g. a visitor from Google).
@@ -33,12 +32,21 @@ export default function SiteHeader({ backHref, showSearch = false, showMenu = tr
           </Link>
         </div>
 
+        {/* Desktop: Route planner and Map as icons; account links live in the ☰ menu. */}
         <nav className="desktop-nav" aria-label="Main">
-          {navLinks.filter((link) => link.href !== "/").map((link) => (
-            <Link key={link.label} href={link.href} className="desktop-nav-link">
-              {link.label}
-            </Link>
-          ))}
+          <Link href="/route-planner" className="icon-button" aria-label="Route planner" title="Route planner">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="6" cy="19" r="2.5" />
+              <circle cx="18" cy="5" r="2.5" />
+              <path d="M8.5 19H16a3.5 3.5 0 0 0 0-7H8a3.5 3.5 0 0 1 0-7h7.5" />
+            </svg>
+          </Link>
+          <Link href="/map" className="icon-button" aria-label="Map" title="Map">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z" />
+              <path d="M9 4v14M15 6v14" />
+            </svg>
+          </Link>
         </nav>
 
         <div className="header-actions">
@@ -53,9 +61,12 @@ export default function SiteHeader({ backHref, showSearch = false, showMenu = tr
           ) : null}
           {showMenu ? (
             <span className="mobile-only">
-              <MenuButton />
+              <MenuButton variant="mobile" />
             </span>
           ) : null}
+          <span className="desktop-only">
+            <MenuButton variant="desktop" />
+          </span>
         </div>
       </div>
     </header>

@@ -193,47 +193,136 @@ img {
   align-items: center;
 }
 
-.desktop-nav {
+.desktop-nav,
+.desktop-only {
   display: none;
 }
 
-.menu-wrap {
-  position: relative;
+/* ---------- ☰ menu: a panel that slides in from the right ---------- */
+
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(20, 33, 28, 0.45); /* ink, dimmed */
   display: flex;
+  justify-content: flex-end;
 }
 
-.menu-panel {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 8px);
-  z-index: 1200;
-  min-width: 200px;
-  padding: 6px;
-  border-radius: 14px;
-  background: var(--surface);
-  box-shadow: var(--shadow-float);
+.drawer {
+  width: min(380px, 86vw);
+  height: 100%;
   display: flex;
   flex-direction: column;
+  background: var(--ground);
+  box-shadow: var(--shadow-float);
+  animation: drawer-in 0.22s ease-out;
 }
 
-.menu-panel[hidden] {
-  display: none;
+@keyframes drawer-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
-.menu-link,
-.menu-link:hover {
+@media (prefers-reduced-motion: reduce) {
+  .drawer {
+    animation: none;
+  }
+}
+
+.drawer-header {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  min-height: 44px;
-  padding: 0 12px;
-  border-radius: 10px;
-  color: var(--ink);
-  font-size: 15px;
+  justify-content: space-between;
+  min-height: 88px;
+  padding: 0 12px 0 24px;
+  background: var(--ink);
+  color: var(--surface);
+}
+
+.drawer-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 24px;
   font-weight: 700;
 }
 
-.menu-link:hover {
-  background: var(--ground);
+.drawer-close {
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: var(--surface);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.drawer-close:hover {
+  background: var(--ink-raised);
+}
+
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.drawer-link,
+.drawer-link:hover {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  padding: 0 16px;
+  border: 1px solid var(--divider);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.drawer-link:hover {
+  border-color: var(--accent);
+  color: var(--accent-hover);
+}
+
+.drawer-divider {
+  width: 100%;
+  margin: 6px 0;
+  border: 0;
+  border-top: 2px solid var(--divider);
+}
+
+.drawer-small-link,
+.drawer-small-link:hover {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 4px;
+  padding: 0 16px;
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.drawer :focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* Phones: Back (when there is one), the logo and the name share the left side of the header. */
@@ -2167,6 +2256,22 @@ a.station-row:hover .station-name {
   font-size: 16px;
 }
 
+/* Our own chevron, set in from the right edge (the browser's arrow hugs the border).
+   Its stroke is the `muted` token, #56635D. */
+.field select {
+  appearance: none;
+  padding-right: 42px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%2356635D' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 18px 18px;
+  text-overflow: ellipsis;
+}
+
+.field select:disabled {
+  opacity: 0.7;
+}
+
 .field input[aria-invalid="true"] {
   border-color: var(--gold-ink);
 }
@@ -2266,7 +2371,7 @@ a.station-row:hover .station-name {
 
 .field select:disabled,
 .field input:disabled {
-  background: var(--ground);
+  background-color: var(--ground);
   color: var(--muted);
 }
 
@@ -2667,24 +2772,17 @@ a.route-stop-name {
 
   .desktop-nav {
     display: flex;
-    gap: 4px;
+    gap: 8px;
     margin-left: auto;
   }
 
-  .desktop-nav-link,
-  .desktop-nav-link:hover {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-    padding: 0 14px;
-    border-radius: 12px;
-    color: var(--surface);
-    font-size: 15px;
-    font-weight: 700;
+  .desktop-only {
+    display: flex;
   }
 
-  .desktop-nav-link:hover {
-    background: var(--ink-raised);
+  /* The menu's dark bar lines up with the desktop header. */
+  .drawer-header {
+    min-height: 72px;
   }
 
   /* Home: wider hero, buttons on one row. */
@@ -2899,6 +2997,52 @@ a.route-stop-name {
   background: var(--surface);
   color: var(--ink);
   box-shadow: var(--shadow-float);
+}
+
+/* Home: the country choice as a labelled pill above the state/city lists. */
+.home-country {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.home-country-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.country-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: var(--shadow-card);
+}
+
+.country-select:hover,
+.country-select[aria-expanded="true"] {
+  border-color: var(--accent);
+}
+
+.country-select-flag {
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* In the page the list opens below the pill, aligned to its left edge. */
+.country-picker.inline .country-picker-panel {
+  left: 0;
+  right: auto;
 }
 
 .country-picker-panel[hidden] {

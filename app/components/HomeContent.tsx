@@ -50,7 +50,7 @@ export default function HomeContent({ country }: { country: CountrySummary | nul
 
   return (
     <div className="app-shell">
-      <SiteHeader countryPicker={<CountryPicker current={current} options={options} basePath="/" />} />
+      <SiteHeader />
 
       <main id="main" className="home-page">
         <div className="hero-mark" aria-hidden="true">
@@ -101,6 +101,11 @@ export default function HomeContent({ country }: { country: CountrySummary | nul
       </main>
 
       <div className="home-more">
+        <div className="home-country">
+          <span className="home-country-label">Showing Superchargers in</span>
+          <CountryPicker current={current} options={options} basePath="/" variant="inline" />
+        </div>
+
         {country ? (
           <>
             <section aria-labelledby="states-title" className="link-section">

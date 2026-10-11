@@ -10,6 +10,8 @@ type CountryPickerProps = {
   options: CountryOption[];
   // The page the choice applies to: "/" (home) or "/map".
   basePath: "/" | "/map";
+  // "header": the small round flag button in the top bar. "inline": a labelled pill in the page.
+  variant?: "header" | "inline";
 };
 
 const US_SLUG = "united-states";
@@ -22,7 +24,7 @@ function flag(code: string | null) {
 // Small round flag button (emoji plus the two-letter code, since flag emoji don't render on
 // Windows). Each option is a plain link, e.g. /?country=germany, so it also works before
 // JavaScript loads; the United States is the page without a country.
-export default function CountryPicker({ current, options, basePath }: CountryPickerProps) {
+export default function CountryPicker({ current, options, basePath, variant = "header" }: CountryPickerProps) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -65,18 +67,30 @@ export default function CountryPicker({ current, options, basePath }: CountryPic
   const OptionLink = basePath === "/" ? "a" : Link;
 
   return (
-    <div ref={wrapRef} className="country-picker">
+    <div ref={wrapRef} className={`country-picker${variant === "inline" ? " inline" : ""}`}>
       <button
         ref={buttonRef}
         type="button"
-        className="country-picker-button"
+        className={variant === "inline" ? "country-select" : "country-picker-button"}
         aria-label={`Country: ${current.name}. Change country`}
         aria-expanded={open}
         aria-controls={menuId}
         onClick={() => setOpen((value) => !value)}
       >
-        <span className="country-picker-flag" aria-hidden="true">{flag(current.code)}</span>
-        <span className="country-picker-code" aria-hidden="true">{current.code}</span>
+        {variant === "inline" ? (
+          <>
+            <span className="country-select-flag" aria-hidden="true">{flag(current.code)}</span>
+            <span aria-hidden="true">{current.name}</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </>
+        ) : (
+          <>
+            <span className="country-picker-flag" aria-hidden="true">{flag(current.code)}</span>
+            <span className="country-picker-code" aria-hidden="true">{current.code}</span>
+          </>
+        )}
       </button>
 
       <div id={menuId} className="country-picker-panel" hidden={!open}>

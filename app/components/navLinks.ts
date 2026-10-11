@@ -1,11 +1,23 @@
-import { authConfigured } from "@/lib/supabase/env";
+export type MenuLink = { label: string; href: string };
 
-export const navLinks = [
-  { label: "Home", href: "/" },
-  { label: "Near me", href: "/map?near=1" },
-  { label: "Map", href: "/map" },
+// The ☰ menu (a panel that slides in from the right), in groups separated by dividers.
+export const accountLinks: MenuLink[] = [
+  { label: "My Profile", href: "/account" },
+  { label: "Log in", href: "/login" },
+];
+
+// Home, Near me and Map aren't in the menu: the logo goes Home, and Near me and Map are on Home.
+const pageLinks: MenuLink[] = [
   { label: "Route planner", href: "/route-planner" },
   { label: "Favorites", href: "/favorites" },
-  // Sign-in shows only once Supabase is set up for this deployment.
-  ...(authConfigured ? [{ label: "Account", href: "/account" }] : []),
 ];
+
+// On desktop the header already has a Route planner icon.
+const desktopPageLinks = pageLinks.filter((link) => link.href !== "/route-planner");
+
+export function menuGroups(variant: "mobile" | "desktop"): MenuLink[][] {
+  return [accountLinks, variant === "desktop" ? desktopPageLinks : pageLinks, [{ label: "Contact us", href: "/contact" }]];
+}
+
+// Shown as a small text link at the bottom of the menu.
+export const menuSmallLinks: MenuLink[] = [{ label: "Privacy policy", href: "/privacy" }];
