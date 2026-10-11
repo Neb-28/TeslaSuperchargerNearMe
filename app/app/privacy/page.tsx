@@ -105,7 +105,9 @@ export default function PrivacyPage() {
               Sentry
             </a>{" "}
             to find and fix errors. When something goes wrong, and for a sample of page loads, Sentry receives technical details such as the
-            page, your browser and device type, and your IP address.
+            page, your browser and device type, and your IP address. For a sample of visits, and for visits where an error happens, Sentry
+            also records a replay of the page layout and your clicks. All text and anything you type are masked in these replays, and
+            images aren&apos;t recorded.
           </li>
           <li>
             The route planner sends the start and destination you enter to{" "}
