@@ -11,8 +11,10 @@ import SiteFooter from "@/components/SiteFooter";
 import SideRails from "@/components/SideRails";
 import SiteHeader from "@/components/SiteHeader";
 import { nearbyForStation } from "@/lib/nearby";
+import { placesForStation } from "@/lib/placesData";
 import { absoluteUrl } from "@/lib/site";
-import { areaName, cityHref, getCity, getStationBySlug, isWorldStation, stateHref, stationHref, stationTitle } from "@/lib/superchargers";
+import { stationAbout } from "@/lib/stationAbout";
+import { areaName, cityHref, getCity, getStationBySlug, isWorldStation, nearestOtherSupercharger, stateHref, stationHref, stationTitle } from "@/lib/superchargers";
 import { stateName } from "@/lib/usStates";
 
 type StationPageProps = PageProps<"/supercharger/[state]/[city]/[slug]">;
@@ -57,6 +59,16 @@ export default async function StationPage({ params }: StationPageProps) {
   const power = station.maxKw ? `${station.maxKw} kW ${plug}` : plug;
   const nearby = await nearbyForStation(station.id);
   const cityInfo = getCity(station.state, station.city);
+  const metric = isWorldStation(station) && station.countryCode !== "GB";
+  const nearest = nearestOtherSupercharger(station);
+  const about = stationAbout({
+    station,
+    places: placesForStation(station.id),
+    nearest: nearest ? { name: nearest.station.name, href: stationHref(nearest.station), miles: nearest.miles } : null,
+    city: cityInfo ? { name: cityInfo.name, href: cityHref(cityInfo.state, cityInfo.city), count: cityInfo.stations.length } : null,
+    metric,
+    isUs: !isWorldStation(station),
+  });
 
   return (
     <div className="app-shell">
@@ -139,7 +151,6 @@ export default async function StationPage({ params }: StationPageProps) {
                       <span className="outlet-dot is-unknown" aria-hidden="true" />
                       <span className="outlet-info">
                         <span className="outlet-name">Stall {number}</span>
-                        <span className="outlet-status">Live status not available yet</span>
                       </span>
                     </li>
                   ))}
@@ -156,6 +167,17 @@ export default async function StationPage({ params }: StationPageProps) {
             <p className="port-status-note">Live stall availability isn&apos;t available yet. Stall counts come from OpenStreetMap.</p>
           </section>
 
+          <section className="station-about" aria-labelledby="station-about-title">
+            <h2 id="station-about-title">About this Supercharger</h2>
+            {about.map((paragraph, index) => (
+              <p key={index}>
+                {paragraph.map((segment, part) =>
+                  typeof segment === "string" ? segment : <Link key={part} href={segment.href}>{segment.text}</Link>,
+                )}
+              </p>
+            ))}
+          </section>
+
           <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_STATION} />
 
           <NearbySection
@@ -163,7 +185,7 @@ export default async function StationPage({ params }: StationPageProps) {
             stationLat={lat}
             stationLon={lon}
             categories={nearby}
-            metric={isWorldStation(station) && station.countryCode !== "GB"}
+            metric={metric}
           />
 
           <SiteFooter osmCredit dataCredit={isWorldStation(station)} />

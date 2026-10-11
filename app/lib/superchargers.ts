@@ -171,6 +171,19 @@ export function getStationById(id: string) {
   return byId.get(id) ?? null;
 }
 
+// The closest other Supercharger anywhere (US or world), for the station page's "About" text.
+export function nearestOtherSupercharger(station: Supercharger) {
+  let best: { station: Supercharger; miles: number } | null = null;
+  for (const other of byId.values()) {
+    if (other.id === station.id) continue;
+    // Skip the far side of the world cheaply before the exact distance.
+    if (Math.abs(other.lat - station.lat) > (best ? best.miles / 69 : 90)) continue;
+    const miles = milesBetween([station.lat, station.lon], [other.lat, other.lon]);
+    if (!best || miles < best.miles) best = { station: other, miles };
+  }
+  return best;
+}
+
 export const US_COUNTRY = { slug: "united-states", code: "US", name: "United States" } as const;
 
 export function isWorldStation(station: Supercharger): station is WorldSupercharger {

@@ -12,7 +12,8 @@ export function placesForStation(stationId: string): Record<CategoryId, Place[]>
   const result = Object.fromEntries(CATEGORIES.map(({ id }) => [id, [] as Place[]])) as Record<CategoryId, Place[]>;
   for (const [index, name, kind, distanceM, lat, lon] of data.stations[stationId] ?? []) {
     const category = data.categories[index] as CategoryId;
-    result[category]?.push({ name, kind, category, distanceM, walkMin: walkMinutes(distanceM), lat, lon });
+    // OSM names sometimes carry stray spaces ("Soluna  Restaurant").
+    result[category]?.push({ name: name.replace(/\s+/g, " ").trim(), kind, category, distanceM, walkMin: walkMinutes(distanceM), lat, lon });
   }
   return result;
 }

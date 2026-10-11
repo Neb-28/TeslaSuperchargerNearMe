@@ -2069,6 +2069,39 @@ a.station-row:hover .station-name {
   padding: 18px;
 }
 
+/* "About this Supercharger": a few sentences from the station's own data. */
+.station-about {
+  padding: 18px;
+  background: var(--surface);
+  border-radius: 20px;
+  box-shadow: var(--shadow-card);
+}
+
+.station-about h2 {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.station-about p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.station-about p + p {
+  margin-top: 10px;
+}
+
+.station-about a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
 .charger-headline {
   display: flex;
   align-items: center;
@@ -2204,11 +2237,6 @@ a.station-row:hover .station-name {
   font-size: 14px;
   font-weight: 700;
   color: var(--ink);
-}
-
-.outlet-status {
-  font-size: 14px;
-  color: var(--muted);
 }
 
 .port-status-note {
