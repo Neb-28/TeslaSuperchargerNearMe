@@ -2024,6 +2024,16 @@ a.station-row:hover .station-name {
   display: flex;
 }
 
+/* The #2 spot: the #1 card's gold background, with the badge and button on white. */
+.sponsored-card.is-highlighted {
+  background: var(--gold-bg);
+}
+
+.sponsored-card.is-highlighted .sponsored-badge,
+.sponsored-card.is-highlighted .sponsored-button {
+  background: var(--surface);
+}
+
 .sponsored-badge {
   padding: 3px 9px;
   border-radius: 999px;
@@ -3279,6 +3289,189 @@ a.route-stop-name {
 
 .form-card .action-button:disabled {
   opacity: 0.7;
+}
+
+/* ---------- Get featured: live preview of the listing ----------
+   A phone showing the station's Nearby list with their listing in it. Phones: below the form.
+   Desktop: beside the form, staying in view while the business scrolls. */
+.featured-builder {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.preview-jump {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  min-height: 44px;
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Clear of the sticky header when the link jumps here. */
+.featured-builder-preview {
+  scroll-margin-top: 88px;
+}
+
+.ad-preview-caption {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* Their own listing gets a dashed outline so it stands out from the rest of the list. */
+.ad-preview-yours {
+  border-radius: 20px;
+  outline: 2px dashed var(--accent);
+  outline-offset: 3px;
+}
+
+/* The chips are plain text here, not buttons: center their labels the way buttons do. */
+.ad-preview-nearby .category-chip {
+  display: inline-flex;
+  align-items: center;
+}
+
+.ad-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* As tall as the screen allows below the sticky header and the caption, between 560 and 860 px.
+   A glossy frame with a soft brand-green glow (the `accent` and `mint` tokens) and a lit bezel edge. */
+.ad-preview-phone {
+  position: relative;
+  width: min(360px, 100%);
+  height: clamp(560px, calc(100vh - 140px), 860px);
+  padding: 10px;
+  border-radius: 48px;
+  background: linear-gradient(150deg, var(--ink-raised) 0%, var(--ink) 45%, var(--ink) 70%, var(--ink-raised) 100%);
+  box-shadow:
+    inset 0 0 0 1.5px var(--ink-raised),
+    0 0 0 1px rgba(61, 220, 151, 0.35),
+    0 28px 56px -12px rgba(11, 110, 91, 0.5),
+    0 0 80px rgba(61, 220, 151, 0.3);
+}
+
+/* Side buttons: power on the right; on desktop (where the phone is always 360 px wide) also volume
+   on the left, drawn as shadows of the power button. */
+.ad-preview-phone::after {
+  content: "";
+  position: absolute;
+  top: 150px;
+  right: -3px;
+  width: 4px;
+  height: 72px;
+  border-radius: 0 3px 3px 0;
+  background: var(--ink-raised);
+}
+
+/* The camera notch. */
+.ad-preview-phone::before {
+  content: "";
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  z-index: 1;
+  width: 96px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--ink);
+  transform: translateX(-50%);
+}
+
+.ad-preview-screen {
+  height: 100%;
+  overflow: hidden;
+  scroll-behavior: smooth;
+  border-radius: 38px;
+  background: var(--ground);
+}
+
+/* Everything on the phone's screen is drawn at 80%, so it's sized like a real phone next to the
+   form and more of the list fits. */
+.ad-preview-content {
+  zoom: 0.8;
+}
+
+/* Pinned to the top of the phone's screen, like the site's header, so the notch never covers content. */
+.ad-preview-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 46px 16px 12px;
+  background: var(--ink);
+  color: var(--surface);
+}
+
+.ad-preview-bar .brand-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
+.ad-preview-brand {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.ad-preview-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 12px;
+}
+
+.ad-preview-station {
+  margin: 0;
+  padding: 0 4px;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.ad-preview-body .nearby-card {
+  padding: 14px;
+}
+
+
+@media (min-width: 900px) {
+  .get-featured-page {
+    max-width: 1120px;
+  }
+
+  .get-featured-page > .page-sub {
+    max-width: 720px;
+  }
+
+  .featured-builder {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 400px;
+    gap: 48px;
+    align-items: start;
+  }
+
+  .featured-builder-preview {
+    position: sticky;
+    top: 88px;
+  }
+
+  .ad-preview-phone::after {
+    box-shadow: -363px -30px 0 var(--ink-raised), -363px 50px 0 var(--ink-raised);
+  }
 }
 
 /* ---------- Admin ---------- */

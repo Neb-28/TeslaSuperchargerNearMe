@@ -6,7 +6,11 @@ import { CATEGORIES, type CategoryId, type Place } from "./places";
 import { placesForStation } from "./placesData";
 
 // What visitors may see of a featured listing: never the business's contact details.
-export type PublicFeatured = Pick<FeaturedListing, "id" | "slot" | "businessName" | "kind" | "offerText" | "ctaLabel" | "ctaUrl" | "distanceM" | "lat" | "lon">;
+// The street address is the business's public location (used for Directions), not a contact detail.
+export type PublicFeatured = Pick<
+  FeaturedListing,
+  "id" | "slot" | "businessName" | "kind" | "offerText" | "ctaLabel" | "ctaUrl" | "address" | "distanceM" | "lat" | "lon"
+>;
 
 export type PublicListing =
   | { type: "featured"; rank: number; featured: PublicFeatured }
@@ -14,8 +18,8 @@ export type PublicListing =
 
 export type NearbyCategory = { id: CategoryId; label: string; listings: PublicListing[] };
 
-function toPublic({ id, slot, businessName, kind, offerText, ctaLabel, ctaUrl, distanceM, lat, lon }: FeaturedListing): PublicFeatured {
-  return { id, slot, businessName, kind, offerText, ctaLabel, ctaUrl, distanceM, lat, lon };
+export function toPublic({ id, slot, businessName, kind, offerText, ctaLabel, ctaUrl, address, distanceM, lat, lon }: FeaturedListing): PublicFeatured {
+  return { id, slot, businessName, kind, offerText, ctaLabel, ctaUrl, address, distanceM, lat, lon };
 }
 
 export async function nearbyCategory(stationId: string, category: CategoryId, featured?: FeaturedListing[]): Promise<PublicListing[]> {

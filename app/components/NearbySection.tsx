@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import type { NearbyCategory, PublicListing } from "@/lib/nearby";
+import type { NearbyCategory, PublicFeatured, PublicListing } from "@/lib/nearby";
 import type { CategoryId } from "@/lib/places";
 
 type NearbySectionProps = {
@@ -13,6 +13,18 @@ type NearbySectionProps = {
   // Stations outside the US and UK show metres and kilometres.
   metric?: boolean;
 };
+
+// Google Maps directions from the station: walking, or driving to other chargers.
+export function directionsUrl(station: { lat: number; lon: number }, destination: string, driving: boolean) {
+  return `https://www.google.com/maps/dir/?api=1&origin=${station.lat},${station.lon}&destination=${destination}&travelmode=${driving ? "driving" : "walking"}`;
+}
+
+// A paid listing's destination: its map location when it's on our nearby list, otherwise the
+// street address the business gave us.
+export function featuredDestination(featured: Pick<PublicFeatured, "lat" | "lon" | "address">) {
+  if (featured.lat != null && featured.lon != null) return `${featured.lat},${featured.lon}`;
+  return featured.address ? encodeURIComponent(featured.address) : null;
+}
 
 function formatDistance(meters: number, metric = false) {
   if (metric) return meters < 1000 ? `${Math.round(meters / 10) * 10} m` : `${(meters / 1000).toFixed(1)} km`;
@@ -26,10 +38,12 @@ export default function NearbySection({ stationSlug, stationLat, stationLon, cat
   const current = categories.find((category) => category.id === selected)!;
   const driving = selected === "chargers";
 
-  const directions = (lat: number, lon: number) =>
-    `https://www.google.com/maps/dir/?api=1&origin=${stationLat},${stationLon}&destination=${lat},${lon}&travelmode=${driving ? "driving" : "walking"}`;
-  const featuredDirections = ({ featured }: Extract<PublicListing, { type: "featured" }>) =>
-    featured.lat != null && featured.lon != null ? directions(featured.lat, featured.lon) : null;
+  const station = { lat: stationLat, lon: stationLon };
+  const directions = (lat: number, lon: number) => directionsUrl(station, `${lat},${lon}`, driving);
+  const featuredDirections = ({ featured }: Extract<PublicListing, { type: "featured" }>) => {
+    const destination = featuredDestination(featured);
+    return destination ? directionsUrl(station, destination, driving) : null;
+  };
 
   return (
     <section className="nearby-card" aria-labelledby="nearby-title">
@@ -85,7 +99,7 @@ export default function NearbySection({ stationSlug, stationLat, stationLon, cat
   );
 }
 
-function FeaturedCard({ listing, directionsHref }: { listing: Extract<PublicListing, { type: "featured" }>; directionsHref: string | null }) {
+export function FeaturedCard({ listing, directionsHref }: { listing: Extract<PublicListing, { type: "featured" }>; directionsHref: string | null }) {
   const { featured } = listing;
   return (
     <article className="featured-card">
@@ -125,11 +139,12 @@ function FeaturedCard({ listing, directionsHref }: { listing: Extract<PublicList
   );
 }
 
-// The #2 and #3 Sponsored spots: smaller than the #1 card, still clearly marked as paid.
-function SponsoredCard({ listing, directionsHref }: { listing: Extract<PublicListing, { type: "featured" }>; directionsHref: string | null }) {
+// The #2 and #3 Sponsored spots: smaller than the #1 card, still clearly marked as paid. The #2
+// spot shares the #1 card's gold background.
+export function SponsoredCard({ listing, directionsHref }: { listing: Extract<PublicListing, { type: "featured" }>; directionsHref: string | null }) {
   const { featured } = listing;
   return (
-    <article className="sponsored-card">
+    <article className={`sponsored-card${featured.slot === 2 ? " is-highlighted" : ""}`}>
       <div className="sponsored-top">
         <span className="sponsored-badge">#{listing.rank} SPONSORED</span>
       </div>
@@ -160,7 +175,7 @@ function SponsoredCard({ listing, directionsHref }: { listing: Extract<PublicLis
   );
 }
 
-function PlaceRow({ listing, driving, metric, href }: { listing: Extract<PublicListing, { type: "place" }>; driving: boolean; metric: boolean; href: string }) {
+export function PlaceRow({ listing, driving, metric, href }: { listing: Extract<PublicListing, { type: "place" }>; driving: boolean; metric: boolean; href: string }) {
   const { place } = listing;
   return (
     <a className="nearby-row" href={href} target="_blank" rel="noreferrer" aria-label={`${place.name}, ${place.kind}, ${formatDistance(place.distanceM, metric)} away. Directions`}>

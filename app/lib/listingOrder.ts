@@ -7,11 +7,14 @@
 import type { FeaturedListing } from "./featured";
 import type { Place } from "./places";
 
-export type Listing =
-  | { type: "featured"; rank: number; featured: FeaturedListing }
+// Generic so the Get featured preview can order a draft listing the same way.
+type Orderable = Pick<FeaturedListing, "status" | "slot" | "businessName">;
+
+export type Listing<F extends Orderable = FeaturedListing> =
+  | { type: "featured"; rank: number; featured: F }
   | { type: "place"; rank: number; place: Place };
 
-export function orderListings(places: Place[], featured: readonly FeaturedListing[]): Listing[] {
+export function orderListings<F extends Orderable>(places: Place[], featured: readonly F[]): Listing<F>[] {
   const live = featured.filter((listing) => listing.status === "live").sort((a, b) => a.slot - b.slot);
   const paidNames = new Set(live.map((listing) => listing.businessName.trim().toLowerCase()));
 
@@ -19,7 +22,7 @@ export function orderListings(places: Place[], featured: readonly FeaturedListin
     .filter((place) => !paidNames.has(place.name.trim().toLowerCase()))
     .sort((a, b) => a.walkMin - b.walkMin || a.distanceM - b.distanceM || a.name.localeCompare(b.name));
 
-  const listings: Listing[] = live.map((listing, index) => ({ type: "featured", rank: index + 1, featured: listing }));
+  const listings: Listing<F>[] = live.map((listing, index) => ({ type: "featured", rank: index + 1, featured: listing }));
   for (const place of free) listings.push({ type: "place", rank: listings.length + 1, place });
   return listings;
 }

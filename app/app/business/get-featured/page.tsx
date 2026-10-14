@@ -5,9 +5,10 @@ import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import type { SponsorSlot } from "@/lib/featured";
 import { liveFeaturedForStation } from "@/lib/featuredStore";
+import { toPublic, type PublicFeatured } from "@/lib/nearby";
 import { CATEGORIES, isCategoryId, type CategoryId } from "@/lib/places";
 import { placesForStation } from "@/lib/placesData";
-import { getStationBySlug, stationHref } from "@/lib/superchargers";
+import { getStationBySlug, isWorldStation, stationHref } from "@/lib/superchargers";
 
 export const metadata: Metadata = {
   title: "Get featured near a Supercharger",
@@ -39,13 +40,16 @@ export default async function GetFeaturedPage({ searchParams }: PageProps<"/busi
   const takenSlots = Object.fromEntries(
     CATEGORIES.map(({ id }) => [id, live.filter((listing) => listing.category === id).map((listing) => listing.slot)]),
   ) as Record<CategoryId, SponsorSlot[]>;
-  const suggestions = Object.fromEntries(CATEGORIES.map(({ id }) => [id, places[id].map((place) => place.name)])) as Record<CategoryId, string[]>;
+  // For the live preview; only public fields, never another business's contact details.
+  const liveSponsors = Object.fromEntries(
+    CATEGORIES.map(({ id }) => [id, live.filter((listing) => listing.category === id).map(toPublic)]),
+  ) as Record<CategoryId, PublicFeatured[]>;
   const href = stationHref(station);
 
   return (
     <div className="app-shell">
       <SiteHeader backHref={href} />
-      <main id="main" className="content-page">
+      <main id="main" className="content-page get-featured-page">
         <h1 className="page-title">Get a sponsored spot at {station.name}</h1>
         <p className="page-sub">
           Drivers spend 20–40 minutes here while they charge. Up to three businesses per category show above every free listing,
@@ -56,8 +60,12 @@ export default async function GetFeaturedPage({ searchParams }: PageProps<"/busi
           stationName={station.name}
           stationHref={href}
           initialCategory={category}
-          suggestions={suggestions}
           takenSlots={takenSlots}
+          places={places}
+          liveSponsors={liveSponsors}
+          stationLat={station.lat}
+          stationLon={station.lon}
+          metric={isWorldStation(station) && station.countryCode !== "GB"}
         />
       </main>
       <SiteFooter />
