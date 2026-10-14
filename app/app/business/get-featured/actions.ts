@@ -1,5 +1,6 @@
 "use server";
 
+import * as Sentry from "@sentry/nextjs";
 import { createFeatured } from "@/lib/featuredStore";
 import { validateFeaturedForm, type FeaturedFormErrors } from "@/lib/featuredValidation";
 import { emailFeaturedRequest } from "@/lib/inboxEmail";
@@ -59,6 +60,14 @@ export async function applyForFeatured(_previous: ApplyState, form: FormData): P
   // Tell us right away. The request is already saved for /admin, so a failed email only gets logged.
   await emailFeaturedRequest(listing, { name: station.name, href: stationHref(station) }).catch((error) => {
     console.error("Get featured email failed", error);
+    Sentry.captureException(error, { tags: { form: "get-featured", step: "email" } });
+  });
+  Sentry.logger.info(Sentry.logger.fmt`Get featured request for ${station.slug}`, {
+    "listing.id": listing.id,
+    "station.id": station.id,
+    "featured.category": listing.category,
+    "featured.slot": listing.slot,
+    "featured.on_nearby_list": Boolean(place),
   });
   return { status: "sent", email: result.values.contactEmail };
 }

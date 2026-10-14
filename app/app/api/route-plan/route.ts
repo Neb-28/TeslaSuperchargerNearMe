@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import { otherChargersFor } from "@/lib/fastChargers";
 import { geocodeZip } from "@/lib/geocode";
 import { drivingRoute, RoutingError, routingConfigured, searchAddress, type AddressMatch } from "@/lib/openRouteService";
@@ -129,6 +130,14 @@ export async function GET(request: Request) {
       arrivePct: plan.arrivePct,
       stuckAtKm: plan.stuckAtKm,
     };
+    // What got planned, never where: from/to can be a home address or the visitor's location.
+    Sentry.logger.info("Route planned", {
+      plug,
+      "range.mi": rangeMi,
+      "route.km": Math.round(route.distanceKm),
+      "route.stops": plan.stops.length,
+      "route.reachable": plan.stuckAtKm === null,
+    });
     // Same trip, same answer: let the CDN reuse it (saves our daily routing quota). Trips that
     // start at the visitor's own location are personal, so those are never cached.
     const personal = coordinates(fromText) || coordinates(toText);
@@ -136,7 +145,15 @@ export async function GET(request: Request) {
       headers: { "Cache-Control": personal ? "private, no-store" : "public, max-age=3600, s-maxage=86400" },
     });
   } catch (error) {
-    if (error instanceof RoutingError) return fail(error.message, error.status);
+    if (error instanceof RoutingError) {
+      // 429 means our daily openrouteservice quota ran out: worth an alert rule on this log.
+      Sentry.logger.warn(Sentry.logger.fmt`Route planner answered ${error.status}: ${error.message}`, {
+        "http.response.status_code": error.status,
+        "ors.quota_exhausted": error.status === 429,
+        plug,
+      });
+      return fail(error.message, error.status);
+    }
     throw error;
   }
 }

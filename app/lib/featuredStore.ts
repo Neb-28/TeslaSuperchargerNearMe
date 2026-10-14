@@ -5,6 +5,7 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import * as Sentry from "@sentry/nextjs";
 import { db } from "./db";
 import { SLOT_LABELS, type FeaturedListing, type FeaturedStatus, type SponsorSlot } from "./featured";
 
@@ -148,6 +149,7 @@ export async function liveFeaturedForStation(stationId: string) {
       return (await db()!<Row[]>`select * from featured_listings where status = 'live' and station_id = ${stationId}`).map(fromRow);
     } catch (error) {
       console.error("Featured listings lookup failed", error);
+      Sentry.captureException(error, { tags: { lookup: "live-featured", "station.id": stationId } });
       return [];
     }
   }

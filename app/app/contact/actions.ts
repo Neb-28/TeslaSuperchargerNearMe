@@ -1,5 +1,6 @@
 "use server";
 
+import * as Sentry from "@sentry/nextjs";
 import { emailContactMessage } from "@/lib/inboxEmail";
 import { validateContactForm, type ContactFormErrors } from "@/lib/contactForm";
 import { createContactMessage } from "@/lib/contactMessages";
@@ -27,17 +28,22 @@ export async function sendContactMessage(_previous: ContactState, form: FormData
     createContactMessage(result.values).then(
       () => true,
       (error) => {
-        console.error("Saving contact message failed", error);
+        // Message and code only: a Postgres error's detail can hold the row, i.e. the visitor's message.
+        console.error("Saving contact message failed", (error as { code?: string }).code, error instanceof Error ? error.message : error);
+        Sentry.captureException(error, { tags: { form: "contact", step: "save" } });
         return false;
       },
     ),
     emailContactMessage(result.values).catch((error) => {
       console.error("Contact email failed", error);
+      Sentry.captureException(error, { tags: { form: "contact", step: "email" } });
       return false;
     }),
   ]);
   if (!saved && !emailed) {
+    Sentry.logger.error("Contact message lost: not saved and not emailed");
     return { status: "error", errors: { form: `We couldn't send your message. Please email us at ${CONTACT_EMAIL}.` }, values };
   }
+  Sentry.logger.info("Contact message received", { saved, emailed });
   return { status: "sent", firstName: result.values.firstName };
 }

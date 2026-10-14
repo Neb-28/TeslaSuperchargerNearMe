@@ -10,7 +10,8 @@ const FROM = "Tesla Supercharger Near Me <no-reply@teslasuperchargernearme.com>"
 
 // Plain text only, so nothing a visitor types can turn into HTML in our inbox. Lines that are
 // null are left out. Returns false when email isn't set up (no RESEND_API_KEY) or Resend refuses it.
-async function sendToInbox({ subject, replyTo, lines }: { subject: string; replyTo: string; lines: (string | null)[] }) {
+// `form` names the email in logs; the subject can't, since it carries the visitor's name.
+async function sendToInbox({ form, subject, replyTo, lines }: { form: string; subject: string; replyTo: string; lines: (string | null)[] }) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return false;
 
@@ -27,7 +28,7 @@ async function sendToInbox({ subject, replyTo, lines }: { subject: string; reply
     signal: AbortSignal.timeout(10_000),
   });
   if (!response.ok) {
-    console.error("Inbox email failed", subject, response.status, await response.text().catch(() => ""));
+    console.error("Inbox email failed", form, response.status, await response.text().catch(() => ""));
     return false;
   }
   return true;
@@ -36,6 +37,7 @@ async function sendToInbox({ subject, replyTo, lines }: { subject: string; reply
 export function emailContactMessage(message: NewContactMessage) {
   const name = [message.firstName, message.lastName].filter(Boolean).join(" ");
   return sendToInbox({
+    form: "contact",
     subject: `Contact form: ${name}`,
     replyTo: message.email,
     lines: [
@@ -52,6 +54,7 @@ export function emailContactMessage(message: NewContactMessage) {
 
 export function emailFeaturedRequest(listing: FeaturedListing, station: { name: string; href: string }) {
   return sendToInbox({
+    form: "get-featured",
     subject: `Get featured request: ${listing.businessName} (${SLOT_LABELS[listing.slot]}) at ${station.name}`,
     replyTo: listing.contactEmail,
     lines: [
