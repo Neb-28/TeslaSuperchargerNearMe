@@ -232,7 +232,8 @@ export default function MapView({ initialQuery, initialPlace, initialNearby, hig
 
         <p className="sheet-note">
           Map data © OpenStreetMap contributors · Not affiliated with Tesla, Inc. ·{" "}
-          <Link href="/privacy" className="footer-link">Privacy</Link>
+          <Link href="/privacy" className="footer-link">Privacy</Link> ·{" "}
+          <Link href="/terms" className="footer-link">Terms</Link>
         </p>
       </section>
 

@@ -11,6 +11,7 @@ export default function SiteFooter({ osmCredit = false, dataCredit = false }: { 
         <Link href="/about" className="footer-link">About</Link>
         <Link href="/contact" className="footer-link">Contact</Link>
         <Link href="/privacy" className="footer-link">Privacy policy</Link>
+        <Link href="/terms" className="footer-link">Terms of Use</Link>
       </nav>
     </footer>
   );

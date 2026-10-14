@@ -19,5 +19,8 @@ export function menuGroups(variant: "mobile" | "desktop"): MenuLink[][] {
   return [accountLinks, variant === "desktop" ? desktopPageLinks : pageLinks, [{ label: "Contact us", href: "/contact" }]];
 }
 
-// Shown as a small text link at the bottom of the menu.
-export const menuSmallLinks: MenuLink[] = [{ label: "Privacy policy", href: "/privacy" }];
+// Shown as small text links at the bottom of the menu.
+export const menuSmallLinks: MenuLink[] = [
+  { label: "Privacy policy", href: "/privacy" },
+  { label: "Terms of Use", href: "/terms" },
+];
