@@ -26,24 +26,10 @@ export default function AboutPage() {
 
         <h2>Where the data comes from</h2>
         <p>
-          US stations and all nearby places come from{" "}
-          <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">
-            OpenStreetMap
-          </a>{" "}
-          contributors. Stations outside the US come from{" "}
-          <a href="https://supercharge.info" target="_blank" rel="noreferrer">
-            supercharge.info
-          </a>
-          . We refresh our listings regularly. Map data © OpenStreetMap contributors.
+          Stations and nearby places come from public and open data sources, and we refresh our listings regularly. The route planner
+          uses official vehicle range figures and, where Superchargers can&apos;t reach, suggests other networks&apos; fast chargers.
         </p>
-        <p>
-          The route planner uses official car ranges from the US EPA (fueleconomy.gov) and, where Superchargers can&apos;t reach, other
-          networks&apos; fast chargers from the US Department of Energy&apos;s Alternative Fuels Data Center. Driving routes come from{" "}
-          <a href="https://openrouteservice.org/" target="_blank" rel="noreferrer">
-            openrouteservice
-          </a>
-          .
-        </p>
+        <p>Map data © OpenStreetMap contributors.</p>
 
         <h2>An honest note on availability</h2>
         <p>

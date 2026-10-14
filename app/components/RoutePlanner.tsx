@@ -283,7 +283,7 @@ export default function RoutePlanner({ configured }: { configured: boolean }) {
           <VehiclePicker value={vehicle} onChange={setVehicle} />
           <p className="login-note">
             We plan as if you leave with {START_PCT}% and stop to charge when you&apos;re down to about {RESERVE_PCT}–{STOP_AT_PCT}%. Ranges
-            come from the EPA (fueleconomy.gov).
+            are official estimates for each model.
           </p>
 
           {error ? <p className="form-error" role="alert">{error}</p> : null}
