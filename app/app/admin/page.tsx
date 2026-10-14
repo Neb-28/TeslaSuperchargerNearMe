@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { adminConfigured, isAdmin } from "@/lib/adminAuth";
+import { listContactMessages } from "@/lib/contactMessages";
 import { SLOT_LABELS, SPONSOR_SLOTS, type FeaturedListing, type FeaturedStatus } from "@/lib/featured";
 import { listFeatured } from "@/lib/featuredStore";
 import { CATEGORIES, categoryLabel } from "@/lib/places";
 import { getStationById, stationHref } from "@/lib/superchargers";
-import { addListingAction, deleteAction, loginAction, logoutAction, setSlotAction, setStatusAction } from "./actions";
+import { addListingAction, deleteAction, deleteMessageAction, loginAction, logoutAction, setSlotAction, setStatusAction } from "./actions";
 
 export const metadata: Metadata = {
   title: "Admin — Featured listings",
@@ -50,7 +51,7 @@ export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
     );
   }
 
-  const listings = await listFeatured();
+  const [listings, messages] = await Promise.all([listFeatured(), listContactMessages()]);
 
   return (
     <AdminShell>
@@ -74,6 +75,35 @@ export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
           </section>
         );
       })}
+
+      <section className="admin-group" aria-labelledby="messages-title">
+        <h2 id="messages-title" className="section-title">
+          Contact messages <span className="admin-count">{messages.length}</span>
+        </h2>
+        {messages.length === 0 ? (
+          <p className="page-sub">No messages yet.</p>
+        ) : (
+          messages.map((message) => (
+            <article key={message.id} className="admin-card">
+              <div className="admin-card-head">
+                <strong>{[message.firstName, message.lastName].filter(Boolean).join(" ")}</strong>
+                <span className="admin-source">{message.createdAt.slice(0, 10)}</span>
+              </div>
+              <p className="admin-line">
+                <a href={`mailto:${message.email}`}>{message.email}</a>
+                {message.phone ? ` · ${message.phone}` : ""}
+              </p>
+              <p className="admin-line admin-message">{message.message}</p>
+              <div className="admin-actions">
+                <form action={deleteMessageAction}>
+                  <input type="hidden" name="id" value={message.id} />
+                  <button type="submit" className="location-button secondary">Delete</button>
+                </form>
+              </div>
+            </article>
+          ))
+        )}
+      </section>
 
       <section className="admin-group" aria-labelledby="add-title">
         <h2 id="add-title" className="section-title">Add a featured listing</h2>

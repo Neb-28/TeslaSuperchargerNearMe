@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { isAdmin, logIn, logOut } from "@/lib/adminAuth";
+import { deleteContactMessage } from "@/lib/contactMessages";
 import { isSponsorSlot, SLOT_LABELS, type FeaturedStatus } from "@/lib/featured";
 import { createFeatured, deleteFeatured, setFeaturedStatus, SlotTakenError, updateFeatured } from "@/lib/featuredStore";
 import { validateFeaturedForm } from "@/lib/featuredValidation";
@@ -68,6 +69,12 @@ export async function deleteAction(form: FormData) {
   await deleteFeatured(String(form.get("id")));
   revalidatePath("/supercharger/[state]/[city]/[slug]", "page");
   done("Listing deleted.");
+}
+
+export async function deleteMessageAction(form: FormData) {
+  await requireAdmin();
+  await deleteContactMessage(String(form.get("id")));
+  done("Message deleted.");
 }
 
 // "We can also add it on our end": admin-created listings go live straight away.

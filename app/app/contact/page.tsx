@@ -1,35 +1,59 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import ContactForm from "@/components/ContactForm";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import { CONTACT_EMAIL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Contact TeslaSuperchargerNearMe: data corrections, business inquiries and privacy questions.",
+  description: "Contact TeslaSuperchargerNearMe: questions, feedback, business and media inquiries.",
   alternates: { canonical: "/contact" },
 };
+
+const TOPICS = [
+  {
+    title: "Customer Support",
+    body: "Questions about a station, the map or your account? Send us a message and we'll get back to you within a few business days.",
+  },
+  {
+    title: "Feedback and Suggestions",
+    body: "We value your feedback and are continuously working to improve the site. Your input is crucial in shaping what we build next.",
+  },
+  {
+    title: "Media Inquiries",
+    body: `For media-related questions or press inquiries, please contact us at ${CONTACT_EMAIL}.`,
+  },
+];
 
 export default function ContactPage() {
   return (
     <div className="app-shell">
       <SiteHeader backHref="/" />
-      <main id="main" className="content-page legal-page">
-        <h1 className="page-title">Contact</h1>
+      <main id="main" className="contact-page">
+        <section className="contact-intro" aria-labelledby="contact-title">
+          <h1 id="contact-title" className="contact-title">Contact Us</h1>
+          <p className="contact-lead">Email, or complete the form to learn how TeslaSuperchargerNearMe can help you or your business.</p>
+          <p className="contact-detail">
+            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+          </p>
+          <p className="contact-detail">
+            <Link href="/business/get-featured" className="contact-link">Advertise your business</Link>
+          </p>
+        </section>
 
-        <p>
-          For data corrections, business inquiries or privacy questions, email us at{" "}
-          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. We read every message and aim to reply within a few business days.
-        </p>
+        <div className="contact-form-col">
+          <ContactForm />
+        </div>
 
-        <h2>Station data corrections</h2>
-        <p>
-          Spot a station that moved, closed or has the wrong details? Tell us the station name and what&apos;s wrong and we&apos;ll fix
-          it. Corrections to the underlying map are best made directly in{" "}
-          <a href="https://www.openstreetmap.org/" target="_blank" rel="noreferrer">
-            OpenStreetMap
-          </a>
-          , which improves every map that uses the data, including ours.
-        </p>
+        <ul className="contact-topics">
+          {TOPICS.map((topic) => (
+            <li key={topic.title}>
+              <h2>{topic.title}</h2>
+              <p>{topic.body}</p>
+            </li>
+          ))}
+        </ul>
       </main>
       <SiteFooter />
     </div>
