@@ -3344,12 +3344,11 @@ a.route-stop-name {
   gap: 14px;
 }
 
-/* As tall as the screen allows below the sticky header and the caption, between 560 and 860 px.
+/* Phones: as tall as the whole list, since the page scrolls anyway (see the desktop rule below).
    A glossy frame with a soft brand-green glow (the `accent` and `mint` tokens) and a lit bezel edge. */
 .ad-preview-phone {
   position: relative;
   width: min(360px, 100%);
-  height: clamp(560px, calc(100vh - 140px), 860px);
   padding: 10px;
   border-radius: 48px;
   background: linear-gradient(150deg, var(--ink-raised) 0%, var(--ink) 45%, var(--ink) 70%, var(--ink-raised) 100%);
@@ -3467,6 +3466,12 @@ a.route-stop-name {
   .featured-builder-preview {
     position: sticky;
     top: 88px;
+  }
+
+  /* Beside the form and always in view: as tall as the screen allows below the sticky header and
+     the caption, between 560 and 860 px. The screen scrolls itself to keep their listing visible. */
+  .ad-preview-phone {
+    height: clamp(560px, calc(100vh - 140px), 860px);
   }
 
   .ad-preview-phone::after {

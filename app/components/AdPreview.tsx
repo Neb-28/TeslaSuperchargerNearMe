@@ -33,8 +33,9 @@ export default function AdPreview({ draft, category, slot, stationName, stationL
   const yoursRef = useRef<HTMLLIElement>(null);
   const barRef = useRef<HTMLDivElement>(null);
 
-  // On the phone, scroll the screen just enough to show all of their listing below the pinned
-  // header (its top stays in view if it's taller than the screen), so the ad is never cut off.
+  // Desktop's phone has a fixed height: scroll its screen just enough to show all of their listing
+  // below the pinned header (its top stays in view if it's taller than the screen). On phones the
+  // preview is as tall as its content, so this leaves it at the top.
   useEffect(() => {
     const screen = screenRef.current;
     const card = yoursRef.current;
