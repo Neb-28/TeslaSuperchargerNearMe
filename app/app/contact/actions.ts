@@ -1,6 +1,6 @@
 "use server";
 
-import { emailContactMessage } from "@/lib/contactEmail";
+import { emailContactMessage } from "@/lib/inboxEmail";
 import { validateContactForm, type ContactFormErrors } from "@/lib/contactForm";
 import { createContactMessage } from "@/lib/contactMessages";
 import { CONTACT_EMAIL } from "@/lib/site";

@@ -2,8 +2,9 @@
 
 import { createFeatured } from "@/lib/featuredStore";
 import { validateFeaturedForm, type FeaturedFormErrors } from "@/lib/featuredValidation";
+import { emailFeaturedRequest } from "@/lib/inboxEmail";
 import { placesForStation } from "@/lib/placesData";
-import { getStationBySlug } from "@/lib/superchargers";
+import { getStationBySlug, stationHref } from "@/lib/superchargers";
 
 export type ApplyState =
   | { status: "idle" }
@@ -37,7 +38,7 @@ export async function applyForFeatured(_previous: ApplyState, form: FormData): P
   if (!result.ok) return { status: "error", errors: result.errors, values: submitted(form) };
 
   const place = match(result.values.businessName);
-  await createFeatured({
+  const listing = await createFeatured({
     stationId: station.id,
     category: result.values.category,
     slot: result.values.slot,
@@ -54,6 +55,10 @@ export async function applyForFeatured(_previous: ApplyState, form: FormData): P
     contactEmail: result.values.contactEmail,
     phone: result.values.phone,
     source: "business",
+  });
+  // Tell us right away. The request is already saved for /admin, so a failed email only gets logged.
+  await emailFeaturedRequest(listing, { name: station.name, href: stationHref(station) }).catch((error) => {
+    console.error("Get featured email failed", error);
   });
   return { status: "sent", email: result.values.contactEmail };
 }
