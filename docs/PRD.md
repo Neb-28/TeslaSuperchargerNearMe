@@ -75,7 +75,7 @@ All screens are designed at 390 px wide (phone first) and must work from 320 px 
 - Brand mark 76 × 76 px, radius 22, mint background, bolt icon 40 px.
 - H1: "Find a Supercharger near you", display font 30 px, bold, letter-spacing −0.6 px.
 - Subline: "30 minutes to charge. A whole neighborhood to explore. Your charging stop just got interesting." 15 px, `muted`.
-- Search field: full width, 52 px tall, pill radius, 1.5 px `border`, search icon inside on the left, placeholder "Search city, place or address". Must be a real `<input type="search">` with a label.
+- Search field: full width, 52 px tall, pill radius, 1.5 px `divider` outline with the floating shadow, search icon inside on the left, placeholder "Search city, place or address". Must be a real `<input type="search">` with a label.
 - Button grid, 2 columns, 10 px gap, each button 52 px tall, radius 14:
     - **Near me** (primary): `accent` fill, white text, navigation-arrow icon. Requests location, then opens Map.
     - **Map**: white, soft shadow, map icon in `accent`. Opens Map at last known or default location.
@@ -132,8 +132,8 @@ One dark-green ink, one mint highlight, one gold for paid placements; define the
 | `ground` | #F3F5F2 | Page background, stat tiles |
 | `surface` | #FFFFFF | Cards, sheets, inputs |
 | `muted` | #56635D | Secondary text, labels |
-| `border` | #CFD8D3 | Input and chip borders |
-| `divider` | #E6EBE8 | List row dividers |
+| `border` | #CFD8D3 | Form field borders |
+| `divider` | #E6EBE8 | List row dividers; chip, search field and secondary-button outlines |
 | `accent` | #0B6E5B | Primary buttons, pins, links, stall numbers |
 | `accent-hover` | #08513F | Hover and pressed states |
 | `accent-soft` | #E2F0EB | Badges, icon tiles |
@@ -161,13 +161,14 @@ Load both from Google Fonts with `display=swap`. Fall back to `system-ui, sans-s
 
 - Spacing scale: 4, 6, 8, 10, 12, 14, 16, 18, 20, 22 px. Page padding 16 px (Home 20 px).
 - Radius: cards 20, featured card 20, sheets 24 (top), buttons 12–14, chips and pills 999, icon tiles 12–14, brand mark 10 (header) and 22 (home).
-- Shadows: cards `0 1px 2px rgba(20,33,28,0.06)`; floating controls `0 2px 8px rgba(20,33,28,0.15)`.
+- Shadows: a 1 px hairline ring plus a soft, long drop, all in `ink` at low opacity. Cards `0 0 0 1px rgba(20,33,28,0.04), 0 1px 2px rgba(20,33,28,0.04), 0 12px 32px -16px rgba(20,33,28,0.14)`; floating controls `0 0 0 1px rgba(20,33,28,0.05), 0 4px 12px -2px rgba(20,33,28,0.12), 0 16px 32px -12px rgba(20,33,28,0.18)`.
+- Finish: primary buttons get a faint white sheen on top and a soft `accent` glow below; the brand mark gets a soft highlight. Map tiles keep their full color. Chip, input and secondary-button outlines use `divider`. Press feedback is a 0.98 scale, off under reduced motion.
 - Touch targets at least 44 × 44 px everywhere.
 
 ### Components
 
 - **Button**: primary (`accent`), secondary (white + shadow), gold (featured), mint (on dark). Height 44–52 px.
-- **Chip**: 44 px tall pill; selected = `ink` fill, white text; unselected = white with `border`. Use `aria-pressed`.
+- **Chip**: 44 px tall pill; selected = `ink` fill, white text; unselected = white with `divider` outline. Use `aria-pressed`.
 - **Segmented control**: `ground` track with 4 px padding; selected segment white with shadow.
 - **Stat tile**, **list row**, **featured card**, **bottom sheet**, **badge** as described in Screen specs.
 - **Icons**: simple stroke icons (Lucide is a good match): bolt, search, map, menu, pin, navigation arrow, star, tag, check, chevron, home, shield. No emoji in the UI.

@@ -19,8 +19,13 @@
   --location: #2f6fe4;
   --other-network: #6b4fbb;
   --other-network-soft: #efeafb;
-  --shadow-card: 0 1px 2px rgba(20, 33, 28, 0.06);
-  --shadow-float: 0 2px 8px rgba(20, 33, 28, 0.15);
+  --shadow-card: 0 0 0 1px rgba(20, 33, 28, 0.04), 0 1px 2px rgba(20, 33, 28, 0.04),
+    0 12px 32px -16px rgba(20, 33, 28, 0.14);
+  --shadow-float: 0 0 0 1px rgba(20, 33, 28, 0.05), 0 4px 12px -2px rgba(20, 33, 28, 0.12),
+    0 16px 32px -12px rgba(20, 33, 28, 0.18);
+  --shadow-primary: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 1px 2px rgba(20, 33, 28, 0.2),
+    0 8px 20px -8px rgba(11, 110, 91, 0.6);
+  --sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0) 60%);
   --font-display: "Bricolage Grotesque", "Segoe UI", sans-serif;
   --font-body: "Figtree", "Segoe UI", sans-serif;
 }
@@ -31,6 +36,23 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+h1,
+h2 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
 }
 
 body {
@@ -117,7 +139,8 @@ img {
   position: sticky;
   top: 0;
   z-index: 1100;
-  background: var(--ink);
+  background: linear-gradient(180deg, var(--ink-raised) -120%, var(--ink) 100%);
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.06), 0 1px 0 rgba(20, 33, 28, 0.2);
   color: var(--surface);
 }
 
@@ -154,7 +177,9 @@ img {
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: var(--mint);
+  background: radial-gradient(120% 120% at 28% 18%, rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0) 52%),
+    var(--mint);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -2px 0 rgba(11, 110, 91, 0.18);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -176,6 +201,7 @@ img {
   border: 0;
   border-radius: 12px;
   background: var(--ink-raised);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
   color: var(--surface);
   display: inline-flex;
   align-items: center;
@@ -453,7 +479,10 @@ img {
   width: 76px;
   height: 76px;
   border-radius: 22px;
-  background: var(--mint);
+  background: radial-gradient(120% 120% at 28% 18%, rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0) 52%),
+    var(--mint);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -3px 0 rgba(11, 110, 91, 0.2),
+    0 18px 40px -14px rgba(61, 220, 151, 0.75);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -464,7 +493,7 @@ img {
   font-family: var(--font-display);
   font-size: clamp(30px, 4vw, 34px);
   line-height: 1.08;
-  letter-spacing: -0.6px;
+  letter-spacing: -0.035em;
   font-weight: 700;
 }
 
@@ -494,10 +523,11 @@ img {
 .search-shell input {
   width: 100%;
   height: 52px;
-  border: 1.5px solid var(--border);
+  border: 1.5px solid var(--divider);
   border-radius: 999px;
   padding: 0 18px 0 46px;
   background: var(--surface);
+  box-shadow: var(--shadow-float);
   color: var(--ink);
   font-size: 16px;
   outline: none;
@@ -538,13 +568,13 @@ img {
 
 .action-button.primary,
 .action-button.primary:hover {
-  background: var(--accent);
+  background: var(--sheen), var(--accent);
   color: var(--surface);
-  box-shadow: 0 1px 3px rgba(20, 33, 28, 0.08);
+  box-shadow: var(--shadow-primary);
 }
 
 .action-button.primary:hover {
-  background: var(--accent-hover);
+  background: var(--sheen), var(--accent-hover);
 }
 
 .action-button.secondary,
@@ -556,6 +586,23 @@ img {
 
 .action-button.secondary:hover {
   box-shadow: var(--shadow-float);
+}
+
+/* A small press-in on the main buttons. */
+@media (prefers-reduced-motion: no-preference) {
+  .action-button,
+  .primary-cta,
+  .station-action,
+  .location-button {
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+  }
+
+  .action-button:active,
+  .primary-cta:active,
+  .station-action:active,
+  .location-button:active {
+    transform: scale(0.98);
+  }
 }
 
 .action-button.wide {
@@ -1133,12 +1180,17 @@ img {
   gap: 6px;
   min-height: 44px;
   padding: 0 14px;
-  border: 1.5px solid var(--border);
+  border: 1.5px solid var(--divider);
   border-radius: 999px;
   background: var(--surface);
+  box-shadow: 0 1px 2px rgba(20, 33, 28, 0.04);
   color: var(--ink);
   font-size: 14px;
   font-weight: 700;
+}
+
+.link-chip:hover {
+  border-color: var(--accent);
 }
 
 .link-chip:hover {
@@ -1228,7 +1280,9 @@ img {
 }
 
 .leaflet-control-attribution {
-  background: rgba(255, 255, 255, 0.8) !important;
+  background: rgba(255, 255, 255, 0.78) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: 10px 0 0 0;
   font-size: 10px;
   padding: 4px 8px !important;
@@ -1379,6 +1433,7 @@ img {
   background: var(--ink);
   border-color: var(--ink);
   color: var(--surface);
+  box-shadow: 0 6px 14px -6px rgba(20, 33, 28, 0.5);
 }
 
 .center-button {
@@ -1407,7 +1462,7 @@ img {
   overflow-y: auto;
   border-radius: 24px 24px 0 0;
   background: var(--surface);
-  box-shadow: 0 -4px 16px rgba(20, 33, 28, 0.12);
+  box-shadow: 0 -1px 0 rgba(20, 33, 28, 0.05), 0 -12px 32px -8px rgba(20, 33, 28, 0.18);
   padding: 10px 16px 14px;
   display: flex;
   flex-direction: column;
@@ -1483,6 +1538,7 @@ a.station-row:hover .station-name {
   height: 40px;
   border-radius: 12px;
   background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px rgba(11, 110, 91, 0.08);
   color: var(--accent);
   display: flex;
   align-items: center;
@@ -1597,17 +1653,19 @@ a.station-row:hover .station-name {
 
 .location-button.primary {
   border: 0;
-  background: var(--accent);
+  background: var(--sheen), var(--accent);
   color: var(--surface);
+  box-shadow: var(--shadow-primary);
 }
 
 .location-button.primary:hover {
-  background: var(--accent-hover);
+  background: var(--sheen), var(--accent-hover);
 }
 
 .location-button.secondary {
-  border: 1.5px solid var(--border);
+  border: 1.5px solid var(--divider);
   background: var(--surface);
+  box-shadow: 0 1px 2px rgba(20, 33, 28, 0.05);
   color: var(--ink);
 }
 
@@ -1824,7 +1882,8 @@ a.station-row:hover .station-name {
   gap: 8px;
   height: 48px;
   border-radius: 12px;
-  background: var(--accent);
+  background: var(--sheen), var(--accent);
+  box-shadow: var(--shadow-primary);
   color: var(--surface);
   font-weight: 700;
   font-size: 15px;
@@ -1841,7 +1900,7 @@ a.station-row:hover .station-name {
   font-family: var(--font-display);
   font-size: 22px;
   font-weight: 700;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.02em;
 }
 
 .section-sub {
@@ -1860,8 +1919,9 @@ a.station-row:hover .station-name {
 .category-chip {
   height: 44px;
   border-radius: 999px;
-  border: 1.5px solid var(--border);
+  border: 1.5px solid var(--divider);
   background: var(--surface);
+  box-shadow: 0 1px 2px rgba(20, 33, 28, 0.04);
   color: var(--ink);
   padding: 0 16px;
   font-weight: 700;
@@ -1873,6 +1933,7 @@ a.station-row:hover .station-name {
   background: var(--ink);
   border-color: var(--ink);
   color: var(--surface);
+  box-shadow: 0 6px 14px -6px rgba(20, 33, 28, 0.5);
 }
 
 .category-bar {
@@ -1897,7 +1958,9 @@ a.station-row:hover .station-name {
 }
 
 .featured-card {
-  background: var(--gold-bg);
+  background: radial-gradient(120% 80% at 0% 0%, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 60%),
+    var(--gold-bg);
+  box-shadow: 0 12px 28px -14px rgba(122, 78, 0, 0.35);
   border: 1.5px solid var(--gold-border);
   border-radius: 20px;
   padding: 16px;
@@ -2012,6 +2075,7 @@ a.station-row:hover .station-name {
 /* #2 and #3 Sponsored: a smaller paid card under the #1 Featured one. */
 .sponsored-card {
   background: var(--surface);
+  box-shadow: 0 10px 24px -14px rgba(122, 78, 0, 0.3);
   border: 1.5px solid var(--gold-border);
   border-radius: 16px;
   padding: 14px;
@@ -2213,6 +2277,7 @@ a.station-row:hover .station-name {
   justify-content: center;
   font-weight: 700;
   font-size: 13px;
+  font-variant-numeric: tabular-nums;
   flex-shrink: 0;
 }
 
@@ -2367,7 +2432,7 @@ a.station-row:hover .station-name {
   font-family: var(--font-display);
   font-size: 26px;
   line-height: 1.12;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.035em;
   font-weight: 700;
 }
 
@@ -2404,17 +2469,19 @@ a.station-row:hover .station-name {
 .station-action.primary,
 .station-action.primary:hover {
   border: 0;
-  background: var(--accent);
+  background: var(--sheen), var(--accent);
   color: var(--surface);
+  box-shadow: var(--shadow-primary);
 }
 
 .station-action.primary:hover {
-  background: var(--accent-hover);
+  background: var(--sheen), var(--accent-hover);
 }
 
 .station-action.secondary {
-  border: 1.5px solid var(--border);
+  border: 1.5px solid var(--divider);
   background: var(--surface);
+  box-shadow: 0 1px 2px rgba(20, 33, 28, 0.05);
   color: var(--accent);
 }
 
@@ -3803,9 +3870,10 @@ a.route-stop-name {
   gap: 6px;
   min-height: 44px;
   padding: 0 12px;
-  border: 1.5px solid var(--border);
+  border: 1.5px solid var(--divider);
   border-radius: 999px;
   background: var(--surface);
+  box-shadow: 0 1px 2px rgba(20, 33, 28, 0.04);
   color: var(--ink);
   font: inherit;
   font-size: 15px;
@@ -4070,7 +4138,8 @@ a.route-stop-name {
   justify-content: center;
   gap: 4px;
   padding: 12px;
-  border: 1.5px dashed var(--border);
+  border: 1.5px solid var(--divider);
+  background: var(--ground);
   color: var(--muted);
   font-size: 14px;
   font-weight: 600;
