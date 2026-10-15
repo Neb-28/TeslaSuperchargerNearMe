@@ -13,8 +13,8 @@ import { stateName, US_STATES } from "@/lib/usStates";
 
 type StatePageProps = PageProps<"/supercharger/[state]">;
 
-function plural(count: number, word: string) {
-  return `${count.toLocaleString("en-US")} ${word}${count === 1 ? "" : "s"}`;
+function plural(count: number, word: string, many = `${word}s`) {
+  return `${count.toLocaleString("en-US")} ${count === 1 ? word : many}`;
 }
 
 function summary(state: string) {
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: StatePageProps): Promise<Meta
   if (!data) return {};
   return {
     title: `Tesla Superchargers in ${countryPhrase(areaName(state, stateName))} (${plural(data.count, "station")})`,
-    description: `All ${plural(data.count, "Tesla Supercharger station")} in ${countryPhrase(areaName(state, stateName))} across ${plural(data.cities.length, "city")}, with stall counts, charging speed, directions and what's within walking distance.`,
+    description: `All ${plural(data.count, "Tesla Supercharger station")} in ${countryPhrase(areaName(state, stateName))} across ${plural(data.cities.length, "city", "cities")}, with stall counts, charging speed, directions and what's within walking distance.`,
     alternates: { canonical: stateHref(state) },
   };
 }
@@ -69,7 +69,7 @@ export default async function StatePage({ params }: StatePageProps) {
         <h1 className="page-title">Tesla Superchargers in {inName}</h1>
         <p className="page-sub">
           {inName.charAt(0).toUpperCase() + inName.slice(1)} has {plural(data.count, "Supercharger station")}
-          {data.stalls ? ` and ${plural(data.stalls, "charging stall")}` : ""} across {plural(data.cities.length, "city")} and town
+          {data.stalls ? ` and ${plural(data.stalls, "charging stall")}` : ""} across {plural(data.cities.length, "city", "cities")} and town
           {data.cities.length === 1 ? "" : "s"}. Pick a city to see each station&apos;s address, charging speed and what&apos;s within
           walking distance.
         </p>
