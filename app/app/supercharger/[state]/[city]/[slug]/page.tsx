@@ -89,6 +89,9 @@ export default async function StationPage({ params }: StationPageProps) {
           <Link className="station-map-link" href={`/map?station=${station.slug}`}>
             View larger map
           </Link>
+          <p className="station-map-credit">
+            &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors
+          </p>
         </section>
 
         <main id="main" className="station-detail-body">
