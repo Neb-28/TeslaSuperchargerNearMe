@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-  <!-- The site's brand mark: mint square with the dark lightning bolt (same shape as the header). -->
-  <rect width="64" height="64" rx="16" fill="#3DDC97"/>
-  <svg x="12.8" y="12.8" width="38.4" height="38.4" viewBox="0 0 24 24">
-    <path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z" fill="none" stroke="#14211C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Favicon: a full mint circle with a solid dark bolt, so it reads at 16 px and fills Google's round frame. -->
+  <circle cx="32" cy="32" r="32" fill="#3DDC97"/>
+  <svg x="14" y="12" width="36" height="40" viewBox="3 1.5 17 21">
+    <path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z" fill="#14211C" stroke="#14211C" stroke-width="1.2" stroke-linejoin="round"/>
   </svg>
 </svg>
