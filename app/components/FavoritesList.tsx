@@ -27,7 +27,7 @@ export default function FavoritesList() {
               </svg>
             </span>
             <span className="station-meta">
-              <span className="station-name">{station.name}</span>
+              <span className="station-name">{station.name}</span>{" "}
               <span className="station-sub">{station.address}</span>
             </span>
           </Link>

@@ -181,7 +181,7 @@ export function PlaceRow({ listing, driving, metric, href }: { listing: Extract<
     <a className="nearby-row" href={href} target="_blank" rel="noreferrer" aria-label={`${place.name}, ${place.kind}, ${formatDistance(place.distanceM, metric)} away. Directions`}>
       <span className="rank-badge" aria-hidden="true">#{listing.rank}</span>
       <span className="nearby-row-copy">
-        <span className="nearby-row-name">{place.name}</span>
+        <span className="nearby-row-name">{place.name}</span>{" "}
         <span className="nearby-row-meta">
           {place.kind}
           {driving ? "" : ` · ${place.walkMin} min walk`}
