@@ -39,6 +39,7 @@ The MVP ships three screens (Home, Map, Station page) plus a simple business sig
 | Optional accounts (email code sign-in): favorites synced across devices, business dashboard | P2 | MVP+ |
 | City pages for SEO ("Superchargers in [city]") | P1 | Phase 2 |
 | Crowd reports (working, busy, broken) | P2 | Phase 2 |
+| Station photos from drivers (upload, automatic face and plate blurring, admin approval) | P1 | Phase 2 |
 | Live free-stall counts via data partner | P2 | Phase 3 |
 | Route planner: Superchargers along a trip, by vehicle and range (Home button replaces Map) | P1 | MVP+ |
 
@@ -106,7 +107,8 @@ Sections from top to bottom, 16 px page padding, 14 px between cards, cards whit
     - Segmented control: **Home charger** | **EV insurance**. Switching changes icon, title, body, three check-mark points, button text and partner line.
     - ZIP code input (5 digits, numeric keypad) and a primary button: "Get install quotes" or "Compare rates".
     - Small print: partner names, "We may be paid when you request quotes.", and the consent text placeholder.
-3. **While you charge**
+3. **Photos** (see Station photos below), directly above While you charge: an "Add photo" tile, then approved driver photos in a strip that scrolls sideways, newest first. No photos yet: "No photos of this station yet. Charging here? Add the first one."
+4. **While you charge**
     - Heading "While you charge" and subline "Everything here is a short walk from the stalls."
     - Charge-time chips: Any, 15 min, 30 min, 45+ min. Filter hides free listings whose typical visit is longer than the chosen time.
     - Category chips (scroll sideways on small screens): **Food & Drink**, **Coffee**, **Grocery**, **Bars & Wine**. Selected chip = `ink` fill, white text.
@@ -114,8 +116,8 @@ Sections from top to bottom, 16 px page padding, 14 px between cards, cards whit
     - **#1 Featured card** (always first, never filtered out): gold background, gold border, "#1 FEATURED" badge and "Sponsored" label, photo, name, type, walk time, hours, offer line with tag icon, and two buttons (offer action + Directions).
     - **Free listings** numbered from #2, sorted by walking time: rank circle, name, type, "N min walk", "~N min visit", hours in `accent`, and a Directions icon button.
     - Empty state: "Nothing else fits that time. Try a longer charge."
-4. **Get featured banner**: dark card, "Own a business near this station?", one line of pitch, mint button "Get featured · [PRICE]/mo" that opens the business sign-up.
-5. **Footer**: "Not affiliated with Tesla, Inc." and "Sponsored listings are clearly labeled."
+5. **Get featured banner**: dark card, "Own a business near this station?", one line of pitch, mint button "Get featured · [PRICE]/mo" that opens the business sign-up.
+6. **Footer**: "Not affiliated with Tesla, Inc." and "Sponsored listings are clearly labeled."
 
 ## Design system
 
@@ -243,6 +245,7 @@ The browser loads map tiles straight from the tile provider; every other request
 | `featured_listings` | id, business_id, station_id, category, offer_text, cta_label, cta_url, photo_url, status (pending, live, paused), stripe_subscription_id, starts_at, ends_at |
 | `leads` | id, type (install, insurance), zip, name, phone, email, station_id, consent_text, consent_at, page_url, delivered_to, status |
 | `events` | id, type (view, click), listing_id or lead_type, station_id, created_at |
+| `station_photos` | id, station_id, photo_path, thumb_path, width, height, caption (max 120 characters), email, ip_hash, blur_status (blurred, none_found, skipped, failed), blurred_areas, status (pending, approved), created_at, reviewed_at. Rejected photos are deleted |
 | `favorites` | user_id (Supabase Auth user), station_id, name, address, href, created_at. Row Level Security: each account reads and writes only its own rows |
 
 ### Import job
@@ -262,6 +265,7 @@ The browser loads map tiles straight from the tile provider; every other request
 - `POST /api/featured/checkout` — starts a Stripe Checkout session for a listing.
 - `POST /api/stripe/webhook` — activates or pauses listings on payment events.
 - `POST /api/events` — records listing and lead-card views and clicks.
+- `POST /api/stations/[id]/photos` — upload of one photo with an optional caption and the uploader's email; saved as pending.
 
 ### Route planner
 
@@ -270,6 +274,22 @@ The browser loads map tiles straight from the tile provider; every other request
 - Stops: stations within ~5 mi of the route. Stop when the battery is down to 10–15% (a 350-mile car first stops after ~227–245 miles), at the fastest station in that band; never arrive below 10%. Charge to 80%; the last stop charges only what the destination needs (+5%), up to 90% if that saves a stop. Before a gap in the network, charge enough to cross it (up to 100%). Superchargers come first: another network's fast charger (US DOE Alternative Fuels Data Center, `data/fast-chargers.json`, refreshed with `node scripts/import-fast-chargers.mjs`) is used only where Superchargers can't bridge a gap, and is shown in `other-network` purple with its network name and a Directions link. Plugs: NACS cars use Superchargers and NACS plugs elsewhere (CCS plugs too if they carry a CCS adapter); CCS cars with a NACS adapter use everything; CCS-only cars use Magic Dock Superchargers and CCS chargers.
 - Each stop shows arrival charge, rough charge time and what's nearby, linking to the station page. Trips typed in are cached by the CDN; trips from the visitor's location are never cached.
 - Attribution: "© openrouteservice.org by HeiGIT" with the OpenStreetMap credit.
+
+### Station photos
+
+Goal: give every station page pictures no other site has (where the stalls are, what's around them), so each page stands out for its own area. Photos come only from drivers on our site, never copied from Google, Yelp or Tesla.
+
+- **Who can upload:** anyone; no account needed. The uploader gives an email address (never shown; for questions about the photo) and confirms: "I took this photo, and TeslaSuperchargerNearMe.com may show it on this site."
+- **Upload page:** `/supercharger/[state]/[city]/[slug]/add-photo` (not indexed), opened from the "Add photo" tile. Two buttons: **Take a photo** (opens the camera) and **Choose from your photos**. Optional description, e.g. "Stalls are on the 2nd floor of the parking garage, near the mall entrance." One photo at a time; files up to 20 MB. The phone shrinks the photo to 2048 px as a JPEG before sending (also turns iPhone HEIC into JPEG); the server takes up to 4 MB.
+- **Processing:** on the server, turn upright, resize to at most 1600 px plus a 480 px thumbnail, save as WebP. Re-encoding removes all metadata (GPS location, time, camera). Originals are not kept.
+- **Automatic blurring:** Google Cloud Vision (`GOOGLE_VISION_API_KEY`) finds faces, objects labeled as license plates, and text on cars (plates Vision doesn't label); those areas are blurred before saving. Without the key, or if Vision fails, the photo is saved unblurred and `/admin` flags it for a closer look.
+- **Storage:** Supabase Storage, public bucket `station-photos`, files with random names cached for a year. Only `lib/photoStorage.ts` touches it, so moving to Cloudflare R2 later is a one-file change.
+- **Review:** every photo waits in `/admin` ("Station photos to review") until approved. Approve publishes it; Reject deletes the record and files. Approved photos can be deleted. We get an email for each new photo.
+- **Limits:** 5 uploads per email address and 10 per network address per day (the address is stored only as a keyed hash).
+- **Display:** up to 24 approved photos, newest first. Each thumbnail links to the full photo (works without JavaScript); with JavaScript a tap opens a full-screen viewer: swipe, Previous/Next buttons or arrow keys, Escape or × to close, "2 of 5" counter, caption and "Driver photo · [Month Year]".
+- **SEO:** photos are in the server-rendered HTML with alt text from the station address, e.g. "Tesla Supercharger at 565 Compass Pt Plz, Leesburg, VA, driver photo 1", plus the caption. Station structured data lists approved photos as `image`. Thumbnails after the first three lazy-load.
+- **Legal:** Terms of Use section 5 "Photos You Upload" (uploader keeps ownership and gives us a license to show the photo; we may remove any photo). Privacy policy covers uploaded photos, the email, Google Cloud Vision and retention. Photos of stations can show Tesla's logo on the stalls; include this in the trademark attorney's review.
+- **Done when:** a visitor can take or pick a photo on a phone and send it; the stored file has no metadata and is resized, with faces and plates blurred; it appears only after admin approval; the station page shows the empty state without photos and the strip and viewer with them; the page still renders all text without JavaScript.
 
 ### Accounts (optional)
 
@@ -310,7 +330,7 @@ Build in four milestones, each one shippable, so you can put the Home and Map li
 1. **M1 — Data:** project setup, database, nightly OSM import of Superchargers and nearby places.
 2. **M2 — Core screens:** Home, Map, Station page with free listings, filters and design system. Deploy to the domain.
 3. **M3 — Money:** featured listings, lead card and lead form, ad slots, admin panel, Stripe sign-up.
-4. **M4 — Growth:** city pages, sitemap, crowd reports, monthly business reports.
+4. **M4 — Growth:** city pages, sitemap, crowd reports, station photos, monthly business reports.
 
 ### Acceptance criteria (MVP)
 
@@ -332,6 +352,7 @@ Build in four milestones, each one shippable, so you can put the Home and Map li
 - Which lead buyers or networks for home charger installs and for insurance, and their payout per lead.
 - Price data source for the "Price" tile.
 - Whether to pursue a live stall-availability data partner, and when.
+- Station photos: add the Photos section and the upload page to the designs in `design/` (built from ChargeFinder screenshots and our tokens).
 - Where today's 673,000 monthly visits land on the domain, so redirects keep them.
 
 ### Notes for building with Claude Code

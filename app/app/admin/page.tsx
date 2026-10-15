@@ -4,9 +4,22 @@ import { adminConfigured, isAdmin } from "@/lib/adminAuth";
 import { listContactMessages } from "@/lib/contactMessages";
 import { SLOT_LABELS, SPONSOR_SLOTS, type FeaturedListing, type FeaturedStatus } from "@/lib/featured";
 import { listFeatured } from "@/lib/featuredStore";
+import { photoUrl } from "@/lib/photoStorage";
 import { CATEGORIES, categoryLabel } from "@/lib/places";
+import type { StationPhoto } from "@/lib/stationPhotoForm";
+import { listPhotos } from "@/lib/stationPhotos";
 import { getStationById, stationHref } from "@/lib/superchargers";
-import { addListingAction, deleteAction, deleteMessageAction, loginAction, logoutAction, setSlotAction, setStatusAction } from "./actions";
+import {
+  addListingAction,
+  approvePhotoAction,
+  deleteAction,
+  deleteMessageAction,
+  deletePhotoAction,
+  loginAction,
+  logoutAction,
+  setSlotAction,
+  setStatusAction,
+} from "./actions";
 
 export const metadata: Metadata = {
   title: "Admin — Featured listings",
@@ -51,7 +64,12 @@ export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
     );
   }
 
-  const [listings, messages] = await Promise.all([listFeatured(), listContactMessages()]);
+  const [listings, messages, pendingPhotos, approvedPhotos] = await Promise.all([
+    listFeatured(),
+    listContactMessages(),
+    listPhotos("pending"),
+    listPhotos("approved", 30),
+  ]);
 
   return (
     <AdminShell>
@@ -75,6 +93,20 @@ export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
           </section>
         );
       })}
+
+      <section className="admin-group" aria-labelledby="photos-pending-title">
+        <h2 id="photos-pending-title" className="section-title">
+          Station photos to review <span className="admin-count">{pendingPhotos.length}</span>
+        </h2>
+        {pendingPhotos.length === 0 ? <p className="page-sub">No new photos.</p> : pendingPhotos.map((photo) => <PhotoCard key={photo.id} photo={photo} />)}
+      </section>
+
+      <section className="admin-group" aria-labelledby="photos-approved-title">
+        <h2 id="photos-approved-title" className="section-title">
+          Latest approved photos <span className="admin-count">{approvedPhotos.length}</span>
+        </h2>
+        {approvedPhotos.length === 0 ? <p className="page-sub">No approved photos yet.</p> : approvedPhotos.map((photo) => <PhotoCard key={photo.id} photo={photo} />)}
+      </section>
 
       <section className="admin-group" aria-labelledby="messages-title">
         <h2 id="messages-title" className="section-title">
@@ -242,6 +274,52 @@ function ListingCard({ listing }: { listing: FeaturedListing }) {
         <form action={deleteAction}>
           <input type="hidden" name="id" value={listing.id} />
           <button type="submit" className="location-button secondary">Delete</button>
+        </form>
+      </div>
+    </article>
+  );
+}
+
+const BLUR_LABELS: Record<StationPhoto["blurStatus"], string> = {
+  blurred: "Faces and plates blurred",
+  none_found: "Nothing to blur found",
+  skipped: "Not blurred (blurring is off): check for faces and plates",
+  failed: "Not blurred (the check failed): check for faces and plates",
+};
+
+function PhotoCard({ photo }: { photo: StationPhoto }) {
+  const station = getStationById(photo.stationId);
+  const unchecked = photo.blurStatus === "skipped" || photo.blurStatus === "failed";
+
+  return (
+    <article className="admin-card">
+      <div className="admin-card-head">
+        <strong>{station ? <Link href={stationHref(station)}>{station.name}</Link> : photo.stationId}</strong>
+        <span className="admin-source">{photo.createdAt.slice(0, 10)}</span>
+      </div>
+      <a href={photoUrl(photo.photoPath)} target="_blank" rel="noreferrer">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={photoUrl(photo.thumbPath)} alt={`Uploaded photo of ${station?.name ?? "a station"}`} className="admin-photo" />
+      </a>
+      {unchecked ? <p className="admin-warning">{BLUR_LABELS[photo.blurStatus]}</p> : null}
+      <p className="admin-line">
+        {photo.caption ? `“${photo.caption}”` : "No caption"}
+        {unchecked ? "" : ` · ${BLUR_LABELS[photo.blurStatus]}${photo.blurredAreas ? ` (${photo.blurredAreas})` : ""}`}
+      </p>
+      <p className="admin-line">
+        From <a href={`mailto:${photo.email}`}>{photo.email}</a>
+      </p>
+      <div className="admin-actions">
+        {photo.status === "pending" ? (
+          <form action={approvePhotoAction}>
+            <input type="hidden" name="id" value={photo.id} />
+            <button type="submit" className="location-button primary">Approve</button>
+          </form>
+        ) : null}
+        {/* Rejecting deletes the photo for good, like deleting an approved one. */}
+        <form action={deletePhotoAction}>
+          <input type="hidden" name="id" value={photo.id} />
+          <button type="submit" className="location-button secondary">{photo.status === "pending" ? "Reject" : "Delete"}</button>
         </form>
       </div>
     </article>

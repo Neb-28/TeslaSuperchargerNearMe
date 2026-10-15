@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 // Green Star Tech's privacy policy (supplied by the owner). Update EFFECTIVE_DATE with every change.
-const EFFECTIVE_DATE = "October 13, 2026";
+const EFFECTIVE_DATE = "October 14, 2026";
 const SITE_HOST = new URL(SITE_URL).host;
 
 function Table({ head, rows }: { head: [string, string]; rows: [string, string][] }) {
@@ -85,7 +85,10 @@ export default function PrivacyPage() {
             ["Location", "Precise location from your device, only if you allow it in your browser or device settings"],
             ["Device and network", "Device type, operating system, screen resolution, browser type, version and language, IP address"],
             ["Usage and activity", "Pages viewed, searches made, clicks, date and time of visits, crash and error logs"],
-            ["Content you provide", "Messages you send us, and details businesses give us when they apply for a featured listing"],
+            [
+              "Content you provide",
+              "Messages you send us, details businesses give us when they apply for a featured listing, and photos of charging stations you upload (with any description and the email address you give with them)",
+            ],
             ["Cookies and similar technologies", "Cookie identifiers, pixel tags, local storage data (see Section 7)"],
           ]}
         />
@@ -147,7 +150,9 @@ export default function PrivacyPage() {
             These include Supabase (database hosting and authentication), Resend (email delivery),{" "}
             <a href="https://sentry.io/privacy/" target="_blank" rel="noreferrer">Sentry</a> (error monitoring),{" "}
             <a href="https://openrouteservice.org/privacy-policy/" target="_blank" rel="noreferrer">openrouteservice</a> (address search and
-            driving routes in the route planner), our map tile provider and our hosting provider.
+            driving routes in the route planner),{" "}
+            <a href="https://cloud.google.com/terms/cloud-privacy-notice" target="_blank" rel="noreferrer">Google Cloud Vision</a> (finding
+            faces and license plates in uploaded photos so we can blur them), our map tile provider and our hosting provider.
           </li>
           <li>
             <strong>Advertising partners.</strong> When ads load, Google and its partners receive device and browser information, such as
@@ -205,6 +210,11 @@ export default function PrivacyPage() {
           account is active. When you delete your account, we delete or de-identify your personal information within a reasonable time,
           unless we must keep some of it to meet legal obligations, resolve disputes or enforce our agreements. Log and error monitoring data
           is kept for a limited period and then deleted.
+        </p>
+        <p>
+          Before we store a photo you upload, we remove its location, time and camera details. Photos we decline are deleted; published
+          photos stay on the Service until we or you remove them. The email address you give with a photo is never shown on the Service; we
+          keep it while the photo is stored, in case we have a question about it.
         </p>
 
         <h2>9. International Data Transfers</h2>

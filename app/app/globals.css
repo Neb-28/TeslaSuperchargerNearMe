@@ -3994,3 +3994,386 @@ a.route-stop-name {
     display: block;
   }
 }
+
+/* ---------- Station photos ----------
+   Station page: a sideways-scrolling strip of driver photos after an "Add photo" tile, and a
+   full-screen viewer. Upload page: the photo picker. */
+.photos-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.photos-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.photo-strip {
+  display: flex;
+  gap: 10px;
+  margin: 0 -18px;
+  padding: 2px 18px 6px;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding: 0 18px;
+  overscroll-behavior-x: contain;
+}
+
+.photo-strip > li {
+  flex: none;
+  scroll-snap-align: start;
+}
+
+.photo-strip > .photo-empty-item {
+  flex: 1;
+  min-width: 200px;
+}
+
+.photo-add,
+.photo-empty,
+.photo-thumb {
+  display: flex;
+  height: 132px;
+  border-radius: 14px;
+}
+
+.photo-add {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 96px;
+  border: 1.5px solid var(--border);
+  background: var(--ground);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.photo-add:hover {
+  border-color: var(--accent);
+  color: var(--accent-hover);
+}
+
+.photo-empty {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px;
+  border: 1.5px dashed var(--border);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.photo-empty span {
+  color: var(--accent);
+}
+
+.photo-thumb {
+  width: 176px;
+  overflow: hidden;
+  background: var(--divider);
+}
+
+.photo-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The page behind the viewer stays put (iOS scrolls it otherwise). */
+html.viewer-open {
+  overflow: hidden;
+}
+
+.photo-viewer {
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--ink);
+  color: var(--surface);
+}
+
+.photo-viewer[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.photo-viewer::backdrop {
+  background: var(--ink);
+}
+
+.photo-viewer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: max(8px, env(safe-area-inset-top)) 8px 8px 16px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.photo-viewer-track {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.photo-viewer-track::-webkit-scrollbar {
+  display: none;
+}
+
+.photo-slide {
+  flex: 0 0 100%;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin: 0;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+}
+
+.photo-slide img {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  object-fit: contain;
+}
+
+.photo-slide figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px max(16px, env(safe-area-inset-bottom));
+}
+
+.photo-caption {
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.photo-credit {
+  font-size: 13px;
+  color: var(--border);
+}
+
+.photo-viewer-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink-raised);
+  color: var(--surface);
+}
+
+.photo-viewer-button:disabled {
+  visibility: hidden;
+}
+
+.photo-viewer :focus-visible {
+  outline-color: var(--mint);
+}
+
+/* Previous and next sit over the photo's edges; on phones people mostly swipe. */
+.photo-viewer-prev,
+.photo-viewer-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.photo-viewer-prev {
+  left: 8px;
+}
+
+.photo-viewer-next {
+  right: 8px;
+}
+
+/* Upload page */
+.photo-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* The tap-to-add box: dashed while empty, the picked photo once there is one. */
+.photo-dropzone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 180px;
+  padding: 20px 16px;
+  border: 2px dashed var(--border);
+  border-radius: 16px;
+  background: var(--ground);
+  color: var(--muted);
+  text-align: center;
+  cursor: pointer;
+}
+
+.photo-dropzone:hover,
+.photo-dropzone.is-dragging {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.photo-dropzone:disabled {
+  cursor: default;
+  opacity: 0.8;
+}
+
+.photo-dropzone.has-photo {
+  padding: 0;
+  border-style: solid;
+  overflow: hidden;
+}
+
+.photo-dropzone-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.photo-dropzone-sub {
+  font-size: 13px;
+}
+
+.photo-preview {
+  width: 100%;
+  max-height: 360px;
+  object-fit: contain;
+  background: var(--ground);
+}
+
+.photo-change {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--surface);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Phones: the two ways to add a photo, under the box. */
+.photo-source-menu {
+  display: flex;
+  flex-direction: column;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow-float);
+  overflow: hidden;
+}
+
+.photo-source-menu[hidden] {
+  display: none;
+}
+
+.photo-source {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 16px;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.photo-source + .photo-source {
+  border-top: 1px solid var(--divider);
+}
+
+.photo-source svg {
+  color: var(--accent);
+}
+
+.photo-source:has(input:focus-visible) {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+}
+
+.field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+  resize: vertical;
+}
+
+.field textarea[aria-invalid="true"] {
+  border-color: var(--gold-ink);
+}
+
+.field-count,
+.field-help {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* `.field > span` is meant for the label text; these spans inside a field keep their own look. */
+.field > .field-count,
+.field > .field-help {
+  font-weight: 400;
+}
+
+.field > .field-error {
+  color: var(--gold-ink);
+}
+
+.field-count {
+  align-self: flex-end;
+}
+
+/* Admin: photo review */
+.admin-photo {
+  width: 100%;
+  max-width: 360px;
+  border-radius: 12px;
+  background: var(--ground);
+}
+
+.admin-warning {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--gold-bg);
+  color: var(--gold-text);
+  font-size: 14px;
+  font-weight: 600;
+}

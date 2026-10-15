@@ -1,10 +1,11 @@
 // Emails our inbox (CONTACT_EMAIL) through Resend, the same account and verified domain that send
-// sign-in emails: Contact page messages and Get featured requests. Reply goes straight to the
-// sender. Server-only.
+// sign-in emails: Contact page messages, Get featured requests and new station photos. Reply goes
+// straight to the sender. Server-only.
 import type { NewContactMessage } from "./contactForm";
 import { SLOT_LABELS, type FeaturedListing } from "./featured";
 import { categoryLabel } from "./places";
 import { absoluteUrl, CONTACT_EMAIL } from "./site";
+import type { BlurStatus, StationPhoto } from "./stationPhotoForm";
 
 const FROM = "Tesla Supercharger Near Me <no-reply@teslasuperchargernearme.com>";
 
@@ -74,6 +75,30 @@ export function emailFeaturedRequest(listing: FeaturedListing, station: { name: 
       listing.phone ? `Phone: ${listing.phone}` : null,
       "",
       `Review it on ${absoluteUrl("/admin")}. Reply to this email to answer them with the price and payment link.`,
+    ],
+  });
+}
+
+const BLUR_NOTES: Record<BlurStatus, string> = {
+  blurred: "Faces and license plates were blurred automatically",
+  none_found: "No faces or license plates were found to blur",
+  skipped: "Not blurred: GOOGLE_VISION_API_KEY isn't set. Check for faces and plates before approving",
+  failed: "Not blurred: the blur check failed. Check for faces and plates before approving",
+};
+
+export function emailNewPhoto(photo: StationPhoto, station: { name: string; href: string }) {
+  return sendToInbox({
+    form: "station-photo",
+    subject: `New station photo at ${station.name}`,
+    replyTo: photo.email,
+    lines: [
+      `Station: ${station.name}`,
+      `Station page: ${absoluteUrl(station.href)}`,
+      photo.caption ? `Caption: ${photo.caption}` : "No caption",
+      `${BLUR_NOTES[photo.blurStatus]}${photo.blurredAreas ? ` (${photo.blurredAreas} area${photo.blurredAreas === 1 ? "" : "s"})` : ""}.`,
+      `From: ${photo.email}`,
+      "",
+      `Review it on ${absoluteUrl("/admin")}. It stays hidden until you approve it.`,
     ],
   });
 }

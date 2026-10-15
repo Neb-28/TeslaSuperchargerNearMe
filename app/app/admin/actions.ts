@@ -7,8 +7,10 @@ import { deleteContactMessage } from "@/lib/contactMessages";
 import { isSponsorSlot, SLOT_LABELS, type FeaturedStatus } from "@/lib/featured";
 import { createFeatured, deleteFeatured, setFeaturedStatus, SlotTakenError, updateFeatured } from "@/lib/featuredStore";
 import { validateFeaturedForm } from "@/lib/featuredValidation";
+import { deletePhotoFiles } from "@/lib/photoStorage";
 import { placesForStation } from "@/lib/placesData";
-import { getStationBySlug, stationHref } from "@/lib/superchargers";
+import { deletePhotoRecord, getPhoto, setPhotoStatus } from "@/lib/stationPhotos";
+import { getStationById, getStationBySlug, stationHref } from "@/lib/superchargers";
 
 // Every action checks the session itself; a page check alone wouldn't protect a forged POST.
 async function requireAdmin() {
@@ -122,4 +124,31 @@ export async function addListingAction(form: FormData) {
   }
   revalidatePath(stationHref(station));
   done(`${result.values.businessName} is live on ${station.name}.`);
+}
+
+// ---------- Station photos ----------
+
+// A station page shows a photo change right away, not at the next deploy.
+function refreshStation(stationId: string) {
+  const station = getStationById(stationId);
+  if (station) revalidatePath(stationHref(station));
+}
+
+export async function approvePhotoAction(form: FormData) {
+  await requireAdmin();
+  const photo = await setPhotoStatus(String(form.get("id")), "approved");
+  if (!photo) done("That photo no longer exists.", "err");
+  refreshStation(photo.stationId);
+  done("Photo approved. It's on the station page now.");
+}
+
+// Rejecting a pending photo and deleting an approved one are the same: record and files go.
+export async function deletePhotoAction(form: FormData) {
+  await requireAdmin();
+  const photo = await getPhoto(String(form.get("id")));
+  if (!photo) done("That photo no longer exists.", "err");
+  await deletePhotoFiles([photo.photoPath, photo.thumbPath]);
+  await deletePhotoRecord(photo.id);
+  refreshStation(photo.stationId);
+  done(photo.status === "pending" ? "Photo rejected and deleted." : "Photo deleted.");
 }

@@ -10,10 +10,12 @@ import ShareButton from "@/components/ShareButton";
 import SiteFooter from "@/components/SiteFooter";
 import SideRails from "@/components/SideRails";
 import SiteHeader from "@/components/SiteHeader";
+import StationPhotos from "@/components/StationPhotos";
 import { nearbyForStation } from "@/lib/nearby";
 import { placesForStation } from "@/lib/placesData";
 import { absoluteUrl } from "@/lib/site";
 import { stationAbout } from "@/lib/stationAbout";
+import { approvedPhotosForStation, toPublicPhoto } from "@/lib/stationPhotos";
 import { areaName, cityHref, getCity, getStationBySlug, isWorldStation, nearestOtherSupercharger, stateHref, stationHref, stationTitle } from "@/lib/superchargers";
 import { stateName } from "@/lib/usStates";
 
@@ -25,7 +27,7 @@ async function loadStation(params: StationPageProps["params"]) {
 }
 
 // Built the first time someone visits, then served from the CDN until the next deploy (the
-// station data ships with each deploy). Admin changes to Featured listings refresh station pages.
+// station data ships with each deploy). Admin changes to Featured listings and photos refresh station pages.
 export function generateStaticParams() {
   return [];
 }
@@ -57,7 +59,8 @@ export default async function StationPage({ params }: StationPageProps) {
   // US stations are NACS; elsewhere the connector comes from the data (CCS2 in Europe, GB/T in China…).
   const plug = station.plug ?? "NACS";
   const power = station.maxKw ? `${station.maxKw} kW ${plug}` : plug;
-  const nearby = await nearbyForStation(station.id);
+  const [nearby, photos] = await Promise.all([nearbyForStation(station.id), approvedPhotosForStation(station.id)]);
+  const publicPhotos = photos.map(toPublicPhoto);
   const cityInfo = getCity(station.state, station.city);
   const metric = isWorldStation(station) && station.countryCode !== "GB";
   const nearest = nearestOtherSupercharger(station);
@@ -180,6 +183,8 @@ export default async function StationPage({ params }: StationPageProps) {
 
           <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_STATION} />
 
+          <StationPhotos photos={publicPhotos} addHref={`${href}/add-photo`} label={`Tesla Supercharger at ${station.address ?? station.name}`} />
+
           <NearbySection
             stationSlug={station.slug}
             stationLat={lat}
@@ -212,6 +217,7 @@ export default async function StationPage({ params }: StationPageProps) {
                   },
                 }
               : {}),
+            ...(publicPhotos.length ? { image: publicPhotos.map((photo) => photo.url) } : {}),
             ...(station.stalls
               ? { amenityFeature: { "@type": "LocationFeatureSpecification", name: "Charging stalls", value: station.stalls } }
               : {}),

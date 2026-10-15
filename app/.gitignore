@@ -45,3 +45,4 @@ next-env.d.ts
 # Local Featured listings store (dev only; production uses Postgres)
 /data/featured-listings.json
 /data/contact-messages.json
+/data/station-photos.json
