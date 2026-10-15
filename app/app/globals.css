@@ -155,6 +155,20 @@ img {
   padding: 14px 16px;
 }
 
+/* The logo and header buttons line up with the page's own content column. */
+.app-shell:has(.content-page) .topbar-inner {
+  max-width: 720px;
+}
+
+.app-shell:has(.home-page) .topbar-inner {
+  max-width: 960px;
+}
+
+.app-shell:has(.contact-page) .topbar-inner {
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
 .brand-wrap {
   display: flex;
   align-items: center;
