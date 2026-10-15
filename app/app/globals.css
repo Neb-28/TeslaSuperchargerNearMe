@@ -1524,6 +1524,21 @@ img {
   padding: 0;
 }
 
+/* City and state pages put the list in a card: keep the card's inner padding so the icons and
+   chevrons don't touch its edge. */
+.station-list.content-card {
+  padding: 4px 16px;
+}
+
+/* On phones the list runs edge to edge, like the Map screen's list. */
+@media (max-width: 719px) {
+  .station-list.content-card {
+    margin-left: -16px;
+    margin-right: -16px;
+    border-radius: 0;
+  }
+}
+
 .station-list li:not(:last-child) .station-row {
   border-bottom: 1px solid var(--divider);
 }
