@@ -1,4 +1,7 @@
-export const SITE_NAME = "TeslaSuperchargerNearMe";
+// The name Google shows above our search results (WebSite structured data and og:site_name). The
+// one-word brand and the domain are listed as alternates so Google knows they are the same site.
+export const SITE_NAME = "Tesla Supercharger Near Me";
+export const SITE_ALTERNATE_NAMES = ["TeslaSuperchargerNearMe", "TeslaSuperchargerNearMe.com"];
 
 // The canonical address of the site. Canonical links (metadataBase in app/layout.tsx), the
 // sitemap and structured data all point here; next.config.ts sends the *.vercel.app address to it.

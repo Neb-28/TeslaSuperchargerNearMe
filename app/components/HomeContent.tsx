@@ -4,7 +4,7 @@ import SideRails from "./SideRails";
 import JsonLd from "./JsonLd";
 import SiteFooter from "./SiteFooter";
 import SiteHeader from "./SiteHeader";
-import { SITE_NAME, SITE_URL } from "@/lib/site";
+import { SITE_ALTERNATE_NAMES, SITE_NAME, SITE_URL } from "@/lib/site";
 import { allCities, cityHref, countryOptions, countryPhrase, stateHref, statesWithStations, superchargers, type CountrySummary } from "@/lib/superchargers";
 import { stateName, US_STATES } from "@/lib/usStates";
 
@@ -183,7 +183,9 @@ export default function HomeContent({ country }: { country: CountrySummary | nul
         </section>
       </div>
 
-      <JsonLd data={{ "@context": "https://schema.org", "@type": "WebSite", name: SITE_NAME, url: SITE_URL }} />
+      <JsonLd
+        data={{ "@context": "https://schema.org", "@type": "WebSite", name: SITE_NAME, alternateName: SITE_ALTERNATE_NAMES, url: SITE_URL }}
+      />
 
       <SiteFooter />
     </div>
