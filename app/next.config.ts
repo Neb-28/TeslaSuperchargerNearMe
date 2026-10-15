@@ -25,7 +25,12 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return {
       beforeFiles: [{ source: "/", has: [{ type: "query", key: "country", value: countryValue }], destination: "/home/:country" }],
-      afterFiles: [],
+      // Safari, iMessage and many in-app browsers fetch these fixed addresses without reading the
+      // page's <link> tags; serve them our home-screen icon (app/apple-icon.tsx).
+      afterFiles: [
+        { source: "/apple-touch-icon.png", destination: "/apple-icon" },
+        { source: "/apple-touch-icon-precomposed.png", destination: "/apple-icon" },
+      ],
       fallback: [],
     };
   },
