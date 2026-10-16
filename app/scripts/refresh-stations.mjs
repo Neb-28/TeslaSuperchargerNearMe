@@ -6,6 +6,8 @@
 //   4. Finds nearby places for stations that have none yet, mostly the ones just added
 //      (scripts/import-places.mjs --missing), within a time limit so a slow Overpass server
 //      can't hold up the station update; the next run continues.
+//   5. Adds the places Overture Maps has and OSM lacks for those stations
+//      (scripts/import-overture-places.mjs --missing).
 //
 // Steps 2 and 3 stop the run when the feed looks broken (their safety brakes), so a bad download
 // never reaches the site. A short summary goes to $REFRESH_SUMMARY when it's set, for the commit.
@@ -48,6 +50,7 @@ for (const extra of [[], ["--world"]]) {
   const lines = run("import-places.mjs", "--missing", `--minutes=${PLACES_MINUTES}`, ...extra);
   summary.push(`Places${extra.length ? " (outside the US)" : ""}: ${lines.at(-1)}`);
 }
+summary.push(...run("import-overture-places.mjs", "--missing").slice(-1));
 
 console.log(`\n${summary.join("\n")}`);
 if (process.env.REFRESH_SUMMARY) appendFileSync(process.env.REFRESH_SUMMARY, `${summary.join("\n")}\n`);

@@ -207,7 +207,7 @@ export default async function StationPage({ params }: StationPageProps) {
             metric={metric}
           />
 
-          <SiteFooter osmCredit dataCredit />
+          <SiteFooter osmCredit dataCredit placesCredit />
         </main>
 
         {/* Described as a schema.org Place (a charging location), not a LocalBusiness: we don't run it. */}

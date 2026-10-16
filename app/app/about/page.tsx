@@ -30,6 +30,10 @@ export default function AboutPage() {
           uses official vehicle range figures and, where Superchargers can&apos;t reach, suggests other networks&apos; fast chargers.
         </p>
         <p>Station data: supercharge.info. Map data © OpenStreetMap contributors.</p>
+        <p>
+          Nearby places: OpenStreetMap contributors and the Overture Maps Foundation, whose places data comes from Meta and
+          Microsoft (CDLA Permissive 2.0), Foursquare (Apache 2.0; Copyright 2024 Foursquare Labs, Inc.) and other sources.
+        </p>
 
         <h2>An honest note on availability</h2>
         <p>

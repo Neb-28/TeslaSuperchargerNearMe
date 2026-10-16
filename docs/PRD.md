@@ -251,8 +251,9 @@ The browser loads map tiles straight from the tile provider; every other request
 
 ### Import job
 
-- Runs nightly. Pulls Tesla Superchargers (`amenity=charging_station` with brand or operator Tesla and "Supercharger" in the name) and, for each station, places within 600 m: restaurants, fast food, cafés, bars and pubs, supermarkets, convenience, greengrocers, wine and alcohol shops.
-- Upserts by OSM id, so edits keep the same URLs. Stations that disappear are marked inactive, not deleted.
+- Runs nightly (GitHub Actions, `.github/workflows/refresh-stations.yml` running `app/scripts/refresh-stations.mjs`). Stations come from OpenStreetMap, checked against supercharge.info: open sites OSM lacks are added, entries that aren't open Superchargers (closed, duplicates, planned) are removed, and temporarily closed stations stay listed with a notice. Outside the US, stations come from supercharge.info.
+- Places within 600 m of each station: restaurants, fast food, cafés, bars and pubs, supermarkets, convenience, greengrocers, wine and alcohol shops, and other shops, from OpenStreetMap plus the Overture Maps places OSM lacks (10 closest per category).
+- Station ids and URLs never change. A removed station's URL permanently redirects to the nearest listed station. A safety brake stops the run when a feed would remove more than 5% of stations.
 - Walking time = straight-line distance at 80 m per minute (upgrade to walking routes later).
 - Typical visit minutes come from category defaults: convenience 5, café 10, wine shop 15, fast food 15, supermarket 20, restaurant 40, bar 45.
 - For the whole US, use a Geofabrik extract processed with osmium, or your own Overpass server; the public Overpass server has fair-use limits.
