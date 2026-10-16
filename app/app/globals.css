@@ -2838,6 +2838,21 @@ a.station-row:hover .station-name {
   color: var(--muted);
 }
 
+.show-more-button {
+  min-height: 44px;
+  border: 1.5px solid var(--divider);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(20, 33, 28, 0.05);
+}
+
+.show-more-button:hover {
+  border-color: var(--accent);
+}
+
 .nearby-list {
   list-style: none;
   margin: 0;

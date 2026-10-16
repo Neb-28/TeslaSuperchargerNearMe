@@ -32,10 +32,16 @@ function formatDistance(meters: number, metric = false) {
   return feet < 1000 ? `${Math.round(feet / 10) * 10} ft` : `${(meters / 1609.34).toFixed(1)} mi`;
 }
 
+const SHOWN_FIRST = 10;
+
 export default function NearbySection({ stationSlug, stationLat, stationLon, categories, metric = false }: NearbySectionProps) {
   const firstWithPlaces = categories.find((category) => category.listings.length)?.id ?? categories[0].id;
   const [selected, setSelected] = useState<CategoryId>(firstWithPlaces);
+  // Each category shows 10 at first; "Show more" opens the rest (up to 30 places).
+  const [expanded, setExpanded] = useState<Set<CategoryId>>(() => new Set());
   const current = categories.find((category) => category.id === selected)!;
+  const shown = expanded.has(selected) ? current.listings : current.listings.slice(0, SHOWN_FIRST);
+  const hidden = current.listings.length - shown.length;
   const driving = selected === "chargers";
 
   const station = { lat: stationLat, lon: stationLon };
@@ -74,7 +80,7 @@ export default function NearbySection({ stationSlug, stationLat, stationLon, cat
         <p className="nearby-empty">Nothing in this category within a short walk yet.</p>
       ) : (
         <ol className="nearby-list">
-          {current.listings.map((listing) => (
+          {shown.map((listing) => (
             <li key={listing.type === "featured" ? `f-${listing.featured.id}` : `p-${listing.place.name}-${listing.place.distanceM}`}>
               {listing.type === "featured" ? (
                 listing.featured.slot === 1 ? (
@@ -87,6 +93,11 @@ export default function NearbySection({ stationSlug, stationLat, stationLon, cat
           ))}
         </ol>
       )}
+      {hidden > 0 ? (
+        <button type="button" className="show-more-button" onClick={() => setExpanded((open) => new Set(open).add(selected))}>
+          Show {hidden} more
+        </button>
+      ) : null}
 
       <div className="get-featured-banner">
         <h3 className="banner-title">Own a business near this station?</h3>

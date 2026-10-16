@@ -1,0 +1,69 @@
+name: Refresh Overture places
+
+# Once a month: when Overture Maps has published a new release, look up the places near every
+# station again (app/scripts/import-overture-places.mjs --if-new-release). The nightly job only
+# does this for new stations. When the data changed and the tests pass, the update is committed
+# to main, which deploys the site. A month without a new release does nothing.
+on:
+  schedule:
+    - cron: "40 9 28 * *" # the 28th, 09:40 UTC; Overture usually releases mid-month
+  workflow_dispatch: # "Run workflow" button on the Actions tab
+
+permissions:
+  contents: write
+
+# Shared with the nightly station refresh, so the two never push at the same time.
+concurrency:
+  group: refresh-stations
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - run: npm ci
+
+      # One pass over Overture's places files for every station: about 15 minutes, 6 GB of memory.
+      - name: Refresh Overture places
+        run: node --max-old-space-size=12288 scripts/import-overture-places.mjs --if-new-release
+
+      - name: Check the updated data
+        run: |
+          npx tsc --noEmit -p .
+          npm test
+
+      - name: Commit and push when the data changed
+        id: commit
+        run: |
+          if git diff --quiet -- data; then
+            echo "No new Overture release, or no changes."
+            exit 0
+          fi
+          release=$(node -p 'require("./data/overture-places.json").release')
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          git commit -m "Overture places refresh (release $release)"
+          git pull --rebase origin main
+          git push origin HEAD:main
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      # Optional: see the note in refresh-stations.yml.
+      - name: Deploy
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: |
+          if [ -n "$VERCEL_DEPLOY_HOOK" ]; then curl -fsS -X POST "$VERCEL_DEPLOY_HOOK"; else echo "No deploy hook set; the push deploys."; fi

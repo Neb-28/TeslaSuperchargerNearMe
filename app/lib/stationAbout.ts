@@ -29,8 +29,8 @@ export type AboutInput = {
   isUs: boolean;
 };
 
-// scripts/import-places.mjs keeps places within 600 m (80 m a minute, so an 8-minute walk) and
-// at most 10 per category, so a full list means "10 or more", not exactly 10.
+// Places are within 600 m (80 m a minute, so an 8-minute walk). Lists hold up to 30 per category
+// but OSM's older lists stop at 10, so 10 or more is told as "10 or more", not an exact count.
 const WALK_LIMIT_MIN = 8;
 const PER_CATEGORY = 10;
 

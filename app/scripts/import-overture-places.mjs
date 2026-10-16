@@ -2,7 +2,7 @@
 // OpenStreetMap places in data/places.json: Overture fills in many restaurants and shops OSM lacks.
 //
 // Only places that add something are stored: a place OSM already lists (same name, nearby) is
-// skipped, and each category keeps no more than the 10 closest places across both sources.
+// skipped, and each category keeps no more than the 30 closest places across both sources.
 // lib/placesData.ts merges the two files for the station pages.
 //
 // Usage:
@@ -10,6 +10,7 @@
 //   node scripts/import-overture-places.mjs --missing    # only stations not looked up yet
 //   node scripts/import-overture-places.mjs --ids=ids.txt     # only these station ids (testing)
 //   node scripts/import-overture-places.mjs --release=2026-09-23.1
+//   node scripts/import-overture-places.mjs --if-new-release  # every station, only if Overture published since
 //
 // Data © Overture Maps Foundation: places from Meta and Microsoft (CDLA Permissive 2.0), Foursquare
 // (Apache 2.0) and others; credited on the station pages and the About page.
@@ -18,7 +19,7 @@ import { DuckDBInstance } from "@duckdb/node-api";
 import { writeData } from "./lib/write-data.mjs";
 
 const WALK_RADIUS_M = 600; // PRD: places within 600 m, as for OSM (scripts/import-places.mjs)
-const PER_CATEGORY = 10;
+const PER_CATEGORY = 30; // the station page shows 10, then "Show more"
 const MIN_CONFIDENCE = 0.6;
 const SAME_PLACE_M = 150; // the same business mapped by both sources lands this close
 const PER_STATION_QUERIES = 50; // up to this many stations, query each one's area; beyond, scan once
@@ -80,6 +81,12 @@ async function latestRelease() {
 const release = args.find((arg) => arg.startsWith("--release="))?.slice("--release=".length) ?? (await latestRelease());
 const OUT = dataUrl("overture-places.json");
 const previous = existsSync(OUT) ? JSON.parse(readFileSync(OUT, "utf8")) : null;
+// The monthly job (.github/workflows/refresh-overture-places.yml) redoes every station only when
+// Overture has published a new release since the last full import.
+if (args.includes("--if-new-release") && previous?.release === release) {
+  console.log(`Overture release ${release} is already imported; nothing to do.`);
+  process.exit(0);
+}
 const output = previous?.stations ?? {};
 
 const allStations = [...read("superchargers.json").stations, ...read("world-superchargers.json").stations];
@@ -163,7 +170,7 @@ if (todo.length) {
       if (osm.some((other) => other.key === key || (sameName(key, other.key) && near(other)))) continue;
       if (seen.some((other) => sameName(key, other.key) && near(other))) continue;
       seen.push({ key, lat: place.lat, lon: place.lon });
-      // Keep it only if it's among the 10 closest in its category across both sources.
+      // Keep it only if it's among the 30 closest in its category across both sources.
       const index = categoryIndex[category];
       const closer = osm.filter((other) => other.category === index && other.distance <= place.distance).length
         + added.filter((row) => row[0] === index).length;
@@ -174,6 +181,9 @@ if (todo.length) {
   }
 }
 
-writeData(OUT, { source: "Overture Maps Foundation", release, fetchedAt: new Date().toISOString(), stations: output }, "stations");
+// "release" is the one the last full import used; nightly runs for a few stations keep it, so the
+// monthly job still sees a new release as not yet imported.
+const fullRelease = (MISSING || onlyIds) && previous?.release ? previous.release : release;
+writeData(OUT, { source: "Overture Maps Foundation", release: fullRelease, fetchedAt: new Date().toISOString(), stations: output }, "stations");
 const withPlaces = allStations.filter((station) => output[station.id]?.length).length;
 console.log(`Overture places added near ${withPlaces} of ${allStations.length} stations`);

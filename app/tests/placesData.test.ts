@@ -18,11 +18,11 @@ describe("nearby places from OpenStreetMap and Overture", () => {
     expect(added.some((name) => merged.includes(name))).toBe(true);
   });
 
-  it("list the closest first, at most 10 per category", () => {
+  it("list the closest first, at most 30 per category", () => {
     const places = placesForStation(stationId);
     for (const { id } of CATEGORIES) {
       const distances = places[id].map((place) => place.distanceM);
-      expect(distances.length).toBeLessThanOrEqual(10);
+      expect(distances.length).toBeLessThanOrEqual(30);
       expect(distances).toEqual([...distances].sort((a, b) => a - b));
     }
   });
@@ -32,5 +32,10 @@ describe("nearby places from OpenStreetMap and Overture", () => {
       const osmNames = new Set((osmRows[id] ?? []).map((row) => row[1].toLowerCase()));
       for (const row of rows) expect(osmNames.has(row[1].toLowerCase()), `${id}: ${row[1]}`).toBe(false);
     }
+  });
+
+  it("go past 10 where there's more within a short walk, for the Show more button", () => {
+    const longest = Math.max(...Object.keys(overtureRows).slice(0, 2000).flatMap((id) => Object.values(placesForStation(id)).map((list) => list.length)));
+    expect(longest).toBeGreaterThan(10);
   });
 });

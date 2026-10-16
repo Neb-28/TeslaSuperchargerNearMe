@@ -28,7 +28,7 @@ const OVERPASS_URLS = ["https://overpass-api.de/api/interpreter", "https://maps.
 const CELL_DEGREES = 3;
 const WALK_RADIUS_M = 600; // PRD: places within 600 m
 const CHARGER_RADIUS_M = 1600; // other EV chargers: about a mile, since you drive there
-const PER_CATEGORY = 10;
+const PER_CATEGORY = 30; // the station page shows 10, then "Show more"
 
 // Order matters: the index is stored in the output (see lib/places.ts CATEGORY_IDS).
 const CATEGORY_IDS = ["food", "coffee", "grocery", "bars", "shops", "chargers"];

@@ -11,7 +11,8 @@ type PlaceRow = [number, string, string, number, number, number];
 const data = snapshot as unknown as { categories: string[]; stations: Record<string, PlaceRow[]> };
 // Same row format and category order as data/places.json, and already without places OSM lists.
 const overture = overtureSnapshot as unknown as { stations: Record<string, PlaceRow[]> };
-const PER_CATEGORY = 10;
+// Up to 30 per category; the station page shows 10 and a "Show more" button for the rest.
+const PER_CATEGORY = 30;
 
 export function placesForStation(stationId: string): Record<CategoryId, Place[]> {
   const result = Object.fromEntries(CATEGORIES.map(({ id }) => [id, [] as Place[]])) as Record<CategoryId, Place[]>;
@@ -20,7 +21,7 @@ export function placesForStation(stationId: string): Record<CategoryId, Place[]>
     // OSM names sometimes carry stray spaces ("Soluna  Restaurant").
     result[category]?.push({ name: name.replace(/\s+/g, " ").trim(), kind, category, distanceM, walkMin: walkMinutes(distanceM), lat, lon });
   }
-  // The two sources together: the closest places first, 10 per category.
+  // The two sources together: the closest places first, up to 30 per category.
   for (const places of Object.values(result)) places.sort((a, b) => a.distanceM - b.distanceM).splice(PER_CATEGORY);
   return result;
 }
