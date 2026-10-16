@@ -5,6 +5,13 @@ export type Place = {
   position: [number, number];
 };
 
+// A street address rather than a city or station name: it starts with a house number
+// ("1600 Amphitheatre Pkwy") or has a comma ("Main St, Springfield"). Map search looks those up.
+export function looksLikeAddress(query: string): boolean {
+  const text = query.trim();
+  return !parseZip(text) && (/^\d+[a-z]?(-\d+)?\s+\S/i.test(text) || text.includes(","));
+}
+
 // Accepts "22202" and ZIP+4 "22202-4512"; returns the 5-digit ZIP or null.
 export function parseZip(query: string): string | null {
   const match = query.trim().match(/^(\d{5})(?:-\d{4})?$/);

@@ -20,7 +20,7 @@ const faqs = [
   {
     question: "How do I find the closest Tesla Supercharger?",
     answer:
-      "Tap Near me and allow location. We list the nearest Superchargers by distance with their stall count and charging speed. You can also search a city or ZIP code.",
+      "Tap Near me and allow location. We list the nearest Superchargers by distance with their stall count and charging speed. You can also search an address, city or ZIP code to see the Superchargers closest to it.",
   },
   {
     question: "Can non-Tesla EVs use Superchargers?",
@@ -67,12 +67,12 @@ export default function HomeContent({ country }: { country: CountrySummary | nul
 
         {/* A plain GET form, so search works before (or without) JavaScript. */}
         <form action="/map" method="get" role="search" className="search-shell">
-          <label htmlFor="home-search" className="sr-only">Search city, ZIP code or station</label>
+          <label htmlFor="home-search" className="sr-only">Search an address, city or ZIP code</label>
           <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
             <circle cx="11" cy="11" r="7" />
             <path d="m20 20-3.5-3.5" />
           </svg>
-          <input id="home-search" name="q" type="search" enterKeyHint="search" placeholder="Search city, ZIP code or station" autoComplete="off" />
+          <input id="home-search" name="q" type="search" enterKeyHint="search" placeholder="Search an address, city or ZIP code" autoComplete="off" />
           {country ? <input type="hidden" name="country" value={country.slug} /> : null}
         </form>
 

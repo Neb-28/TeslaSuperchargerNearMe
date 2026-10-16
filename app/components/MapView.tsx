@@ -4,9 +4,9 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { pinFromTuple, type Pin, type PinTuple } from "@/lib/pins";
+import { isClosedPin, pinFromTuple, pinMatches, type Pin, type PinTuple } from "@/lib/pins";
 import { DEFAULT_CENTER, milesBetween } from "@/lib/stations";
-import { parseZip, type Place } from "@/lib/zipQuery";
+import { looksLikeAddress, parseZip, type Place } from "@/lib/zipQuery";
 import LocationCard from "./LocationCard";
 import { useGeolocation } from "./useGeolocation";
 
@@ -21,8 +21,13 @@ const LIST_LIMIT = 25;
 
 type MapViewProps = {
   initialQuery: string;
-  // Set when the page opens on a ZIP search or a station's "View larger map" (looked up on the server).
+  // Set when the page opens on a ZIP, address or place search, or a station's "View larger map"
+  // (looked up on the server).
   initialPlace: Place | null;
+  // initialPlace is where initialQuery was found (an address or place), not a name filter.
+  searchedPlace?: boolean;
+  // The server couldn't find the address or place in initialQuery.
+  initialError?: string | null;
   // The nearest stations to the starting point, so the list is in the server-rendered HTML.
   initialNearby: Pin[];
   // Station to highlight when opened from its "View larger map" link.
@@ -50,20 +55,23 @@ function formatDistance(miles: number, countryCode: string | null | undefined) {
 }
 
 // Accent- and case-insensitive, so "munchen" and "Munich" both find München.
-const fold = (text: string) => text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+function placeNotFound(text: string) {
+  return `We couldn't find “${text}”. Try adding the city, or use a ZIP code.`;
+}
 
-export default function MapView({ initialQuery, initialPlace, initialNearby, highlightHref, near, focusSearch, country = null }: MapViewProps) {
+export default function MapView({ initialQuery, initialPlace, initialNearby, highlightHref, near, focusSearch, country = null, searchedPlace = false, initialError = null }: MapViewProps) {
   const router = useRouter();
   const searchRef = useRef<HTMLInputElement>(null);
   const [draft, setDraft] = useState(initialQuery);
   // ZIP codes are US-only; elsewhere five digits are just part of a search.
   const initialZip = country ? null : parseZip(initialQuery);
   const countryPlace = country ? initialPlace : null;
-  // `query` filters by station name (names include the city); a ZIP search sets `place` instead.
-  const [query, setQuery] = useState(initialZip ? "" : initialQuery.trim());
+  // `query` filters by station name (names include the city); a ZIP, address or place search sets
+  // `place` instead.
+  const [query, setQuery] = useState(initialZip || searchedPlace ? "" : initialQuery.trim());
   const [place, setPlace] = useState<Place | null>(initialPlace);
   const [placeCount, setPlaceCount] = useState(initialPlace ? 1 : 0);
-  const [searchError, setSearchError] = useState<string | null>(initialZip && !initialPlace ? zipNotFound(initialZip) : null);
+  const [searchError, setSearchError] = useState<string | null>(initialError ?? (initialZip && !initialPlace ? zipNotFound(initialZip) : null));
   // Every US Supercharger, loaded once from our own API (never from Overpass).
   const [allPins, setAllPins] = useState<Pin[] | null>(null);
   // "Near me" starts the location request as soon as the map opens.
@@ -92,7 +100,7 @@ export default function MapView({ initialQuery, initialPlace, initialNearby, hig
     const source = allPins ?? initialNearby;
     if (!needle) return source;
     // Pins outside the US also match on their city, region and country names.
-    return source.filter((pin) => (pin.search === undefined ? pin.name.toLowerCase().includes(needle) : fold(`${pin.name} ${pin.search}`).includes(fold(needle))));
+    return source.filter((pin) => pinMatches(pin, needle));
   }, [allPins, initialNearby, needle]);
 
   const nearby = useMemo(() => {
@@ -114,6 +122,23 @@ export default function MapView({ initialQuery, initialPlace, initialNearby, hig
     setSearchError(null);
 
     const zip = country ? null : parseZip(trimmed);
+    // An address, or a name no station matches (a city without a Supercharger, a landmark, a
+    // business): look the place up and list the stations nearest to it, like "Near me".
+    const lookUp = !zip && trimmed && (looksLikeAddress(trimmed) || !(allPins ?? initialNearby).some((pin) => pinMatches(pin, trimmed)));
+    if (lookUp) {
+      setQuery("");
+      try {
+        const near = userPos ? `&near=${userPos[0].toFixed(3)},${userPos[1].toFixed(3)}` : "";
+        const response = await fetch(`/api/geocode?q=${encodeURIComponent(trimmed)}${country?.code ? `&country=${country.code}` : ""}${near}`);
+        if (!response.ok) throw new Error(String(response.status));
+        setPlace((await response.json()) as Place);
+        setPlaceCount((count) => count + 1);
+      } catch {
+        setPlace(countryPlace);
+        setSearchError(placeNotFound(trimmed));
+      }
+      return;
+    }
     if (!zip) {
       setPlace(countryPlace);
       setQuery(trimmed);
@@ -160,12 +185,14 @@ export default function MapView({ initialQuery, initialPlace, initialNearby, hig
   const where = place ? `near ${place.label}` : geo.status === "located" ? "near you" : "in this area";
   const title = needle ? `${total} ${noun} matching “${query}”` : `${total} ${noun} ${where}`;
   const showNearest = place !== null || geo.status === "located";
+  // "Nearest" goes to the closest station drivers can use, not a temporarily closed one.
+  const nearestIndex = nearby.findIndex((pin) => !isClosedPin(pin));
 
   return (
     <main id="main" className="map-layout">
       <div className="map-toolbar">
         <form action="/map" method="get" role="search" className="map-search" onSubmit={handleSearch}>
-          <label htmlFor="map-search" className="sr-only">Search city, ZIP code or station</label>
+          <label htmlFor="map-search" className="sr-only">Search an address, city or ZIP code</label>
           <svg className="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
             <circle cx="11" cy="11" r="7" />
             <path d="m20 20-3.5-3.5" />
@@ -177,7 +204,7 @@ export default function MapView({ initialQuery, initialPlace, initialNearby, hig
             type="search"
             enterKeyHint="search"
             autoComplete="off"
-            placeholder="Search city, ZIP code or station"
+            placeholder="Search an address, city or ZIP code"
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
           />
@@ -201,7 +228,7 @@ export default function MapView({ initialQuery, initialPlace, initialNearby, hig
 
         <ul className="station-list">
           {nearby.map((station, index) => {
-            const isNearest = index === 0 && showNearest && !needle;
+            const isNearest = index === nearestIndex && showNearest && !needle;
             const sub = [formatDistance(station.miles, country?.code), station.stalls ? `${station.stalls} stalls` : null, station.kw ? `${station.kw} kW` : null]
               .filter(Boolean)
               .join(" · ");

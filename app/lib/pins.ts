@@ -15,6 +15,20 @@ export type Pin = {
 // Pins outside the US carry a 7th field with extra search words.
 export type PinTuple = [number, number, number | null, number | null, string, string] | [number, number, number | null, number | null, string, string, string];
 
+// Pins carry no status; a temporarily closed station's name ends with this label (listName in
+// lib/superchargers.ts), which is also how the map knows not to call it "Nearest".
+export const CLOSED_LABEL = " · Temporarily closed";
+export const isClosedPin = (pin: Pick<Pin, "name">) => pin.name.endsWith(CLOSED_LABEL);
+
+const fold = (text: string) => text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+// Map search by name: a station's name (which includes its city) or, outside the US, its city,
+// region and country names. Shared by the map and the server, so both agree on a "match".
+export function pinMatches(pin: Pin, query: string) {
+  const needle = query.trim().toLowerCase();
+  return pin.search === undefined ? pin.name.toLowerCase().includes(needle) : fold(`${pin.name} ${pin.search}`).includes(fold(needle));
+}
+
 export function pinFromTuple([lat, lon, stalls, kw, name, href, search]: PinTuple): Pin {
   return search === undefined ? { lat, lon, stalls, kw, name, href } : { lat, lon, stalls, kw, name, href, search };
 }

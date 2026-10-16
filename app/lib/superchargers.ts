@@ -3,7 +3,7 @@
 import snapshot from "@/data/superchargers.json";
 import stationRedirects from "@/data/station-redirects.json";
 import worldSnapshot from "@/data/world-superchargers.json";
-import type { Pin, PinTuple } from "./pins";
+import { CLOSED_LABEL, type Pin, type PinTuple } from "./pins";
 import { milesBetween, type LatLng } from "./stations";
 
 export type Supercharger = {
@@ -29,7 +29,7 @@ export type Supercharger = {
 };
 
 // The station's name as lists and the map show it, with a closed station labeled.
-export const listName = (station: Supercharger) => (station.temporarilyClosed ? `${station.name} · Temporarily closed` : station.name);
+export const listName = (station: Supercharger) => (station.temporarilyClosed ? `${station.name}${CLOSED_LABEL}` : station.name);
 
 export const superchargers = (snapshot as { stations: Supercharger[] }).stations;
 // When the list last changed: the latest supercharge.info check, or the OSM download before any.

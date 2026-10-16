@@ -30,12 +30,14 @@ export type AddressMatch = {
 };
 
 // The best few matches for an address or place name, best first. `near` biases the search
-// toward a point (e.g. the other end of the trip when that's an exact location).
-export async function searchAddress(text: string, near?: LatLng): Promise<AddressMatch[]> {
+// toward a point (e.g. the other end of the trip when that's an exact location); `country`
+// (ISO code, "US") keeps it inside one country.
+export async function searchAddress(text: string, near?: LatLng, country?: string): Promise<AddressMatch[]> {
   const url = new URL(`${baseUrl()}/geocode/search`);
   url.searchParams.set("api_key", process.env.ORS_API_KEY ?? "");
   url.searchParams.set("text", text);
   url.searchParams.set("size", "5");
+  if (country) url.searchParams.set("boundary.country", country);
   if (near) {
     url.searchParams.set("focus.point.lat", String(near[0]));
     url.searchParams.set("focus.point.lon", String(near[1]));
