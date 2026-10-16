@@ -5,6 +5,9 @@
 //        node scripts/import-places.mjs --fresh  (start over instead of resuming)
 //        node scripts/import-places.mjs --first=38.63,-77.29  (do the area around a point first)
 //        node scripts/import-places.mjs --world  (stations outside the US, data/world-superchargers.json)
+//        node scripts/import-places.mjs --missing  (only stations with no places yet, e.g. just added;
+//                                                   add --world for stations outside the US)
+//        node scripts/import-places.mjs --missing --ids=new-ids.txt  (only these station ids, one per line)
 //
 // US stations are looked up around Tesla stations as mapped in OpenStreetMap. Many stations
 // abroad (China especially) aren't in OSM, so --world searches around each station's own
@@ -141,7 +144,7 @@ if (WORLD) {
 }
 
 function queryFor(cellStations) {
-  if (WORLD) {
+  if (WORLD || MISSING) {
     const around = (radius, station) => `(around:${radius},${station.lat},${station.lon})`;
     const parts = cellStations.flatMap((station) => [
       `nwr${around(WALK_RADIUS_M, station)}["amenity"~"^(restaurant|fast_food|food_court|ice_cream|cafe|bar|pub|biergarten)$"]["name"];`,
@@ -169,6 +172,17 @@ const output = previous?.stations ?? {};
 const cellsDone = new Set(previous?.cellsDone ?? []);
 const save = () =>
   writeFileSync(OUT, JSON.stringify({ categories: CATEGORY_IDS, cellsDone: [...cellsDone], stations: output }));
+
+// --missing: only stations with no places yet, searched around their own coordinates like --world
+// (stations added from supercharge.info may not be in OSM). These batches aren't marked done.
+const MISSING = process.argv.includes("--missing");
+const idsArg = process.argv.find((arg) => arg.startsWith("--ids="));
+const onlyIds = idsArg ? new Set(readFileSync(idsArg.slice("--ids=".length), "utf8").split(/\s+/).filter(Boolean)) : null;
+if (MISSING) {
+  const todo = stations.filter((station) => !output[station.id] && (!onlyIds || onlyIds.has(station.id)));
+  cells.clear();
+  for (let i = 0; i < todo.length; i += WORLD_BATCH) cells.set(`m:${i / WORLD_BATCH}`, todo.slice(i, i + WORLD_BATCH));
+}
 
 // Optionally process the cell containing a given point first (handy for testing one area).
 const firstArg = process.argv.find((arg) => arg.startsWith("--first="));
@@ -228,7 +242,7 @@ for (const [cellKey, cellStations] of order) {
     if (rows.length) output[station.id] = rows;
   }
 
-  cellsDone.add(cellKey);
+  if (!MISSING) cellsDone.add(cellKey);
   save();
   console.log(`cell ${done}/${cells.size}: ${cellStations.length} stations, ${places.length} places`);
   await sleep(3000);

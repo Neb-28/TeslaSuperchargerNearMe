@@ -19,7 +19,8 @@ import { parseZip } from "@/lib/zipQuery";
 // Every trip is planned as leaving with 80% (lib/routePlanner.ts START_PCT).
 // → { from, to, distanceKm, durationS, path, stops, arrivePct, stuckAtKm }
 
-const allStations = [...superchargers, ...worldStations];
+// Temporarily closed stations are never planned as a stop.
+const allStations = [...superchargers, ...worldStations].filter((station) => !station.temporarilyClosed);
 const toRouteStation = (station: (typeof allStations)[number]): RouteStation => ({
   id: station.id,
   name: station.name,

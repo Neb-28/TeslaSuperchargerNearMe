@@ -8,7 +8,7 @@ import SideRails from "@/components/SideRails";
 import SiteHeader from "@/components/SiteHeader";
 import StationListCard from "@/components/StationListCard";
 import { absoluteUrl } from "@/lib/site";
-import { areaName, cityHref, countryPhrase, getCity, getCountry, nearbyCities, stateHref, stationHref, stationTitle } from "@/lib/superchargers";
+import { areaName, cityHref, countryPhrase, getCity, nearbyCities, stateHref, stationHref, stationTitle } from "@/lib/superchargers";
 import { stateName } from "@/lib/usStates";
 
 type CityPageProps = PageProps<"/supercharger/[state]/[city]">;
@@ -109,7 +109,7 @@ export default async function CityPage({ params }: CityPageProps) {
           }}
         />
       </main>
-      <SiteFooter osmCredit dataCredit={Boolean(getCountry(city.state))} />
+      <SiteFooter osmCredit dataCredit />
     </div>
   );
 }

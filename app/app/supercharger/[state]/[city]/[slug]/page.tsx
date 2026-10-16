@@ -16,7 +16,7 @@ import { placesForStation } from "@/lib/placesData";
 import { absoluteUrl } from "@/lib/site";
 import { stationAbout } from "@/lib/stationAbout";
 import { approvedPhotosForStation, toPublicPhoto } from "@/lib/stationPhotos";
-import { areaName, cityHref, getCity, getStationBySlug, isWorldStation, nearestOtherSupercharger, stateHref, stationHref, stationTitle } from "@/lib/superchargers";
+import { areaName, cityHref, getCity, getStationBySlug, isWorldStation, nearestOtherSupercharger, replacementForSlug, stateHref, stationHref, stationTitle } from "@/lib/superchargers";
 import { stateName } from "@/lib/usStates";
 
 type StationPageProps = PageProps<"/supercharger/[state]/[city]/[slug]">;
@@ -45,7 +45,12 @@ export async function generateMetadata({ params }: StationPageProps): Promise<Me
 
 export default async function StationPage({ params }: StationPageProps) {
   const station = await loadStation(params);
-  if (!station) notFound();
+  if (!station) {
+    // A station whose slug changed, or one that was removed: send visitors to where it went.
+    const replacement = replacementForSlug((await params).slug);
+    if (replacement) permanentRedirect(stationHref(replacement));
+    notFound();
+  }
 
   // One URL per station: fix a wrong state or city segment with a permanent redirect.
   const { state, city } = await params;
@@ -110,6 +115,12 @@ export default async function StationPage({ params }: StationPageProps) {
             <h1>{station.name}</h1>
             <div className="station-model">Tesla Supercharger</div>
             {station.address ? <div className="station-address">{station.address}</div> : null}
+            {station.temporarilyClosed ? (
+              <p className="closed-notice">
+                <strong>Temporarily closed.</strong> supercharge.info lists this Supercharger as temporarily closed. Check the
+                Tesla app before you drive here.
+              </p>
+            ) : null}
 
             <div className="station-actions">
               <a className="station-action primary" href={directionsUrl} target="_blank" rel="noreferrer">
@@ -170,7 +181,7 @@ export default async function StationPage({ params }: StationPageProps) {
                 </span>
               </div>
             )}
-            <p className="port-status-note">Live stall availability isn&apos;t available yet. Stall counts come from OpenStreetMap.</p>
+            <p className="port-status-note">Live stall availability isn&apos;t available yet. Stall counts come from supercharge.info and OpenStreetMap.</p>
           </section>
 
           <section className="station-about" aria-labelledby="station-about-title">
@@ -196,7 +207,7 @@ export default async function StationPage({ params }: StationPageProps) {
             metric={metric}
           />
 
-          <SiteFooter osmCredit dataCredit={isWorldStation(station)} />
+          <SiteFooter osmCredit dataCredit />
         </main>
 
         {/* Described as a schema.org Place (a charging location), not a LocalBusiness: we don't run it. */}

@@ -38,7 +38,7 @@ const faqs = [
   },
   {
     question: "Is this site run by Tesla?",
-    answer: "No. TeslaSuperchargerNearMe is an independent guide and is not affiliated with Tesla, Inc. Station locations come from OpenStreetMap.",
+    answer: "No. TeslaSuperchargerNearMe is an independent guide and is not affiliated with Tesla, Inc. Station locations come from supercharge.info and OpenStreetMap.",
   },
 ];
 

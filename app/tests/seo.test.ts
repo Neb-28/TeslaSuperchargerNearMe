@@ -14,9 +14,13 @@ describe("station titles", () => {
     expect(stationTitle(station)).toContain(station.cityLabel!);
   });
 
-  it("say 'near' a city for stations OSM has no address for", () => {
-    const station = superchargers.find((item) => item.nearLabel)!;
-    expect(stationTitle(station)).toContain(`near ${station.nearLabel}`);
+  // scripts/reconcile-us-superchargers.mjs gives stations OSM had no address for the address from
+  // supercharge.info, so none borrows a nearby city ("near …") any more.
+  it("give every station its own city", () => {
+    for (const station of superchargers) {
+      expect(station.cityLabel).toBeTruthy();
+      expect(station.nearLabel).toBeNull();
+    }
   });
 });
 

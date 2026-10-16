@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-// `dataCredit` is for pages showing stations outside the US, which come from supercharge.info.
+// `dataCredit` is for pages showing station details, which are checked against supercharge.info.
 export default function SiteFooter({ osmCredit = false, dataCredit = false }: { osmCredit?: boolean; dataCredit?: boolean }) {
   return (
     <footer className="footer-note">

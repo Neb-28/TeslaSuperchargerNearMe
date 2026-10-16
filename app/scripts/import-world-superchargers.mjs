@@ -7,12 +7,12 @@
 //   node scripts/import-world-superchargers.mjs              # download the feed (~6.5 MB)
 //   node scripts/import-world-superchargers.mjs saved.json   # re-process an earlier download
 //
-// Only built stations are kept (OPEN, plus EXPANDING), matching the US data, which only lists
-// stations that exist. Station data: supercharge.info (credited on the pages that show it).
-import { readFileSync, writeFileSync } from "node:fs";
+// Only built stations are kept (OPEN, EXPANDING, and CLOSED_TEMP, shown as temporarily closed),
+// matching the US data. Station data: supercharge.info (credited on the pages that show it).
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 
 const FEED_URL = "https://supercharge.info/service/supercharge/allSites";
-const KEEP_STATUSES = new Set(["OPEN", "EXPANDING"]);
+const KEEP_STATUSES = new Set(["OPEN", "EXPANDING", "CLOSED_TEMP"]);
 
 async function load(source) {
   if (source) return JSON.parse(readFileSync(source, "utf8"));
@@ -122,14 +122,36 @@ const stations = rows.map((s) => {
     countryCode,
     cityName: a.city,
     region: region || null,
+    ...(s.status === "CLOSED_TEMP" ? { temporarilyClosed: true } : {}),
   };
 });
 
 const slugs = new Set(stations.map((s) => s.slug));
 if (slugs.size !== stations.length) throw new Error("Station slugs are not unique");
 
+// Stations that dropped out of the feed (closed, or moved to a new site id) send their visitors to
+// the nearest station still listed, through data/station-redirects.json (shared with the US list).
+const OUT = new URL("../data/world-superchargers.json", import.meta.url);
+const REDIRECTS = new URL("../data/station-redirects.json", import.meta.url);
+const previous = existsSync(OUT) ? JSON.parse(readFileSync(OUT, "utf8")).stations : [];
+const redirects = existsSync(REDIRECTS) ? JSON.parse(readFileSync(REDIRECTS, "utf8")).redirects : {};
+const currentIds = new Set(stations.map((s) => s.id));
+const km = (a, b) => {
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const h = Math.sin(toRad(b.lat - a.lat) / 2) ** 2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(toRad(b.lon - a.lon) / 2) ** 2;
+  return 2 * 6371 * Math.asin(Math.sqrt(h));
+};
+const dropped = previous.filter((old) => !currentIds.has(old.id));
+for (const old of dropped) {
+  const nearest = stations.reduce((best, s) => (!best || km(old, s) < km(old, best) ? s : best), null);
+  redirects[old.id] = nearest.id;
+}
+for (const id of currentIds) delete redirects[id]; // a station that came back
+writeFileSync(REDIRECTS, JSON.stringify({ redirects: Object.fromEntries(Object.entries(redirects).sort()) }, null, 1) + "\n");
+if (dropped.length) console.log(`${dropped.length} stations dropped out of the feed; redirected to the nearest listed station`);
+
 writeFileSync(
-  new URL("../data/world-superchargers.json", import.meta.url),
+  OUT,
   JSON.stringify({ source: "supercharge.info", fetchedAt: new Date().toISOString(), stations }),
 );
 const countries = new Set(stations.map((s) => s.state));

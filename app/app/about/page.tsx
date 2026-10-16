@@ -29,7 +29,7 @@ export default function AboutPage() {
           Stations and nearby places come from public and open data sources, and we refresh our listings regularly. The route planner
           uses official vehicle range figures and, where Superchargers can&apos;t reach, suggests other networks&apos; fast chargers.
         </p>
-        <p>Map data © OpenStreetMap contributors.</p>
+        <p>Station data: supercharge.info. Map data © OpenStreetMap contributors.</p>
 
         <h2>An honest note on availability</h2>
         <p>

@@ -2733,6 +2733,16 @@ a.station-row:hover .station-name {
   color: var(--ink);
 }
 
+.closed-notice {
+  margin: 10px 0 4px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: var(--surface);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
 .port-status-note {
   margin: 8px 0 0;
   color: var(--muted);

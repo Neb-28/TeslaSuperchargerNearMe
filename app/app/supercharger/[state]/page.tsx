@@ -115,7 +115,7 @@ export default async function StatePage({ params }: StatePageProps) {
           }}
         />
       </main>
-      <SiteFooter osmCredit dataCredit={Boolean(getCountry(state))} />
+      <SiteFooter osmCredit dataCredit />
     </div>
   );
 }

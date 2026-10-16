@@ -55,6 +55,16 @@ describe("GET /api/route-plan", () => {
     expect(response.headers.get("cache-control")).toContain("s-maxage");
   });
 
+  it("never plans a stop at a temporarily closed station", async () => {
+    const closed = superchargers.find((station) => station.temporarilyClosed)!;
+    // A route straight through the closed station, long enough to need a stop around it.
+    const points: [number, number][] = [-1.5, -0.75, 0, 0.75, 1.5].map((offset) => [closed.lat, closed.lon + offset]);
+    vi.stubGlobal("fetch", vi.fn(async () => Response.json(fakeRoute(points, 250_000))));
+
+    const body = await (await call({ ...trip, range: "100" })).json();
+    expect(body.stops.map((stop: { station: { id: string } }) => stop.station.id)).not.toContain(closed.id);
+  });
+
   it("never caches trips from the visitor's own location", async () => {
     const a = superchargers[0];
     vi.stubGlobal("fetch", vi.fn(async () => Response.json(fakeRoute([[a.lat, a.lon], [a.lat + 0.1, a.lon]], 12_000))));

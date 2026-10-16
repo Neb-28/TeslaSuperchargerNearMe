@@ -1,6 +1,7 @@
 // Server-only: loads the ~900 KB Supercharger snapshot (scripts/import-superchargers.mjs).
 // When the M1 database lands, these functions become SQL queries with the same shapes.
 import snapshot from "@/data/superchargers.json";
+import stationRedirects from "@/data/station-redirects.json";
 import worldSnapshot from "@/data/world-superchargers.json";
 import type { Pin, PinTuple } from "./pins";
 import { milesBetween, type LatLng } from "./stations";
@@ -22,10 +23,17 @@ export type Supercharger = {
   ccs: boolean; // has a CCS (Magic Dock) connector, so non-Tesla EVs can plug in
   // Outside the US only (data/world-superchargers.json); US stations show "NACS".
   plug?: string | null;
+  // supercharge.info lists the station as temporarily closed: the page says so, lists label it
+  // and the route planner skips it.
+  temporarilyClosed?: boolean;
 };
 
+// The station's name as lists and the map show it, with a closed station labeled.
+export const listName = (station: Supercharger) => (station.temporarilyClosed ? `${station.name} · Temporarily closed` : station.name);
+
 export const superchargers = (snapshot as { stations: Supercharger[] }).stations;
-export const snapshotDate = (snapshot as { fetchedAt: string | null }).fetchedAt;
+// When the list last changed: the latest supercharge.info check, or the OSM download before any.
+export const snapshotDate = (snapshot as { fetchedAt: string | null; checkedAt?: string }).checkedAt ?? (snapshot as { fetchedAt: string | null }).fetchedAt;
 
 export function stationHref(station: Pick<Supercharger, "state" | "city" | "slug">) {
   return `/supercharger/${station.state}/${station.city}/${station.slug}`;
@@ -38,7 +46,7 @@ export function getStationBySlug(slug: string) {
 }
 
 export function stationPins(): PinTuple[] {
-  return superchargers.map((station) => [station.lat, station.lon, station.stalls, station.maxKw, station.name, stationHref(station)]);
+  return superchargers.map((station) => [station.lat, station.lon, station.stalls, station.maxKw, listName(station), stationHref(station)]);
 }
 
 export function toPin(station: Supercharger): Pin {
@@ -171,6 +179,19 @@ export function getStationById(id: string) {
   return byId.get(id) ?? null;
 }
 
+// Removed stations (closed, duplicates, not open yet) point at the nearest station still listed
+// (scripts/reconcile-us-superchargers.mjs), so old links and search results land on a real one.
+const redirectedIds = (stationRedirects as { redirects: Record<string, string> }).redirects;
+
+// For a slug that isn't a current station, where its visitors should go: the same station under
+// a new slug (the id at the end, "aborn-square-n12914068932", stays the same), or the station a
+// removed one was redirected to.
+export function replacementForSlug(slug: string) {
+  const id = /-([nwrs]\d+)$/.exec(slug)?.[1];
+  if (!id) return null;
+  return byId.get(id) ?? byId.get(redirectedIds[id] ?? "") ?? null;
+}
+
 // The closest other Supercharger anywhere (US or world), for the station page's "About" text.
 export function nearestOtherSupercharger(station: Supercharger) {
   let best: { station: Supercharger; miles: number } | null = null;
@@ -288,7 +309,7 @@ const ENGLISH_NAMES: Record<string, string> = {
 
 function worldPin(station: WorldSupercharger): PinTuple {
   const search = [station.cityName, ENGLISH_NAMES[station.cityName], station.region, station.country].filter(Boolean).join(" ");
-  return [station.lat, station.lon, station.stalls, station.maxKw, station.name, stationHref(station), search];
+  return [station.lat, station.lon, station.stalls, station.maxKw, listName(station), stationHref(station), search];
 }
 
 export function countryPins(slug: string): PinTuple[] {
