@@ -6,10 +6,12 @@
 // Usage:
 //   node scripts/import-world-superchargers.mjs              # download the feed (~6.5 MB)
 //   node scripts/import-world-superchargers.mjs saved.json   # re-process an earlier download
+//   node scripts/import-world-superchargers.mjs saved.json --force  # past the safety brake (see below)
 //
 // Only built stations are kept (OPEN, EXPANDING, and CLOSED_TEMP, shown as temporarily closed),
 // matching the US data. Station data: supercharge.info (credited on the pages that show it).
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { writeData } from "./lib/write-data.mjs";
 
 const FEED_URL = "https://supercharge.info/service/supercharge/allSites";
 const KEEP_STATUSES = new Set(["OPEN", "EXPANDING", "CLOSED_TEMP"]);
@@ -67,7 +69,7 @@ function plugLabel(plugs = {}) {
   return null;
 }
 
-const raw = await load(process.argv[2]);
+const raw = await load(process.argv.slice(2).find((arg) => !arg.startsWith("--")));
 const rows = raw
   .filter((s) => s.address?.country && s.address.country !== "USA")
   .filter((s) => KEEP_STATUSES.has(s.status))
@@ -142,6 +144,13 @@ const km = (a, b) => {
   return 2 * 6371 * Math.asin(Math.sqrt(h));
 };
 const dropped = previous.filter((old) => !currentIds.has(old.id));
+// Safety brake for the nightly run, as in reconcile-us-superchargers.mjs: a broken feed must not
+// empty the map. Stop without writing anything; --force goes ahead.
+const maxDropped = Math.max(25, Math.round(previous.length * 0.05));
+if (!process.argv.includes("--force") && (dropped.length > maxDropped || stations.length < previous.length * 0.9)) {
+  console.error(`Stopped: ${dropped.length} stations would drop out (limit ${maxDropped}), ${stations.length} listed for ${previous.length} before. Nothing was written.`);
+  process.exit(1);
+}
 for (const old of dropped) {
   const nearest = stations.reduce((best, s) => (!best || km(old, s) < km(old, best) ? s : best), null);
   redirects[old.id] = nearest.id;
@@ -150,10 +159,7 @@ for (const id of currentIds) delete redirects[id]; // a station that came back
 writeFileSync(REDIRECTS, JSON.stringify({ redirects: Object.fromEntries(Object.entries(redirects).sort()) }, null, 1) + "\n");
 if (dropped.length) console.log(`${dropped.length} stations dropped out of the feed; redirected to the nearest listed station`);
 
-writeFileSync(
-  OUT,
-  JSON.stringify({ source: "supercharge.info", fetchedAt: new Date().toISOString(), stations }),
-);
+writeData(OUT, { source: "supercharge.info", fetchedAt: new Date().toISOString(), stations }, "stations");
 const countries = new Set(stations.map((s) => s.state));
 const cities = new Set(stations.map((s) => `${s.state}/${s.city}`));
 console.log(`Wrote ${stations.length} Superchargers outside the US: ${countries.size} countries, ${cities.size} cities`);

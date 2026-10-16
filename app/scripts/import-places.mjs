@@ -8,6 +8,7 @@
 //        node scripts/import-places.mjs --missing  (only stations with no places yet, e.g. just added;
 //                                                   add --world for stations outside the US)
 //        node scripts/import-places.mjs --missing --ids=new-ids.txt  (only these station ids, one per line)
+//        node scripts/import-places.mjs --missing --minutes=20  (start no new batch after 20 minutes)
 //
 // US stations are looked up around Tesla stations as mapped in OpenStreetMap. Many stations
 // abroad (China especially) aren't in OSM, so --world searches around each station's own
@@ -19,7 +20,8 @@
 // The US is split into grid cells so each Overpass query stays small, and queries run one at a
 // time with pauses, within the public server's fair-use limits.
 // Data © OpenStreetMap contributors, ODbL.
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { writeData } from "./lib/write-data.mjs";
 
 // The main public server is often busy (504); retries alternate with a public mirror.
 const OVERPASS_URLS = ["https://overpass-api.de/api/interpreter", "https://maps.mail.ru/osm/tools/overpass/api/interpreter"];
@@ -170,12 +172,13 @@ const OUT = new URL("../data/places.json", import.meta.url);
 const previous = !process.argv.includes("--fresh") && existsSync(OUT) ? JSON.parse(readFileSync(OUT, "utf8")) : null;
 const output = previous?.stations ?? {};
 const cellsDone = new Set(previous?.cellsDone ?? []);
-const save = () =>
-  writeFileSync(OUT, JSON.stringify({ categories: CATEGORY_IDS, cellsDone: [...cellsDone], stations: output }));
+const save = () => writeData(OUT, { categories: CATEGORY_IDS, cellsDone: [...cellsDone], stations: output }, "stations");
 
 // --missing: only stations with no places yet, searched around their own coordinates like --world
 // (stations added from supercharge.info may not be in OSM). These batches aren't marked done.
 const MISSING = process.argv.includes("--missing");
+const minutesArg = process.argv.find((arg) => arg.startsWith("--minutes="));
+const deadline = minutesArg ? Date.now() + Number(minutesArg.slice("--minutes=".length)) * 60_000 : Infinity;
 const idsArg = process.argv.find((arg) => arg.startsWith("--ids="));
 const onlyIds = idsArg ? new Set(readFileSync(idsArg.slice("--ids=".length), "utf8").split(/\s+/).filter(Boolean)) : null;
 if (MISSING) {
@@ -199,6 +202,10 @@ let skipped = 0;
 for (const [cellKey, cellStations] of order) {
   done++;
   if (cellsDone.has(cellKey)) continue;
+  if (Date.now() > deadline) {
+    console.warn(`Time limit reached after ${done - 1} of ${cells.size} batches; the next run continues.`);
+    break;
+  }
   const query = queryFor(cellStations);
 
   const elements = await overpass(query);
@@ -239,7 +246,10 @@ for (const [cellKey, cellStations] of order) {
         .slice(0, PER_CATEGORY)
         .forEach((place) => rows.push([index, place.name, place.kind, place.distance, Number(place.lat.toFixed(5)), Number(place.lon.toFixed(5))]));
     }
-    if (rows.length) output[station.id] = rows;
+    // Searches around a station's own coordinates (--world, --missing) also record "nothing
+    // nearby", so --missing doesn't search the same empty spot again. The US grid search only finds
+    // places around stations mapped in OSM, so there an empty result isn't final.
+    if (rows.length || WORLD || MISSING) output[station.id] = rows;
   }
 
   if (!MISSING) cellsDone.add(cellKey);
@@ -249,4 +259,6 @@ for (const [cellKey, cellStations] of order) {
 }
 
 save();
-console.log(`Places for ${Object.keys(output).length} of ${stations.length} stations${skipped ? `; ${skipped} cells skipped, run again to retry them` : ""}`);
+const withPlaces = stations.filter((station) => output[station.id]?.length).length;
+const searched = stations.filter((station) => output[station.id]).length;
+console.log(`Places near ${withPlaces} of ${stations.length} stations (${searched - withPlaces} searched, nothing nearby)${skipped ? `; ${skipped} batches skipped, run again to retry them` : ""}`);

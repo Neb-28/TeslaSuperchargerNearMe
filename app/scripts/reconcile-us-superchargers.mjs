@@ -17,9 +17,11 @@
 //   node scripts/reconcile-us-superchargers.mjs                    # download the feed (~6.5 MB)
 //   node scripts/reconcile-us-superchargers.mjs saved.json         # use an earlier download
 //   node scripts/reconcile-us-superchargers.mjs saved.json --report=report.json
+//   node scripts/reconcile-us-superchargers.mjs saved.json --force   # past the safety brake (see below)
 //
 // Station data: supercharge.info and OpenStreetMap contributors (ODbL), credited on the pages.
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { writeData } from "./lib/write-data.mjs";
 
 const FEED_URL = "https://supercharge.info/service/supercharge/allSites";
 const OPEN_STATUSES = new Set(["OPEN", "EXPANDING", "CLOSED_TEMP"]);
@@ -29,6 +31,7 @@ const FAR_KM = 2;
 const args = process.argv.slice(2);
 const source = args.find((arg) => !arg.startsWith("--"));
 const reportPath = args.find((arg) => arg.startsWith("--report="))?.slice("--report=".length);
+const force = args.includes("--force");
 
 async function load() {
   if (source) return JSON.parse(readFileSync(source, "utf8"));
@@ -233,15 +236,20 @@ for (const [from, to] of Object.entries(redirects)) {
 const slugs = new Set(kept.map((station) => station.slug));
 if (slugs.size !== kept.length) throw new Error("Station slugs are not unique");
 
+// Safety brake for the nightly run: a broken or half-empty feed would otherwise remove hundreds of
+// stations. Stop without writing anything; after a look at the feed, --force goes ahead.
+const maxRemoved = Math.max(25, Math.round(ours.length * 0.05));
+const openSites = sites.filter((site) => OPEN_STATUSES.has(site.status)).length;
+if (!force && (removed.length > maxRemoved || openSites < ours.length * 0.9)) {
+  console.error(`Stopped: ${removed.length} stations would be removed (limit ${maxRemoved}) and the feed lists ${openSites} open US sites for our ${ours.length}. Nothing was written.`);
+  process.exit(1);
+}
+
 const stations = kept.sort((a, b) => a.state.localeCompare(b.state) || a.city.localeCompare(b.city) || a.slug.localeCompare(b.slug));
-writeFileSync(
+writeData(
   dataUrl("superchargers.json"),
-  JSON.stringify({
-    source: "OpenStreetMap contributors (ODbL), checked against supercharge.info",
-    fetchedAt: snapshot.fetchedAt,
-    checkedAt: new Date().toISOString(),
-    stations,
-  }),
+  { source: "OpenStreetMap contributors (ODbL), checked against supercharge.info", fetchedAt: snapshot.fetchedAt, checkedAt: new Date().toISOString(), stations },
+  "stations",
 );
 writeFileSync(redirectsFile, JSON.stringify({ redirects: Object.fromEntries(Object.entries(redirects).sort()) }, null, 1) + "\n");
 
