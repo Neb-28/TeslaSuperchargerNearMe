@@ -28,7 +28,9 @@ export async function isAdmin() {
 
 export async function logIn(password: string) {
   const token = sessionToken();
-  if (!token || !safeEqual(password, process.env.ADMIN_PASSWORD!)) return false;
+  // Spaces or a line break at either end are never meant: a password saved with `vercel env add`
+  // can end in a newline, and phones add a trailing space. Everything else must match exactly.
+  if (!token || !safeEqual(password.trim(), process.env.ADMIN_PASSWORD!.trim())) return false;
   (await cookies()).set(COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

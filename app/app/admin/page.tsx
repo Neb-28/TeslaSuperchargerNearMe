@@ -56,7 +56,7 @@ export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
         <form action={loginAction} className="form-card">
           <label className="field">
             <span>Password</span>
-            <input name="password" type="password" autoComplete="current-password" required />
+            <input name="password" type="password" autoComplete="current-password" autoCapitalize="off" autoCorrect="off" spellCheck={false} required />
           </label>
           <button type="submit" className="action-button primary">Sign in</button>
         </form>
