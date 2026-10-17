@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import JsonLd from "@/components/JsonLd";
+import MapLinkLabel from "@/components/MapLinkLabel";
 import OtherFastChargers from "@/components/OtherFastChargers";
 import SiteFooter from "@/components/SiteFooter";
 import SideRails from "@/components/SideRails";
@@ -47,7 +48,7 @@ export default function TownPage({ town }: { town: TownSummary }) {
           {town.name}. Open a station for directions and for places to eat, grab coffee or shop within a short walk while you charge.
         </p>
         <Link href={`/map?station=${closest.station.slug}`} className="action-button primary">
-          See them on the map
+          <MapLinkLabel>See them on the map</MapLinkLabel>
         </Link>
 
         <ul className="station-list content-card">

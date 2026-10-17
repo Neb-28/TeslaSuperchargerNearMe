@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import JsonLd from "@/components/JsonLd";
+import MapLinkLabel from "@/components/MapLinkLabel";
 import OtherFastChargers from "@/components/OtherFastChargers";
 import SiteFooter from "@/components/SiteFooter";
 import SideRails from "@/components/SideRails";
@@ -82,7 +83,7 @@ export default async function CityPage({ params }: CityPageProps) {
           within a short walk while you charge.
         </p>
         <Link href={`/map?station=${city.stations[0].slug}`} className="action-button primary">
-          See them on the map
+          <MapLinkLabel>See them on the map</MapLinkLabel>
         </Link>
 
         <ul className="station-list content-card">
