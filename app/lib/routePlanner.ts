@@ -47,8 +47,8 @@ export type PlanOptions = {
 export const START_PCT = 80;
 export const RESERVE_PCT = 10;
 export const STOP_AT_PCT = 15;
-export const CHARGE_TO_PCT = 80;
-export const MAX_DETOUR_KM = 8; // about 5 miles off the route
+const CHARGE_TO_PCT = 80;
+const MAX_DETOUR_KM = 8; // about 5 miles off the route
 const SAMPLE_KM = 0.5;
 const CELL_DEG = 0.1; // ~11 km, more than MAX_DETOUR_KM, so a 3×3 block of cells covers it
 const MAX_STOPS = 40;
@@ -62,7 +62,7 @@ const toRad = (deg: number) => (deg * Math.PI) / 180;
 // Round a charge level up, ignoring floating-point dust (85.0000001% is 85%).
 const roundUpPct = (pct: number) => Math.ceil(pct - 1e-6);
 
-export function kmBetween(a: LatLng, b: LatLng) {
+function kmBetween(a: LatLng, b: LatLng) {
   const dLat = toRad(b[0] - a[0]);
   const dLon = toRad(b[1] - a[1]);
   const h = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a[0])) * Math.cos(toRad(b[0])) * Math.sin(dLon / 2) ** 2;

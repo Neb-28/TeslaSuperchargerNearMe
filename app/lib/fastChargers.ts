@@ -50,7 +50,7 @@ const NETWORK_NAMES: Record<string, string> = {
 };
 
 // Rare networks not listed above: "DIRT_ROAD" → "Dirt Road"; short codes like "FCN" stay as they are.
-export function networkName(raw: string) {
+function networkName(raw: string) {
   return (
     NETWORK_NAMES[raw] ??
     raw

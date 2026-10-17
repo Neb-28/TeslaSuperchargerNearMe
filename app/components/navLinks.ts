@@ -1,7 +1,7 @@
 export type MenuLink = { label: string; href: string };
 
 // The ☰ menu (a panel that slides in from the right), in groups separated by dividers.
-export const accountLinks: MenuLink[] = [
+const accountLinks: MenuLink[] = [
   { label: "My Profile", href: "/account" },
   { label: "Log in", href: "/login" },
 ];

@@ -209,7 +209,7 @@ export function nearestOtherSupercharger(station: Supercharger) {
   return best;
 }
 
-export const US_COUNTRY = { slug: "united-states", code: "US", name: "United States" } as const;
+const US_COUNTRY = { slug: "united-states", code: "US", name: "United States" } as const;
 
 export function isWorldStation(station: Supercharger): station is WorldSupercharger {
   return "country" in station;
@@ -252,11 +252,6 @@ for (const [key, stations] of Map.groupBy(worldStations, (station) => `${station
   });
 }
 
-const centerOf = (stations: Supercharger[]): LatLng => [
-  stations.reduce((sum, station) => sum + station.lat, 0) / stations.length,
-  stations.reduce((sum, station) => sum + station.lon, 0) / stations.length,
-];
-
 export const countries: CountrySummary[] = [...Map.groupBy(worldStations, (station) => station.state)]
   .map(([slug, stations]) => {
     const cities = [...worldCitiesByKey.values()]
@@ -269,7 +264,7 @@ export const countries: CountrySummary[] = [...Map.groupBy(worldStations, (stati
       count: stations.length,
       stalls: stations.reduce((sum, station) => sum + (station.stalls ?? 0), 0),
       cities,
-      center: centerOf(cities[0].stations),
+      center: cityCenter(cities[0]),
     };
   })
   .sort((a, b) => a.name.localeCompare(b.name));
