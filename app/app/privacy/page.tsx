@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 // Green Star Tech's privacy policy (supplied by the owner). Update EFFECTIVE_DATE with every change.
-const EFFECTIVE_DATE = "October 14, 2026";
+const EFFECTIVE_DATE = "October 17, 2026";
 const SITE_HOST = new URL(SITE_URL).host;
 
 function Table({ head, rows }: { head: [string, string]; rows: [string, string][] }) {
@@ -82,7 +82,7 @@ export default function PrivacyPage() {
           head={["Category", "Examples"]}
           rows={[
             ["Identifiers", "First and last name, email address, phone number, account ID"],
-            ["Location", "Precise location from your device, only if you allow it in your browser or device settings"],
+            ["Location", "Approximate location (city or region) worked out from your IP address; precise location from your device, only if you allow it in your browser or device settings"],
             ["Device and network", "Device type, operating system, screen resolution, browser type, version and language, IP address"],
             ["Usage and activity", "Pages viewed, searches made, clicks, date and time of visits, crash and error logs"],
             [
@@ -109,8 +109,10 @@ export default function PrivacyPage() {
           usage information through server logs, error monitoring, cookies, pixels and local storage.
         </p>
         <p>
-          <strong>Location.</strong> If you allow it, the site uses your device&apos;s precise location to show nearby chargers and
-          businesses. You can turn off precise location at any time in your device or browser settings; nearby results will then be less accurate.
+          <strong>Location.</strong> When you open the map without searching, it starts at your approximate city, which our hosting
+          provider works out from your IP address. We use it only to choose where the map starts and do not store it. If you allow it,
+          the site uses your device&apos;s precise location to show nearby chargers and businesses. You can turn off precise location at
+          any time in your device or browser settings; nearby results will then be less accurate.
         </p>
 
         <h2>4. How We Use Information</h2>
@@ -136,7 +138,7 @@ export default function PrivacyPage() {
           rows={[
             ["Contract", "Running your account and providing the features you ask for"],
             ["Consent", "Precise location, non-essential cookies and interest-based advertising"],
-            ["Legitimate interests", "Error monitoring, service improvement, security and fraud prevention, balanced against your rights"],
+            ["Legitimate interests", "Starting the map at your approximate city, error monitoring, service improvement, security and fraud prevention, balanced against your rights"],
             ["Legal obligation", "Meeting tax, accounting and other legal requirements, and responding to lawful requests"],
           ]}
         />

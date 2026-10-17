@@ -27,6 +27,8 @@ type LeafletMapProps = {
   userPos: LatLng | null;
   // Center of a searched ZIP code or the highlighted station.
   searchPos: LatLng | null;
+  // The visitor's approximate city: where the map starts when there's no search (no marker).
+  startPos?: LatLng | null;
   // Bumped each time the map should re-frame on searchPos / the visitor.
   recenter: number;
   // Changes when a name search changes, to frame the matches.
@@ -34,7 +36,7 @@ type LeafletMapProps = {
   onOpenStation: (href: string) => void;
 };
 
-export default function LeafletMap({ pins, nearby, highlightHref, userPos, searchPos, recenter, fitKey, onOpenStation }: LeafletMapProps) {
+export default function LeafletMap({ pins, nearby, highlightHref, userPos, searchPos, startPos = null, recenter, fitKey, onOpenStation }: LeafletMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const dotsRef = useRef<L.LayerGroup | null>(null);
@@ -55,7 +57,7 @@ export default function LeafletMap({ pins, nearby, highlightHref, userPos, searc
     const container = containerRef.current;
     if (!container) return;
 
-    const map = L.map(container, { zoomControl: false }).setView(searchPos ?? DEFAULT_CENTER, 12);
+    const map = L.map(container, { zoomControl: false }).setView(searchPos ?? startPos ?? DEFAULT_CENTER, 12);
     L.control.zoom({ position: "topright" }).addTo(map);
     L.tileLayer(tileUrl, {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -164,7 +166,7 @@ export default function LeafletMap({ pins, nearby, highlightHref, userPos, searc
   useEffect(() => {
     const map = mapRef.current;
     if (recenter === 0 || !map) return;
-    const focus = searchPos ?? userPos;
+    const focus = searchPos ?? userPos ?? startPos;
     if (!focus) {
       map.setView(DEFAULT_CENTER, 12);
       return;

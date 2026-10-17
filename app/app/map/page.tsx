@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import CountryPicker from "@/components/CountryPicker";
 import MapView from "@/components/MapView";
 import SiteHeader from "@/components/SiteHeader";
+import { approximateLocation } from "@/lib/approximateLocation";
 import { findPlace } from "@/lib/findPlace";
 import { geocodeZip } from "@/lib/geocode";
 import { pinFromTuple, pinMatches } from "@/lib/pins";
 import { DEFAULT_CENTER } from "@/lib/stations";
-import { countryOptions, countryPins, getCountry, getStationBySlug, isWorldStation, nearestInCountry, nearestStations, stationHref, stationPins, toPin } from "@/lib/superchargers";
+import { countries, countryOptions, countryPins, getCountry, getStationBySlug, isWorldStation, nearestInCountry, nearestStations, stationHref, stationPins, toPin } from "@/lib/superchargers";
 import { looksLikeAddress, parseZip, type Place } from "@/lib/zipQuery";
 
 export const metadata: Metadata = {
@@ -28,7 +30,22 @@ export default async function MapPage({ searchParams }: PageProps<"/map">) {
   const station = typeof params.station === "string" ? getStationBySlug(params.station) : null;
   // Outside the US (?country=germany, or a station abroad) the map opens on that country's
   // busiest city and only shows its stations. Without a country the map is the US map, unchanged.
-  const country = station && isWorldStation(station) ? getCountry(station.state) : !station && typeof params.country === "string" ? getCountry(params.country) : null;
+  const chosenCountry = station && isWorldStation(station) ? getCountry(station.state) : !station && typeof params.country === "string" ? getCountry(params.country) : null;
+  // A plain visit (from Google, the menu or "Near me") with no station, search or country: start
+  // at the visitor's approximate city instead of our default spot in Virginia, in their own
+  // country when it has Superchargers. Anywhere else, or when the city is unknown, nothing changes.
+  const plainVisit = !station && !chosenCountry && !query.trim() && typeof params.country !== "string";
+  const approx = plainVisit ? approximateLocation(await headers()) : null;
+  const approxCountry = approx && approx.countryCode !== "US" ? (countries.find((item) => item.code === approx.countryCode) ?? null) : null;
+  const startAt =
+    approx && (approx.countryCode === "US" || approxCountry)
+      ? {
+          // "Los Angeles, CA", "Toronto, ON", "Manchester, United Kingdom" (like our city labels)
+          label: `${approx.city}, ${["US", "CA", "AU"].includes(approx.countryCode) && approx.region ? approx.region : (approxCountry?.name ?? approx.countryCode)}`,
+          position: approx.position,
+        }
+      : null;
+  const country = chosenCountry ?? approxCountry;
   // An address, or text no station name matches (a city without a Supercharger, a landmark):
   // look the place up and list the stations nearest to it. Other text filters station names.
   const text = query.trim();
@@ -40,15 +57,18 @@ export default async function MapPage({ searchParams }: PageProps<"/map">) {
     ? { label: station.cityLabel ?? station.nearLabel ?? station.name, position: [station.lat, station.lon] }
     : found
       ? found
-      : country
-        ? { label: country.cities[0].name, position: country.center }
-        : geocodeZip(query);
+      : startAt
+        ? null
+        : country
+          ? { label: country.cities[0].name, position: country.center }
+          : geocodeZip(query);
+  const origin = place?.position ?? startAt?.position ?? (country ? country.center : DEFAULT_CENTER);
   // A name search lists its matches (so "San Jose" shows San Jose's stations before the map's full
   // list loads); otherwise the stations nearest to where the map starts.
   const initialNearby =
     !lookUp && nameMatches.length
       ? nameMatches.slice(0, NAME_MATCHES_SHOWN)
-      : (country ? nearestInCountry(country.slug, place!.position) : nearestStations(place?.position ?? DEFAULT_CENTER)).map(({ station: item }) => toPin(item));
+      : (country ? nearestInCountry(country.slug, origin) : nearestStations(origin)).map(({ station: item }) => toPin(item));
   const options = countryOptions();
   const current = (country && options.find((option) => option.slug === country.slug)) || options[0];
 
@@ -64,6 +84,7 @@ export default async function MapPage({ searchParams }: PageProps<"/map">) {
         initialQuery={station ? "" : query}
         country={country ? { slug: country.slug, code: country.code } : null}
         initialPlace={place}
+        startAt={startAt}
         searchedPlace={Boolean(found)}
         initialError={lookUp && !found ? `We couldn't find “${text}”. Try adding the city, or use a ZIP code.` : null}
         initialNearby={initialNearby}

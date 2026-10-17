@@ -24,6 +24,9 @@ type MapViewProps = {
   // Set when the page opens on a ZIP, address or place search, or a station's "View larger map"
   // (looked up on the server).
   initialPlace: Place | null;
+  // The visitor's approximate city (from their IP address) on a plain visit: where the map and
+  // distances start until they search or share their location. Not a search, so no marker.
+  startAt?: Place | null;
   // initialPlace is where initialQuery was found (an address or place), not a name filter.
   searchedPlace?: boolean;
   // The server couldn't find the address or place in initialQuery.
@@ -59,7 +62,7 @@ function placeNotFound(text: string) {
   return `We couldn't find “${text}”. Try adding the city, or use a ZIP code.`;
 }
 
-export default function MapView({ initialQuery, initialPlace, initialNearby, highlightHref, near, focusSearch, country = null, searchedPlace = false, initialError = null }: MapViewProps) {
+export default function MapView({ initialQuery, initialPlace, startAt = null, initialNearby, highlightHref, near, focusSearch, country = null, searchedPlace = false, initialError = null }: MapViewProps) {
   const router = useRouter();
   const searchRef = useRef<HTMLInputElement>(null);
   const [draft, setDraft] = useState(initialQuery);
@@ -78,7 +81,8 @@ export default function MapView({ initialQuery, initialPlace, initialNearby, hig
   const geo = useGeolocation(near);
   const userPos = geo.position;
   const [manualRecenter, setManualRecenter] = useState(0);
-  const recenter = geo.fixCount + manualRecenter + placeCount;
+  // Starting at the approximate city also frames it with its nearest station once the map loads.
+  const recenter = geo.fixCount + manualRecenter + placeCount + (startAt ? 1 : 0);
 
   useEffect(() => {
     let cancelled = false;
@@ -104,12 +108,12 @@ export default function MapView({ initialQuery, initialPlace, initialNearby, hig
   }, [allPins, initialNearby, needle]);
 
   const nearby = useMemo(() => {
-    const origin = place?.position ?? userPos ?? DEFAULT_CENTER;
+    const origin = place?.position ?? userPos ?? startAt?.position ?? DEFAULT_CENTER;
     return matchingPins
       .map((pin) => ({ ...pin, miles: milesBetween(origin, [pin.lat, pin.lon]) }))
       .sort((a, b) => a.miles - b.miles)
       .slice(0, LIST_LIMIT);
-  }, [matchingPins, place, userPos]);
+  }, [matchingPins, place, userPos, startAt]);
 
   useEffect(() => {
     if (focusSearch) searchRef.current?.focus();
@@ -182,9 +186,11 @@ export default function MapView({ initialQuery, initialPlace, initialNearby, hig
   const total = needle ? matchingPins.length : nearby.length;
   const noun = total === 1 ? "Supercharger" : "Superchargers";
   // Only say "near you" once we actually know where the visitor is.
-  const where = place ? `near ${place.label}` : geo.status === "located" ? "near you" : "in this area";
+  const located = geo.status === "located";
+  const approximate = !place && !located && startAt !== null;
+  const where = place ? `near ${place.label}` : located ? "near you" : approximate ? `near ${startAt.label}` : "in this area";
   const title = needle ? `${total} ${noun} matching “${query}”` : `${total} ${noun} ${where}`;
-  const showNearest = place !== null || geo.status === "located";
+  const showNearest = place !== null || located;
   // "Nearest" goes to the closest station drivers can use, not a temporarily closed one.
   const nearestIndex = nearby.findIndex((pin) => !isClosedPin(pin));
 
@@ -216,6 +222,13 @@ export default function MapView({ initialQuery, initialPlace, initialNearby, hig
         <h1 id="sheet-title" className="sheet-title" aria-live="polite">{title}</h1>
 
         <LocationCard status={geo.status} onRequest={geo.request} onDismiss={geo.dismiss} onSearchInstead={searchInstead} />
+
+        {approximate && !needle && geo.status === "idle" ? (
+          <div className="sheet-status approx-note">
+            <span>Based on your approximate location.</span>
+            <button type="button" className="text-button" onClick={centerOnMe}>Use my exact location</button>
+          </div>
+        ) : null}
 
         {searchError ? <p className="sheet-status" role="status">{searchError}</p> : null}
 
@@ -271,6 +284,7 @@ export default function MapView({ initialQuery, initialPlace, initialNearby, hig
           highlightHref={highlightHref}
           userPos={userPos}
           searchPos={place?.position ?? null}
+          startPos={startAt?.position ?? null}
           recenter={recenter}
           fitKey={needle}
           onOpenStation={(href) => router.push(href)}

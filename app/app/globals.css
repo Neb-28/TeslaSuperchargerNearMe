@@ -1548,6 +1548,15 @@ img {
   color: var(--muted);
 }
 
+/* "Based on your approximate location. Use my exact location" under the map's heading: the
+   button keeps its 44 px tap height without stretching the line of text. */
+.approx-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 6px;
+}
+
 .text-button {
   display: inline-flex;
   align-items: center;
