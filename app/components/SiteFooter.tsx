@@ -2,17 +2,19 @@ import Link from "next/link";
 
 // `dataCredit` is for pages showing station details, which are checked against supercharge.info;
 // `placesCredit` for pages listing nearby places, which also come from Overture Maps;
-// `chargersCredit` for pages listing other networks' chargers.
+// `chargersCredit` for pages listing other networks' chargers; `townsCredit` for town pages abroad.
 export default function SiteFooter({
   osmCredit = false,
   dataCredit = false,
   placesCredit = false,
   chargersCredit = false,
+  townsCredit = false,
 }: {
   osmCredit?: boolean;
   dataCredit?: boolean;
   placesCredit?: boolean;
   chargersCredit?: boolean;
+  townsCredit?: boolean;
 }) {
   return (
     <footer className="footer-note">
@@ -20,6 +22,11 @@ export default function SiteFooter({
       {dataCredit ? <div>Station data: supercharge.info</div> : null}
       {placesCredit ? <div>Places: OpenStreetMap contributors, Overture Maps Foundation</div> : null}
       {chargersCredit ? <div>Other chargers: U.S. Department of Energy, Alternative Fuels Data Center</div> : null}
+      {townsCredit ? (
+        <div>
+          Towns: <a href="https://www.geonames.org/" className="footer-link">GeoNames</a> (CC BY 4.0)
+        </div>
+      ) : null}
       <div>Not affiliated with Tesla, Inc.</div>
       <nav className="footer-links" aria-label="Site">
         <Link href="/about" className="footer-link">About</Link>

@@ -8,6 +8,7 @@ import SiteFooter from "@/components/SiteFooter";
 import SideRails from "@/components/SideRails";
 import SiteHeader from "@/components/SiteHeader";
 import StationListCard from "@/components/StationListCard";
+import { unitFor } from "@/lib/distance";
 import { fastChargersNear } from "@/lib/fastChargers";
 import { absoluteUrl } from "@/lib/site";
 import { areaName, cityCenter, cityHref, countryPhrase, getCity, nearbyCities, stateHref, stationHref, stationTitle } from "@/lib/superchargers";
@@ -56,7 +57,8 @@ export default async function CityPage({ params }: CityPageProps) {
   const fastest = Math.max(0, ...city.stations.map((station) => station.maxKw ?? 0));
   const nearOnly = city.stations.filter((station) => !station.cityLabel).length;
   const others = nearbyCities(city);
-  const chargers = fastChargersNear(cityCenter(city));
+  const unit = unitFor(city.state);
+  const chargers = fastChargersNear(cityCenter(city), unit);
   const href = cityHref(city.state, city.city);
 
   return (
@@ -91,7 +93,7 @@ export default async function CityPage({ params }: CityPageProps) {
           ))}
         </ul>
 
-        <OtherFastChargers place={city.name} chargers={chargers} />
+        <OtherFastChargers place={city.name} chargers={chargers} unit={unit} />
 
         {others.length ? (
           <section aria-labelledby="other-cities" className="link-section">

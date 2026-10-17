@@ -4,8 +4,9 @@ import { allCities, allWorldCities, cityHref, countries, snapshotDate, stateHref
 import { allTowns } from "@/lib/towns";
 import { US_STATES } from "@/lib/usStates";
 
-// About 19,000 URLs: home, map, ~52 states, ~2,000 US cities, ~5,100 US towns near a Supercharger
-// and every US station page, plus ~54 countries, ~2,850 cities and ~5,750 stations elsewhere.
+// About 21,800 URLs: home, map, ~52 states, ~2,000 US cities, ~5,100 US towns near a Supercharger
+// and every US station page, plus ~54 countries, ~2,850 cities, ~5,750 stations and ~2,500 towns
+// (Canada, the UK, Australia, New Zealand, Ireland) elsewhere.
 // (Google's limit is 50,000 per sitemap; split with generateSitemaps if we ever get close.)
 export default function sitemap(): MetadataRoute.Sitemap {
   const updated = snapshotDate ? new Date(snapshotDate) : new Date();

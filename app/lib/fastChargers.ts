@@ -3,6 +3,7 @@
 // and listed on city and town pages.
 import data from "@/data/fast-chargers.json";
 import type { RouteStation } from "./routePlanner";
+import { nearRadius, type DistanceUnit } from "./distance";
 import { milesBetween, type LatLng } from "./stations";
 
 const CCS = 1;
@@ -86,8 +87,6 @@ export function otherChargersFor(plug: "nacs" | "ccs-adapter" | "ccs", ccsAdapte
   return ccsAdapter ? everyCharger : withNacs;
 }
 
-export const NEARBY_CHARGER_MILES = 10;
-
 export type NearbyCharger = RouteStation & { plugs: string; miles: number };
 
 const plugNames = (connectors: number) => [connectors & CCS ? "CCS" : null, connectors & NACS ? "NACS" : null].filter(Boolean).join(" and ");
@@ -96,14 +95,15 @@ const plugNames = (connectors: number) => [connectors & CCS ? "CCS" : null, conn
 // list already covers those.
 const listable = rows.filter((row) => !/tesla/i.test(row[1]));
 
-/** Other networks' fast chargers within 10 miles of a point, nearest first. */
-export function fastChargersNear(point: LatLng, limit = 8): NearbyCharger[] {
+/** Other networks' fast chargers within 10 miles (or 15 km) of a point, nearest first. */
+export function fastChargersNear(point: LatLng, unit: DistanceUnit = "mi", limit = 8): NearbyCharger[] {
+  const radius = nearRadius(unit).miles;
   const near: NearbyCharger[] = [];
   for (const row of listable) {
     // A degree of latitude is about 69 miles; skip far chargers before the exact distance.
-    if (Math.abs(row[3] - point[0]) > NEARBY_CHARGER_MILES / 69) continue;
+    if (Math.abs(row[3] - point[0]) > radius / 69) continue;
     const miles = milesBetween(point, [row[3], row[4]]);
-    if (miles <= NEARBY_CHARGER_MILES) near.push({ ...toRouteStation(row), plugs: plugNames(row[7]), miles });
+    if (miles <= radius) near.push({ ...toRouteStation(row), plugs: plugNames(row[7]), miles });
   }
   return near.sort((a, b) => a.miles - b.miles).slice(0, limit);
 }

@@ -55,7 +55,7 @@ export default async function StatePage({ params }: StatePageProps) {
     .flatMap((city) => city.stations)
     .sort((a, b) => (b.stalls ?? 0) - (a.stalls ?? 0))
     .slice(0, 5);
-  const towns = US_STATES[state] ? townsInState(state) : [];
+  const towns = townsInState(state);
 
   return (
     <div className="app-shell">

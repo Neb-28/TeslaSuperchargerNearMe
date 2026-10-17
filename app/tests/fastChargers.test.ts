@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fastChargersNear, NEARBY_CHARGER_MILES } from "@/lib/fastChargers";
+import { fastChargersNear } from "@/lib/fastChargers";
 import { cityCenter, getCity } from "@/lib/superchargers";
 
 describe("other fast chargers on city and town pages", () => {
@@ -11,7 +11,7 @@ describe("other fast chargers on city and town pages", () => {
     expect(chargers.length).toBeLessThanOrEqual(8);
     const miles = chargers.map((charger) => charger.miles);
     expect(miles).toEqual([...miles].sort((a, b) => a - b));
-    expect(Math.max(...miles)).toBeLessThanOrEqual(NEARBY_CHARGER_MILES);
+    expect(Math.max(...miles)).toBeLessThanOrEqual(10);
   });
 
   it("leave out Tesla sites and link to directions", () => {
@@ -20,6 +20,12 @@ describe("other fast chargers on city and town pages", () => {
       expect(charger.href).toMatch(/^https:\/\/www\.google\.com\/maps\/dir\//);
       expect(charger.plugs).toMatch(/^(CCS|NACS|CCS and NACS)$/);
     }
+  });
+
+  it("use 15 km abroad", () => {
+    const toronto = fastChargersNear(cityCenter(getCity("canada", "toronto")!), "km");
+    expect(toronto.length).toBeGreaterThan(0);
+    for (const charger of toronto) expect(charger.miles).toBeLessThanOrEqual(15 / 1.609344);
   });
 
   it("find nothing far from any charger", () => {

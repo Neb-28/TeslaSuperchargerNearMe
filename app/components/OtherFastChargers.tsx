@@ -1,22 +1,23 @@
-import { NEARBY_CHARGER_MILES, type NearbyCharger } from "@/lib/fastChargers";
+import { distanceText, nearRadius, type DistanceUnit } from "@/lib/distance";
+import type { NearbyCharger } from "@/lib/fastChargers";
 
 // Other networks' DC fast chargers near a city or town page, nearest first. We have no page for
 // them, so each row opens directions in Google Maps.
-export default function OtherFastChargers({ place, chargers }: { place: string; chargers: NearbyCharger[] }) {
+export default function OtherFastChargers({ place, chargers, unit }: { place: string; chargers: NearbyCharger[]; unit: DistanceUnit }) {
   if (!chargers.length) return null;
   return (
     <section aria-labelledby="other-chargers" className="link-section">
       <div>
         <h2 id="other-chargers" className="section-title">Other EV charging stations near {place}</h2>
         <p className="section-sub">
-          DC fast chargers from other networks within {NEARBY_CHARGER_MILES} miles. Most Teslas can use CCS chargers with a CCS adapter.
+          DC fast chargers from other networks within {nearRadius(unit).text}. Most Teslas can use CCS chargers with a CCS adapter.
         </p>
       </div>
       <ul className="station-list content-card">
         {chargers.map((charger) => {
           const independent = charger.network === "Independent charger";
           const meta = [
-            `${charger.miles.toFixed(1)} mi away`,
+            `${distanceText(charger.miles, unit, true)} away`,
             independent ? null : charger.name,
             charger.stalls ? `${charger.stalls} port${charger.stalls === 1 ? "" : "s"}` : null,
             charger.maxKw ? `up to ${charger.maxKw} kW` : null,
