@@ -123,6 +123,14 @@ img {
   outline-color: var(--brand);
 }
 
+/* Text fields light up in the near-black ink when tapped; buttons, links and checkboxes keep the
+   red ring. Fields with a border get an ink border and a soft glow instead (see .field and the
+   contact form), like the search boxes. */
+:where(input:not([type="checkbox"], [type="radio"], [type="button"], [type="submit"], [type="reset"], [type="file"], [type="range"], [type="color"]), select, textarea):focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
 .app-shell {
   flex: 1;
   display: flex;
@@ -547,9 +555,10 @@ img {
   outline: none;
 }
 
+/* Search fields light up in the near-black ink, not the brand red, when tapped. */
 .search-shell input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 4px rgba(204, 26, 33, 0.12);
+  border-color: var(--ink);
+  box-shadow: 0 0 0 4px rgba(23, 26, 28, 0.12);
 }
 
 .search-icon {
@@ -988,11 +997,13 @@ img {
   opacity: 1;
 }
 
-/* The site's focus ring goes on the whole pill when the field inside it has focus. */
+/* A tapped field lights up the whole pill: an ink border and a soft glow, like the search boxes. */
+.contact-field input:focus-visible,
 .contact-phone:has(:focus-visible),
 .contact-message:has(:focus-visible) {
-  outline: 3px solid var(--accent);
-  outline-offset: 2px;
+  outline: none;
+  border-color: var(--ink);
+  box-shadow: 0 0 0 4px rgba(23, 26, 28, 0.12);
 }
 
 .contact-field input[aria-invalid="true"],
@@ -1465,6 +1476,11 @@ img {
   padding: 0 18px 0 44px;
   font-size: 16px;
   color: var(--ink);
+}
+
+.map-search input:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-float), 0 0 0 2px var(--ink), 0 0 0 6px rgba(23, 26, 28, 0.12);
 }
 
 .filter-row {
@@ -3042,6 +3058,13 @@ a.station-row:hover .station-name {
 
 .field select:disabled {
   opacity: 0.7;
+}
+
+.field input:not([type="checkbox"], [type="radio"], [aria-invalid="true"]):focus-visible,
+.field select:focus-visible {
+  outline: none;
+  border-color: var(--ink);
+  box-shadow: 0 0 0 4px rgba(23, 26, 28, 0.12);
 }
 
 .field input[aria-invalid="true"] {
