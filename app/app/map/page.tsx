@@ -13,7 +13,8 @@ import { looksLikeAddress, parseZip, type Place } from "@/lib/zipQuery";
 
 export const metadata: Metadata = {
   title: "Map of Tesla Superchargers near me",
-  description: "Every US Tesla Supercharger on one map. Use your location, an address or a ZIP code to find the closest stations.",
+  description:
+    "Find the Tesla Superchargers closest to you, with stalls, charging speed and what's within walking distance. Search any address or city, or use your location.",
   // Searches and "View larger map" links add query strings; they are all the same page to Google.
   alternates: { canonical: "/map" },
 };
