@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { adminConfigured, isAdmin } from "@/lib/adminAuth";
@@ -26,6 +27,18 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+
+// A database hiccup (a statement timeout) shouldn't take the whole admin page down: an empty list
+// and a note instead, reported to Sentry.
+async function orEmpty<T>(lookup: Promise<T[]>, name: string, failed: string[]): Promise<T[]> {
+  try {
+    return await lookup;
+  } catch (error) {
+    Sentry.captureException(error, { tags: { lookup: `admin-${name}` } });
+    failed.push(name);
+    return [];
+  }
+}
 
 const GROUPS: { status: FeaturedStatus; title: string; empty: string }[] = [
   { status: "pending", title: "Waiting for review", empty: "No new applications." },
@@ -64,11 +77,12 @@ export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
     );
   }
 
+  const failed: string[] = [];
   const [listings, messages, pendingPhotos, approvedPhotos] = await Promise.all([
-    listFeatured(),
-    listContactMessages(),
-    listPhotos("pending"),
-    listPhotos("approved", 30),
+    orEmpty(listFeatured(), "Featured requests", failed),
+    orEmpty(listContactMessages(), "contact messages", failed),
+    orEmpty(listPhotos("pending"), "photos waiting for review", failed),
+    orEmpty(listPhotos("approved", 30), "approved photos", failed),
   ]);
 
   return (
@@ -80,6 +94,11 @@ export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
         </form>
       </div>
       {message ? <p className="form-success" role="status">{message}</p> : null}
+      {failed.length ? (
+        <p className="form-error" role="alert">
+          Couldn&apos;t load {failed.join(", ")}: the database didn&apos;t answer in time. Reload the page to try again.
+        </p>
+      ) : null}
       {error ? <p className="form-error" role="alert">{error}</p> : null}
 
       {GROUPS.map((group) => {
