@@ -24,7 +24,7 @@ export default function SiteHeader({ backHref, showSearch = false, showMenu = tr
           {backHref ? <BackButton fallbackHref={backHref} /> : null}
           <Link href="/" className="brand-link" aria-label={`${BRAND_NAME} home`}>
             <span className="brand-icon" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#14211C" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z" />
               </svg>
             </span>

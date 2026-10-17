@@ -129,7 +129,7 @@ export default function LeafletMap({ pins, nearby, highlightHref, userPos, searc
         radius: selected ? 8 : 5,
         color: "#FFFFFF",
         weight: 1.5,
-        fillColor: selected ? "#171A1C" : "#CC1A21",
+        fillColor: selected ? "#14211C" : "#0B6E5B",
         fillOpacity: 1,
       })
         .bindPopup(() => stationPopup(pin, (href) => openStationRef.current(href)))
@@ -155,7 +155,7 @@ export default function LeafletMap({ pins, nearby, highlightHref, userPos, searc
     layer.clearLayers();
     // A highlighted station marks itself; only a searched ZIP needs its own marker.
     if (searchPos && !highlightHref) {
-      L.circleMarker(searchPos, { radius: 8, color: "#FFFFFF", weight: 3, fillColor: "#171A1C", fillOpacity: 1 })
+      L.circleMarker(searchPos, { radius: 8, color: "#FFFFFF", weight: 3, fillColor: "#14211C", fillOpacity: 1 })
         .bindPopup("Searched area")
         .addTo(layer);
     }

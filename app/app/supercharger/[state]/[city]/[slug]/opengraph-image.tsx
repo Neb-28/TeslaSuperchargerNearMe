@@ -22,7 +22,7 @@ export default async function StationImage({ params }: { params: Promise<{ slug:
         </div>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ fontSize: 64, fontWeight: 700, color: BRAND.surface, lineHeight: 1.1 }}>{station?.name ?? "Tesla Supercharger"}</div>
-          {facts ? <div style={{ marginTop: 20, fontSize: 40, color: BRAND.brand }}>{facts}</div> : null}
+          {facts ? <div style={{ marginTop: 20, fontSize: 40, color: BRAND.mint }}>{facts}</div> : null}
           <div style={{ marginTop: 16, fontSize: 32, color: BRAND.border }}>Places to eat, coffee and shops within walking distance</div>
         </div>
       </div>
