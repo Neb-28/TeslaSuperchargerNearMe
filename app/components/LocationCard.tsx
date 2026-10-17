@@ -42,6 +42,11 @@ function enableSteps(): string[] {
   ];
 }
 
+// Apps' built-in browsers (Google, Facebook, Instagram…) often never show the location prompt.
+function inAppBrowser() {
+  return /GSA\/|FBAN|FBAV|Instagram|LinkedInApp|Line\/|MicroMessenger|Snapchat|musical_ly|BytedanceWebview|Pinterest|Twitter/.test(navigator.userAgent);
+}
+
 type LocationCardProps = {
   status: GeoStatus;
   onRequest: () => void;
@@ -78,6 +83,14 @@ export default function LocationCard({ status, onRequest, onDismiss, onSearchIns
     unavailable: {
       title: "We couldn't find your location",
       body: "Make sure Location (GPS) is on for your device, then try again.",
+      primary: "Try again",
+      secondary: "Search instead",
+    },
+    noAnswer: {
+      title: "Your browser hasn't asked for your location",
+      body: inAppBrowser()
+        ? "Location often doesn't work in an app's built-in browser. Open this page in Safari or Chrome (look for Open in browser in the menu), or search for a city or ZIP code."
+        : "If no prompt appeared, check that Location Services is on for your browser, then try again. Or search for a city or ZIP code.",
       primary: "Try again",
       secondary: "Search instead",
     },
