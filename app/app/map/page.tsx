@@ -53,7 +53,8 @@ export default async function MapPage({ searchParams }: PageProps<"/map">) {
   const isZip = !country && Boolean(parseZip(text));
   const nameMatches = !station && text && !isZip ? (country ? countryPins(country.slug) : stationPins()).map(pinFromTuple).filter((pin) => pinMatches(pin, text)) : [];
   const lookUp = !station && Boolean(text) && !isZip && (looksLikeAddress(text) || nameMatches.length === 0);
-  const found = lookUp ? await findPlace(text, country?.code ?? "US").catch(() => null) : null;
+  // ?exact=1 ("Search for … instead"): no correction of a misspelled place name.
+  const found = lookUp ? await findPlace(text, country?.code ?? "US", undefined, params.exact === "1").catch(() => null) : null;
   const place: Place | null = station
     ? { label: station.cityLabel ?? station.nearLabel ?? station.name, position: [station.lat, station.lon] }
     : found

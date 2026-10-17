@@ -3,6 +3,8 @@
 import { geocodeZip } from "./geocode";
 import { routingConfigured, searchAddress, type AddressMatch } from "./openRouteService";
 import type { LatLng } from "./stations";
+import { correction, exactPlace } from "./suggest";
+import { countries } from "./superchargers";
 import { parseZip, type Place } from "./zipQuery";
 
 // Below this, the geocoder is guessing (it returns something for any text).
@@ -19,12 +21,21 @@ function bestMatch(matches: AddressMatch[], query: string) {
 
 // `country` is the ISO code of the map being searched ("US" for the US map, "DE" for Germany's);
 // the search stays inside it, since that map only lists that country's stations. `near` (the
-// visitor's location, when known) favors the closer of two same-named places.
-export async function findPlace(text: string, country = "US", near?: LatLng): Promise<Place | null> {
+// visitor's location, when known) favors the closer of two same-named places. `exact` skips the
+// typo correction ("Search for “woodbrige” instead").
+export async function findPlace(text: string, country = "US", near?: LatLng, exact = false): Promise<Place | null> {
   const query = text.trim();
   if (!query) return null;
   // ZIP codes come from our own table: instant, and no call to the geocoder.
   if (country === "US" && parseZip(query)) return geocodeZip(query);
+  // A city, town or state we know by name ("Dale City, VA", picked from the suggestions): our own
+  // coordinates, also instant and no geocoder call.
+  const countrySlug = country === "US" ? null : (countries.find((item) => item.code === country)?.slug ?? "-");
+  const known = exactPlace(query, countrySlug);
+  if (known) return known;
+  // A misspelled place name: the place we think was meant, before the geocoder guesses.
+  const fixed = exact ? null : correction(query, countrySlug);
+  if (fixed) return { ...fixed, correctedFrom: query };
   if (!routingConfigured()) return null;
 
   const matches = await searchAddress(query, near, country);

@@ -6,8 +6,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { isClosedPin, pinFromTuple, pinMatches, type Pin, type PinTuple } from "@/lib/pins";
 import { DEFAULT_CENTER, milesBetween } from "@/lib/stations";
+import type { Suggestion } from "@/lib/suggest";
 import { looksLikeAddress, parseZip, type Place } from "@/lib/zipQuery";
 import LocationCard from "./LocationCard";
+import SearchSuggest, { suggestionHref } from "./SearchSuggest";
 import { useGeolocation } from "./useGeolocation";
 
 // Leaflet touches `window`, so only the map canvas is client-only; the search and
@@ -119,10 +121,12 @@ export default function MapView({ initialQuery, initialPlace, startAt = null, in
     if (focusSearch) searchRef.current?.focus();
   }, [focusSearch]);
 
-  async function applySearch(value: string) {
+  // `exact` searches the text as typed, without correcting a misspelled place name.
+  async function applySearch(value: string, exact = false) {
     const trimmed = value.trim();
     const countryParam = country ? `country=${country.slug}` : "";
-    window.history.replaceState(null, "", trimmed ? `/map?q=${encodeURIComponent(trimmed)}${countryParam ? `&${countryParam}` : ""}` : `/map${countryParam ? `?${countryParam}` : ""}`);
+    const exactParam = exact ? "&exact=1" : "";
+    window.history.replaceState(null, "", trimmed ? `/map?q=${encodeURIComponent(trimmed)}${countryParam ? `&${countryParam}` : ""}${exactParam}` : `/map${countryParam ? `?${countryParam}` : ""}`);
     setSearchError(null);
 
     const zip = country ? null : parseZip(trimmed);
@@ -133,7 +137,7 @@ export default function MapView({ initialQuery, initialPlace, startAt = null, in
       setQuery("");
       try {
         const near = userPos ? `&near=${userPos[0].toFixed(3)},${userPos[1].toFixed(3)}` : "";
-        const response = await fetch(`/api/geocode?q=${encodeURIComponent(trimmed)}${country?.code ? `&country=${country.code}` : ""}${near}`);
+        const response = await fetch(`/api/geocode?q=${encodeURIComponent(trimmed)}${country?.code ? `&country=${country.code}` : ""}${near}${exactParam}`);
         if (!response.ok) throw new Error(String(response.status));
         setPlace((await response.json()) as Place);
         setPlaceCount((count) => count + 1);
@@ -165,6 +169,27 @@ export default function MapView({ initialQuery, initialPlace, startAt = null, in
     event.preventDefault();
     void applySearch(draft);
     searchRef.current?.blur();
+  }
+
+  // A picked suggestion: a place on this map moves the map there (no geocoder call); a station,
+  // a country or a place in another country opens that map.
+  function pickSuggestion(suggestion: Suggestion) {
+    const onThisMap = (suggestion.country ?? null) === (country?.slug ?? null);
+    if (!suggestion.position || !onThisMap || suggestion.kind === "country") {
+      router.push(suggestionHref(suggestion));
+      return;
+    }
+    window.history.replaceState(null, "", suggestionHref(suggestion));
+    setSearchError(null);
+    setQuery("");
+    setPlace({ label: suggestion.label, position: suggestion.position });
+    setPlaceCount((count) => count + 1);
+    searchRef.current?.blur();
+  }
+
+  function searchExactly(text: string) {
+    setDraft(text);
+    void applySearch(text, true);
   }
 
   function clearSearch() {
@@ -203,16 +228,17 @@ export default function MapView({ initialQuery, initialPlace, startAt = null, in
             <circle cx="11" cy="11" r="7" />
             <path d="m20 20-3.5-3.5" />
           </svg>
-          <input
-            ref={searchRef}
+          <SearchSuggest
+            inputRef={searchRef}
             id="map-search"
             name="q"
             type="search"
             enterKeyHint="search"
-            autoComplete="off"
             placeholder="Search an address, city or ZIP code"
             value={draft}
-            onChange={(event) => setDraft(event.target.value)}
+            onValueChange={setDraft}
+            country={country?.slug ?? null}
+            onPick={pickSuggestion}
           />
         </form>
       </div>
@@ -231,6 +257,17 @@ export default function MapView({ initialQuery, initialPlace, startAt = null, in
         ) : null}
 
         {searchError ? <p className="sheet-status" role="status">{searchError}</p> : null}
+
+        {place?.correctedFrom ? (
+          <div className="sheet-status approx-note" role="status">
+            <span>
+              Showing results for <strong>{place.label}</strong>.
+            </span>
+            <button type="button" className="text-button" onClick={() => searchExactly(place.correctedFrom!)}>
+              Search for “{place.correctedFrom}” instead
+            </button>
+          </div>
+        ) : null}
 
         {needle && total === 0 ? (
           <p className="sheet-status">

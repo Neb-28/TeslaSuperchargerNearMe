@@ -3,6 +3,9 @@
 export type Place = {
   label: string;
   position: [number, number];
+  // Set when what was typed looked like a misspelled place name and this is the place we think
+  // was meant ("woodbrige" → Woodbridge, VA); the map offers to search the exact text instead.
+  correctedFrom?: string;
 };
 
 // A street address rather than a city or station name: it starts with a house number

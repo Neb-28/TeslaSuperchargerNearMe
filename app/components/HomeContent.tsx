@@ -1,5 +1,6 @@
 import Link from "next/link";
 import CountryPicker from "./CountryPicker";
+import HomeSearchInput from "./HomeSearchInput";
 import SideRails from "./SideRails";
 import JsonLd from "./JsonLd";
 import SiteFooter from "./SiteFooter";
@@ -72,7 +73,7 @@ export default function HomeContent({ country }: { country: CountrySummary | nul
             <circle cx="11" cy="11" r="7" />
             <path d="m20 20-3.5-3.5" />
           </svg>
-          <input id="home-search" name="q" type="search" enterKeyHint="search" placeholder="Search an address, city or ZIP code" autoComplete="off" />
+          <HomeSearchInput country={country?.slug ?? null} />
           {country ? <input type="hidden" name="country" value={country.slug} /> : null}
         </form>
 

@@ -108,9 +108,23 @@ describe("GET /api/geocode", () => {
   it("passes on a busy address service as a friendly error", async () => {
     process.env.ORS_API_KEY = "test-key";
     vi.stubGlobal("fetch", vi.fn(async () => new Response("", { status: 429 })));
-    const response = await call("Bethesda, MD");
+    const response = await call("123 Main St, Springfield");
     expect(response.status).toBe(429);
     expect((await response.json()).error).toContain("ZIP code");
+  });
+
+  it("finds a city or town we know by name without calling the geocoder", async () => {
+    process.env.ORS_API_KEY = "test-key";
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const response = await call("Dale City, VA");
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.label).toBe("Dale City, VA");
+    expect(body.position[0]).toBeCloseTo(38.65, 1);
+    const toronto = await (await call("Toronto, ON", "CA")).json();
+    expect(toronto.label).toBe("Toronto, ON");
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 });
 

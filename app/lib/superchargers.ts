@@ -142,8 +142,8 @@ export function stateHref(state: string) {
   return `/supercharger/${state}`;
 }
 
-/** The middle of a city's stations, for distances to and from the city. */
-export function cityCenter(city: CitySummary): LatLng {
+/** The middle of a city's (or any group's) stations, for distances to and from it. */
+export function cityCenter(city: Pick<CitySummary, "stations">): LatLng {
   return [
     city.stations.reduce((sum, station) => sum + station.lat, 0) / city.stations.length,
     city.stations.reduce((sum, station) => sum + station.lon, 0) / city.stations.length,
@@ -299,7 +299,7 @@ export function countryOptions() {
 
 // Extra words a station can be found by on the map: its city and country, plus English names
 // for cities the feed spells locally ("Munich" for München).
-const ENGLISH_NAMES: Record<string, string> = {
+export const ENGLISH_NAMES: Record<string, string> = {
   München: "Munich", Köln: "Cologne", "Frankfurt am Main": "Frankfurt", Nürnberg: "Nuremberg", Roma: "Rome",
   Milano: "Milan", Napoli: "Naples", Venezia: "Venice", Firenze: "Florence", Torino: "Turin", Praha: "Prague",
   Warszawa: "Warsaw", Göteborg: "Gothenburg", Beograd: "Belgrade", Sevilla: "Seville", "Ciudad de México": "Mexico City",
