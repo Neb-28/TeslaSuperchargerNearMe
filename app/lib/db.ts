@@ -6,6 +6,10 @@ let client: postgres.Sql | null = null;
 
 export function db() {
   if (!process.env.DATABASE_URL) return null;
-  client ??= postgres(process.env.DATABASE_URL, { prepare: false, max: 3, idle_timeout: 20 });
+  // Serverless functions are paused between requests, and a connection kept open across a pause
+  // can die silently; the next query then hangs until the 2-minute statement timeout (admin
+  // sign-in "taking forever"). Close idle connections after 2 seconds, so every request starts on
+  // a fresh one (about 0.4 s to connect), and give up connecting after 10 seconds.
+  client ??= postgres(process.env.DATABASE_URL, { prepare: false, max: 3, idle_timeout: 2, connect_timeout: 10 });
   return client;
 }
