@@ -1,7 +1,9 @@
 // Server-only: other networks' DC fast chargers in the US and Canada (data/fast-chargers.json,
-// from scripts/import-fast-chargers.mjs), used by the route planner where Superchargers can't reach.
+// from scripts/import-fast-chargers.mjs), used by the route planner where Superchargers can't reach
+// and listed on city and town pages.
 import data from "@/data/fast-chargers.json";
 import type { RouteStation } from "./routePlanner";
+import { milesBetween, type LatLng } from "./stations";
 
 const CCS = 1;
 const NACS = 2;
@@ -82,4 +84,26 @@ export function otherChargersFor(plug: "nacs" | "ccs-adapter" | "ccs", ccsAdapte
   if (plug === "ccs") return withCcs;
   if (plug === "ccs-adapter") return everyCharger;
   return ccsAdapter ? everyCharger : withNacs;
+}
+
+export const NEARBY_CHARGER_MILES = 10;
+
+export type NearbyCharger = RouteStation & { plugs: string; miles: number };
+
+const plugNames = (connectors: number) => [connectors & CCS ? "CCS" : null, connectors & NACS ? "NACS" : null].filter(Boolean).join(" and ");
+
+// Some Canadian rows are named after Tesla sites ("Tesla - 12511 - Jasper AB"); our Supercharger
+// list already covers those.
+const listable = rows.filter((row) => !/tesla/i.test(row[1]));
+
+/** Other networks' fast chargers within 10 miles of a point, nearest first. */
+export function fastChargersNear(point: LatLng, limit = 8): NearbyCharger[] {
+  const near: NearbyCharger[] = [];
+  for (const row of listable) {
+    // A degree of latitude is about 69 miles; skip far chargers before the exact distance.
+    if (Math.abs(row[3] - point[0]) > NEARBY_CHARGER_MILES / 69) continue;
+    const miles = milesBetween(point, [row[3], row[4]]);
+    if (miles <= NEARBY_CHARGER_MILES) near.push({ ...toRouteStation(row), plugs: plugNames(row[7]), miles });
+  }
+  return near.sort((a, b) => a.miles - b.miles).slice(0, limit);
 }

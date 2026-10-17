@@ -142,16 +142,20 @@ export function stateHref(state: string) {
   return `/supercharger/${state}`;
 }
 
+/** The middle of a city's stations, for distances to and from the city. */
+export function cityCenter(city: CitySummary): LatLng {
+  return [
+    city.stations.reduce((sum, station) => sum + station.lat, 0) / city.stations.length,
+    city.stations.reduce((sum, station) => sum + station.lon, 0) / city.stations.length,
+  ];
+}
+
 // Other cities in the same state, nearest first (internal links between city pages).
 export function nearbyCities(city: CitySummary, limit = 8) {
-  const center = (item: CitySummary): LatLng => [
-    item.stations.reduce((sum, station) => sum + station.lat, 0) / item.stations.length,
-    item.stations.reduce((sum, station) => sum + station.lon, 0) / item.stations.length,
-  ];
-  const origin = center(city);
+  const origin = cityCenter(city);
   return (getCountry(city.state)?.cities ?? citiesInState(city.state))
     .filter((item) => item.city !== city.city)
-    .map((item) => ({ item, miles: milesBetween(origin, center(item)) }))
+    .map((item) => ({ item, miles: milesBetween(origin, cityCenter(item)) }))
     .sort((a, b) => a.miles - b.miles)
     .slice(0, limit)
     .map(({ item }) => item);

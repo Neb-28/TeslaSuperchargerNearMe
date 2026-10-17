@@ -1,10 +1,12 @@
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import JsonLd from "@/components/JsonLd";
+import OtherFastChargers from "@/components/OtherFastChargers";
 import SiteFooter from "@/components/SiteFooter";
 import SideRails from "@/components/SideRails";
 import SiteHeader from "@/components/SiteHeader";
 import StationListCard from "@/components/StationListCard";
+import { fastChargersNear } from "@/lib/fastChargers";
 import { absoluteUrl } from "@/lib/site";
 import { cityHref, stateHref, stationHref, stationTitle } from "@/lib/superchargers";
 import { milesText, NEAR_MILES, nearbyCityPages, nearbyTowns, type TownSummary } from "@/lib/towns";
@@ -17,6 +19,7 @@ export default function TownPage({ town }: { town: TownSummary }) {
   const [closest] = town.nearest;
   const cities = nearbyCityPages(town);
   const towns = nearbyTowns(town);
+  const chargers = fastChargersNear([town.lat, town.lon]);
 
   return (
     <div className="app-shell">
@@ -51,6 +54,8 @@ export default function TownPage({ town }: { town: TownSummary }) {
             </li>
           ))}
         </ul>
+
+        <OtherFastChargers place={town.name} chargers={chargers} />
 
         {cities.length ? (
           <section aria-labelledby="nearby-cities" className="link-section">
@@ -98,7 +103,7 @@ export default function TownPage({ town }: { town: TownSummary }) {
           }}
         />
       </main>
-      <SiteFooter osmCredit dataCredit />
+      <SiteFooter osmCredit dataCredit chargersCredit={chargers.length > 0} />
     </div>
   );
 }

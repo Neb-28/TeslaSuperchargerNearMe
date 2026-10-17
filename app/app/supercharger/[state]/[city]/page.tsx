@@ -3,12 +3,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import JsonLd from "@/components/JsonLd";
+import OtherFastChargers from "@/components/OtherFastChargers";
 import SiteFooter from "@/components/SiteFooter";
 import SideRails from "@/components/SideRails";
 import SiteHeader from "@/components/SiteHeader";
 import StationListCard from "@/components/StationListCard";
+import { fastChargersNear } from "@/lib/fastChargers";
 import { absoluteUrl } from "@/lib/site";
-import { areaName, cityHref, countryPhrase, getCity, nearbyCities, stateHref, stationHref, stationTitle } from "@/lib/superchargers";
+import { areaName, cityCenter, cityHref, countryPhrase, getCity, nearbyCities, stateHref, stationHref, stationTitle } from "@/lib/superchargers";
 import { getTown, townDescription, townTitle } from "@/lib/towns";
 import { stateName } from "@/lib/usStates";
 import TownPage from "./TownPage";
@@ -54,6 +56,7 @@ export default async function CityPage({ params }: CityPageProps) {
   const fastest = Math.max(0, ...city.stations.map((station) => station.maxKw ?? 0));
   const nearOnly = city.stations.filter((station) => !station.cityLabel).length;
   const others = nearbyCities(city);
+  const chargers = fastChargersNear(cityCenter(city));
   const href = cityHref(city.state, city.city);
 
   return (
@@ -88,6 +91,8 @@ export default async function CityPage({ params }: CityPageProps) {
           ))}
         </ul>
 
+        <OtherFastChargers place={city.name} chargers={chargers} />
+
         {others.length ? (
           <section aria-labelledby="other-cities" className="link-section">
             <h2 id="other-cities" className="section-title">Other cities in {countryPhrase(areaName(city.state, stateName))}</h2>
@@ -119,7 +124,7 @@ export default async function CityPage({ params }: CityPageProps) {
           }}
         />
       </main>
-      <SiteFooter osmCredit dataCredit />
+      <SiteFooter osmCredit dataCredit chargersCredit={chargers.length > 0} />
     </div>
   );
 }
