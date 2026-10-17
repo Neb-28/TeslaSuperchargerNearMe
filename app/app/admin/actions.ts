@@ -8,7 +8,6 @@ import { isSponsorSlot, SLOT_LABELS, type FeaturedStatus } from "@/lib/featured"
 import { createFeatured, deleteFeatured, setFeaturedStatus, SlotTakenError, updateFeatured } from "@/lib/featuredStore";
 import { validateFeaturedForm } from "@/lib/featuredValidation";
 import { deletePhotoFiles } from "@/lib/photoStorage";
-import { placesForStation } from "@/lib/placesData";
 import { deletePhotoRecord, getPhoto, setPhotoStatus } from "@/lib/stationPhotos";
 import { getStationById, getStationBySlug, stationHref } from "@/lib/superchargers";
 
@@ -90,6 +89,9 @@ export async function addListingAction(form: FormData) {
   form.set("stationSlug", slug);
 
   const category = String(form.get("category"));
+  // Loaded only here: the places data is about 18 MB, and importing it at the top made every
+  // admin page start (sign-in included) parse it first.
+  const { placesForStation } = await import("@/lib/placesData");
   const nearby = placesForStation(station.id)[category as keyof ReturnType<typeof placesForStation>] ?? [];
   const match = (name: string) => nearby.find((place) => place.name.toLowerCase() === name.trim().toLowerCase());
   const result = validateFeaturedForm(form, { requireOwnerConfirmation: false, isNearbyPlace: (name) => Boolean(match(name)) });
