@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-  <!-- Favicon: a full mint circle with a solid dark bolt, so it reads at 16 px and fills Google's round frame. -->
-  <circle cx="32" cy="32" r="32" fill="#3DDC97"/>
+  <!-- Favicon: a full red circle with a solid white bolt, so it reads at 16 px and fills Google's round frame. -->
+  <circle cx="32" cy="32" r="32" fill="#E82127"/>
   <svg x="14" y="12" width="36" height="40" viewBox="3 1.5 17 21">
-    <path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z" fill="#14211C" stroke="#14211C" stroke-width="1.2" stroke-linejoin="round"/>
+    <path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.2" stroke-linejoin="round"/>
   </svg>
 </svg>

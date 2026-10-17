@@ -66,13 +66,13 @@ All screens are designed at 390 px wide (phone first) and must work from 320 px 
 ### Shared header
 
 - Dark bar (`ink` background), 60 to 72 px tall, 16 px side padding.
-- Left: brand mark (mint rounded square with a lightning bolt) and the wordmark "TeslaSuperchargerNearMe.com" in the display font, 20 px, bold.
+- Left: brand mark (red rounded square with a white lightning bolt) and the wordmark "TeslaSuperchargerNearMe.com" in the display font, 20 px, bold.
 - Right: icon buttons 44 × 44 px, radius 12, background `ink-raised`. Home shows Menu; Station page shows Search and Map; Map shows a Back button on the left.
 
 ### Screen 1: Home (Google landing page)
 
 - Content centered vertically and horizontally, 20 px side padding, 22 px gaps.
-- Brand mark 76 × 76 px, radius 22, mint background, bolt icon 40 px.
+- Brand mark 76 × 76 px, radius 22, `brand` red background, white bolt icon 40 px.
 - H1: "Find a Supercharger near you", display font 30 px, bold, letter-spacing −0.6 px.
 - Subline: "30 minutes to charge. A whole neighborhood to explore. Your charging stop just got interesting." 15 px, `muted`.
 - Search field: full width, 52 px tall, pill radius, 1.5 px `divider` outline with the floating shadow, search icon inside on the left, placeholder "Search city, place or address". Must be a real `<input type="search">` with a label.
@@ -116,28 +116,28 @@ Sections from top to bottom, 16 px page padding, 14 px between cards, cards whit
     - **#1 Featured card** (always first, never filtered out): gold background, gold border, "#1 FEATURED" badge and "Sponsored" label, photo, name, type, walk time, hours, offer line with tag icon, and two buttons (offer action + Directions).
     - **Free listings** numbered from #2, sorted by walking time: rank circle, name, type, "N min walk", "~N min visit", hours in `accent`, and a Directions icon button.
     - Empty state: "Nothing else fits that time. Try a longer charge."
-5. **Get featured banner**: dark card, "Own a business near this station?", one line of pitch, mint button "Get featured · [PRICE]/mo" that opens the business sign-up.
+5. **Get featured banner**: dark card, "Own a business near this station?", one line of pitch, red `accent` button "Get featured · [PRICE]/mo" that opens the business sign-up.
 6. **Footer**: "Not affiliated with Tesla, Inc." and "Sponsored listings are clearly labeled."
 
 ## Design system
 
-One dark-green ink, one mint highlight, one gold for paid placements; define these as CSS variables (or Tailwind theme tokens) and use nothing else.
+One near-black ink, one red brand colour (Tesla red for the logo, a deeper red for buttons and links so white text stays readable), one gold for paid placements; define these as CSS variables (or Tailwind theme tokens) and use nothing else.
 
 ### Colors
 
 | Token | Hex | Used for |
 | --- | --- | --- |
-| `ink` | #14211C | Header, primary text, selected chips, dark banner |
-| `ink-raised` | #24342E | Icon buttons on the header |
-| `ground` | #F3F5F2 | Page background, stat tiles |
+| `ink` | #171A1C | Header, primary text, selected chips, dark banner |
+| `ink-raised` | #2A2E31 | Icon buttons on the header |
+| `ground` | #F4F4F5 | Page background, stat tiles |
 | `surface` | #FFFFFF | Cards, sheets, inputs |
-| `muted` | #56635D | Secondary text, labels |
-| `border` | #CFD8D3 | Form field borders |
-| `divider` | #E6EBE8 | List row dividers; chip, search field and secondary-button outlines |
-| `accent` | #0B6E5B | Primary buttons, pins, links, stall numbers |
-| `accent-hover` | #08513F | Hover and pressed states |
-| `accent-soft` | #E2F0EB | Badges, icon tiles |
-| `mint` | #3DDC97 | Brand mark, button on dark banner |
+| `muted` | #5B6066 | Secondary text, labels |
+| `border` | #D4D6D9 | Form field borders |
+| `divider` | #E8E9EB | List row dividers; chip, search field and secondary-button outlines |
+| `accent` | #CC1A21 | Primary buttons, pins, links, stall numbers |
+| `accent-hover` | #A10E14 | Hover and pressed states |
+| `accent-soft` | #FCEBEC | Badges, icon tiles |
+| `brand` | #E82127 | Brand mark and favicon (white bolt), focus rings and highlights on the dark header. Not for text: white on it is 4.49:1 |
 | `gold-bg` | #FFF6E0 | Featured card background |
 | `gold-border` | #E2B04A | Featured card border |
 | `gold-ink` | #7A4E00 | Featured badge, buttons, labels |
@@ -167,7 +167,7 @@ Load both from Google Fonts with `display=swap`. Fall back to `system-ui, sans-s
 
 ### Components
 
-- **Button**: primary (`accent`), secondary (white + shadow), gold (featured), mint (on dark). Height 44–52 px.
+- **Button**: primary (`accent`), secondary (white + shadow), gold (featured); on dark backgrounds the primary button stays `accent`. Height 44–52 px.
 - **Chip**: 44 px tall pill; selected = `ink` fill, white text; unselected = white with `divider` outline. Use `aria-pressed`.
 - **Segmented control**: `ground` track with 4 px padding; selected segment white with shadow.
 - **Stat tile**, **list row**, **featured card**, **bottom sheet**, **badge** as described in Screen specs.

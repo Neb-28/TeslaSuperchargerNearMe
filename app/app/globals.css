@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --ink: #14211c;
-  --ink-raised: #24342e;
-  --ground: #f3f5f2;
+  --ink: #171a1c;
+  --ink-raised: #2a2e31;
+  --ground: #f4f4f5;
   --surface: #ffffff;
-  --muted: #56635d;
-  --border: #cfd8d3;
-  --divider: #e6ebe8;
-  --accent: #0b6e5b;
-  --accent-hover: #08513f;
-  --accent-soft: #e2f0eb;
-  --mint: #3ddc97;
+  --muted: #5b6066;
+  --border: #d4d6d9;
+  --divider: #e8e9eb;
+  --accent: #cc1a21;
+  --accent-hover: #a10e14;
+  --accent-soft: #fcebec;
+  --brand: #e82127;
   --gold-bg: #fff6e0;
   --gold-border: #e2b04a;
   --gold-ink: #7a4e00;
@@ -19,12 +19,12 @@
   --location: #2f6fe4;
   --other-network: #6b4fbb;
   --other-network-soft: #efeafb;
-  --shadow-card: 0 0 0 1px rgba(20, 33, 28, 0.04), 0 1px 2px rgba(20, 33, 28, 0.04),
-    0 12px 32px -16px rgba(20, 33, 28, 0.14);
-  --shadow-float: 0 0 0 1px rgba(20, 33, 28, 0.05), 0 4px 12px -2px rgba(20, 33, 28, 0.12),
-    0 16px 32px -12px rgba(20, 33, 28, 0.18);
-  --shadow-primary: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 1px 2px rgba(20, 33, 28, 0.2),
-    0 8px 20px -8px rgba(11, 110, 91, 0.6);
+  --shadow-card: 0 0 0 1px rgba(23, 26, 28, 0.04), 0 1px 2px rgba(23, 26, 28, 0.04),
+    0 12px 32px -16px rgba(23, 26, 28, 0.14);
+  --shadow-float: 0 0 0 1px rgba(23, 26, 28, 0.05), 0 4px 12px -2px rgba(23, 26, 28, 0.12),
+    0 16px 32px -12px rgba(23, 26, 28, 0.18);
+  --shadow-primary: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 1px 2px rgba(23, 26, 28, 0.2),
+    0 8px 20px -8px rgba(204, 26, 33, 0.6);
   --sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0) 60%);
   --font-display: "Bricolage Grotesque", "Segoe UI", sans-serif;
   --font-body: "Figtree", "Segoe UI", sans-serif;
@@ -120,7 +120,7 @@ img {
 }
 
 .topbar :focus-visible {
-  outline-color: var(--mint);
+  outline-color: var(--brand);
 }
 
 .app-shell {
@@ -140,7 +140,7 @@ img {
   top: 0;
   z-index: 1100;
   background: linear-gradient(180deg, var(--ink-raised) -120%, var(--ink) 100%);
-  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.06), 0 1px 0 rgba(20, 33, 28, 0.2);
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.06), 0 1px 0 rgba(23, 26, 28, 0.2);
   color: var(--surface);
 }
 
@@ -192,8 +192,8 @@ img {
   height: 34px;
   border-radius: 10px;
   background: radial-gradient(120% 120% at 28% 18%, rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0) 52%),
-    var(--mint);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -2px 0 rgba(11, 110, 91, 0.18);
+    var(--brand);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -2px 0 rgba(204, 26, 33, 0.18);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -223,7 +223,7 @@ img {
 }
 
 .icon-button:hover {
-  color: var(--mint);
+  color: var(--brand);
 }
 
 .header-actions {
@@ -244,7 +244,7 @@ img {
   position: fixed;
   inset: 0;
   z-index: 2000;
-  background: rgba(20, 33, 28, 0.45); /* ink, dimmed */
+  background: rgba(23, 26, 28, 0.45); /* ink, dimmed */
   display: flex;
   justify-content: flex-end;
 }
@@ -494,9 +494,9 @@ img {
   height: 76px;
   border-radius: 22px;
   background: radial-gradient(120% 120% at 28% 18%, rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0) 52%),
-    var(--mint);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -3px 0 rgba(11, 110, 91, 0.2),
-    0 18px 40px -14px rgba(61, 220, 151, 0.75);
+    var(--brand);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -3px 0 rgba(204, 26, 33, 0.2),
+    0 18px 40px -14px rgba(232, 33, 39, 0.75);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -549,7 +549,7 @@ img {
 
 .search-shell input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 4px rgba(11, 110, 91, 0.12);
+  box-shadow: 0 0 0 4px rgba(204, 26, 33, 0.12);
 }
 
 .search-icon {
@@ -1045,14 +1045,14 @@ img {
   border-right: 1.5px solid var(--divider);
 }
 
-/* Same chevron as .field select; its stroke is the `ink` token, #14211C. */
+/* Same chevron as .field select; its stroke is the `ink` token, #171A1C. */
 .contact-dial select {
   appearance: none;
   height: 100%;
   min-width: 92px;
   padding: 0 38px 0 20px;
   border: 0;
-  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%2314211C' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center / 16px 16px;
+  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23171A1C' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center / 16px 16px;
   color: var(--ink);
   font: inherit;
   font-size: 16px;
@@ -1239,7 +1239,7 @@ img {
   border: 1.5px solid var(--divider);
   border-radius: 999px;
   background: var(--surface);
-  box-shadow: 0 1px 2px rgba(20, 33, 28, 0.04);
+  box-shadow: 0 1px 2px rgba(23, 26, 28, 0.04);
   color: var(--ink);
   font-size: 14px;
   font-weight: 700;
@@ -1391,7 +1391,7 @@ img {
   font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
-  box-shadow: 0 2px 6px rgba(20, 33, 28, 0.25);
+  box-shadow: 0 2px 6px rgba(23, 26, 28, 0.25);
 }
 
 .pin-stem {
@@ -1489,7 +1489,7 @@ img {
   background: var(--ink);
   border-color: var(--ink);
   color: var(--surface);
-  box-shadow: 0 6px 14px -6px rgba(20, 33, 28, 0.5);
+  box-shadow: 0 6px 14px -6px rgba(23, 26, 28, 0.5);
 }
 
 .center-button {
@@ -1518,7 +1518,7 @@ img {
   overflow-y: auto;
   border-radius: 24px 24px 0 0;
   background: var(--surface);
-  box-shadow: 0 -1px 0 rgba(20, 33, 28, 0.05), 0 -12px 32px -8px rgba(20, 33, 28, 0.18);
+  box-shadow: 0 -1px 0 rgba(23, 26, 28, 0.05), 0 -12px 32px -8px rgba(23, 26, 28, 0.18);
   padding: 10px 16px 14px;
   display: flex;
   flex-direction: column;
@@ -1618,7 +1618,7 @@ a.station-row:hover .station-name {
   height: 40px;
   border-radius: 12px;
   background: var(--accent-soft);
-  box-shadow: inset 0 0 0 1px rgba(11, 110, 91, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(204, 26, 33, 0.08);
   color: var(--accent);
   display: flex;
   align-items: center;
@@ -1745,7 +1745,7 @@ a.station-row:hover .station-name {
 .location-button.secondary {
   border: 1.5px solid var(--divider);
   background: var(--surface);
-  box-shadow: 0 1px 2px rgba(20, 33, 28, 0.05);
+  box-shadow: 0 1px 2px rgba(23, 26, 28, 0.05);
   color: var(--ink);
 }
 
@@ -2001,7 +2001,7 @@ a.station-row:hover .station-name {
   border-radius: 999px;
   border: 1.5px solid var(--divider);
   background: var(--surface);
-  box-shadow: 0 1px 2px rgba(20, 33, 28, 0.04);
+  box-shadow: 0 1px 2px rgba(23, 26, 28, 0.04);
   color: var(--ink);
   padding: 0 16px;
   font-weight: 700;
@@ -2013,7 +2013,7 @@ a.station-row:hover .station-name {
   background: var(--ink);
   border-color: var(--ink);
   color: var(--surface);
-  box-shadow: 0 6px 14px -6px rgba(20, 33, 28, 0.5);
+  box-shadow: 0 6px 14px -6px rgba(23, 26, 28, 0.5);
 }
 
 .category-bar {
@@ -2417,7 +2417,7 @@ a.station-row:hover .station-name {
 }
 
 .banner-copy {
-  color: #c9d3ce;
+  color: #d0d2d5;
   font-size: 14px;
 }
 
@@ -2427,8 +2427,8 @@ a.station-row:hover .station-name {
   justify-content: center;
   height: 46px;
   border-radius: 12px;
-  background: var(--mint);
-  color: var(--ink);
+  background: var(--accent);
+  color: var(--surface);
   font-weight: 700;
   font-size: 15px;
 }
@@ -2576,7 +2576,7 @@ a.station-row:hover .station-name {
 .station-action.secondary {
   border: 1.5px solid var(--divider);
   background: var(--surface);
-  box-shadow: 0 1px 2px rgba(20, 33, 28, 0.05);
+  box-shadow: 0 1px 2px rgba(23, 26, 28, 0.05);
   color: var(--accent);
 }
 
@@ -2897,7 +2897,7 @@ a.station-row:hover .station-name {
   color: var(--accent);
   font-size: 15px;
   font-weight: 700;
-  box-shadow: 0 1px 2px rgba(20, 33, 28, 0.05);
+  box-shadow: 0 1px 2px rgba(23, 26, 28, 0.05);
 }
 
 .show-more-button:hover {
@@ -3029,11 +3029,11 @@ a.station-row:hover .station-name {
 }
 
 /* Our own chevron, set in from the right edge (the browser's arrow hugs the border).
-   Its stroke is the `muted` token, #56635D. */
+   Its stroke is the `muted` token, #5B6066. */
 .field select {
   appearance: none;
   padding-right: 42px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%2356635D' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%235B6066' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 14px center;
   background-size: 18px 18px;
@@ -3532,7 +3532,7 @@ a.route-stop-name {
 }
 
 /* Phones: as tall as the whole list, since the page scrolls anyway (see the desktop rule below).
-   A glossy frame with a soft brand-green glow (the `accent` and `mint` tokens) and a lit bezel edge. */
+   A glossy frame with a soft brand-red glow (the `accent` and `brand` tokens) and a lit bezel edge. */
 .ad-preview-phone {
   position: relative;
   width: min(360px, 100%);
@@ -3541,9 +3541,9 @@ a.route-stop-name {
   background: linear-gradient(150deg, var(--ink-raised) 0%, var(--ink) 45%, var(--ink) 70%, var(--ink-raised) 100%);
   box-shadow:
     inset 0 0 0 1.5px var(--ink-raised),
-    0 0 0 1px rgba(61, 220, 151, 0.35),
-    0 28px 56px -12px rgba(11, 110, 91, 0.5),
-    0 0 80px rgba(61, 220, 151, 0.3);
+    0 0 0 1px rgba(232, 33, 39, 0.35),
+    0 28px 56px -12px rgba(204, 26, 33, 0.5),
+    0 0 80px rgba(232, 33, 39, 0.3);
 }
 
 /* Side buttons: power on the right; on desktop (where the phone is always 360 px wide) also volume
@@ -3937,7 +3937,7 @@ a.route-stop-name {
 
 .country-picker-button:hover,
 .country-picker-button[aria-expanded="true"] {
-  box-shadow: 0 0 0 2px var(--mint);
+  box-shadow: 0 0 0 2px var(--brand);
 }
 
 .country-picker-flag {
@@ -3993,7 +3993,7 @@ a.route-stop-name {
   border: 1.5px solid var(--divider);
   border-radius: 999px;
   background: var(--surface);
-  box-shadow: 0 1px 2px rgba(20, 33, 28, 0.04);
+  box-shadow: 0 1px 2px rgba(23, 26, 28, 0.04);
   color: var(--ink);
   font: inherit;
   font-size: 15px;
@@ -4382,7 +4382,7 @@ html.viewer-open {
 }
 
 .photo-viewer :focus-visible {
-  outline-color: var(--mint);
+  outline-color: var(--brand);
 }
 
 /* Previous and next sit over the photo's edges; on phones people mostly swipe. */

@@ -8,8 +8,8 @@ import type { LatLng } from "@/lib/stations";
 const tileUrl = process.env.NEXT_PUBLIC_MAP_TILE_URL || "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 
 // Literal values of the design tokens (Leaflet draws on canvas/SVG, not with CSS variables).
-const ACCENT = "#0B6E5B";
-const INK = "#14211C";
+const ACCENT = "#CC1A21";
+const INK = "#171A1C";
 const SURFACE = "#FFFFFF";
 
 type RouteMapProps = {
