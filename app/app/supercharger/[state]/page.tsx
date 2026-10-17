@@ -9,6 +9,7 @@ import SiteHeader from "@/components/SiteHeader";
 import StationListCard from "@/components/StationListCard";
 import { absoluteUrl } from "@/lib/site";
 import { areaName, cityHref, citiesInState, countryPhrase, getCountry, stateHref, statesWithStations } from "@/lib/superchargers";
+import { townsInState } from "@/lib/towns";
 import { stateName, US_STATES } from "@/lib/usStates";
 
 type StatePageProps = PageProps<"/supercharger/[state]">;
@@ -54,6 +55,7 @@ export default async function StatePage({ params }: StatePageProps) {
     .flatMap((city) => city.stations)
     .sort((a, b) => (b.stalls ?? 0) - (a.stalls ?? 0))
     .slice(0, 5);
+  const towns = US_STATES[state] ? townsInState(state) : [];
 
   return (
     <div className="app-shell">
@@ -86,6 +88,21 @@ export default async function StatePage({ params }: StatePageProps) {
             ))}
           </ul>
         </section>
+
+        {towns.length ? (
+          <section aria-labelledby="towns-title" className="link-section">
+            <h2 id="towns-title" className="section-title">Towns near a Supercharger</h2>
+            <ul className="link-chips">
+              {towns.map((town) => (
+                <li key={town.slug}>
+                  <Link href={cityHref(town.state, town.slug)} className="link-chip">
+                    {town.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         {biggest.length ? (
           <section aria-labelledby="biggest-title" className="link-section">

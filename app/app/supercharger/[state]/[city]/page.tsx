@@ -9,7 +9,9 @@ import SiteHeader from "@/components/SiteHeader";
 import StationListCard from "@/components/StationListCard";
 import { absoluteUrl } from "@/lib/site";
 import { areaName, cityHref, countryPhrase, getCity, nearbyCities, stateHref, stationHref, stationTitle } from "@/lib/superchargers";
+import { getTown, townDescription, townTitle } from "@/lib/towns";
 import { stateName } from "@/lib/usStates";
+import TownPage from "./TownPage";
 
 type CityPageProps = PageProps<"/supercharger/[state]/[city]">;
 
@@ -26,7 +28,11 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: CityPageProps): Promise<Metadata> {
   const { state, city: citySlug } = await params;
   const city = getCity(state, citySlug);
-  if (!city) return {};
+  if (!city) {
+    // No Supercharger in this town: the "near" page, at the URL its city page would have.
+    const town = getTown(state, citySlug);
+    return town ? { title: townTitle(town), description: townDescription(town), alternates: { canonical: cityHref(town.state, town.slug) } } : {};
+  }
   const count = city.stations.length;
   return {
     title: `Tesla Superchargers in ${city.label} (${plural(count, "station")})`,
@@ -38,7 +44,11 @@ export async function generateMetadata({ params }: CityPageProps): Promise<Metad
 export default async function CityPage({ params }: CityPageProps) {
   const { state, city: citySlug } = await params;
   const city = getCity(state, citySlug);
-  if (!city) notFound();
+  if (!city) {
+    const town = getTown(state, citySlug);
+    if (!town) notFound();
+    return <TownPage town={town} />;
+  }
 
   const count = city.stations.length;
   const fastest = Math.max(0, ...city.stations.map((station) => station.maxKw ?? 0));
